@@ -27,6 +27,10 @@ Restart OpenCode after changing this configuration or any skill file.
 - **Evaluation:** `evaluation`, `advanced-evaluation`
 - **Specialized:** `latent-briefing`, `self-improvement-loops`, `bdi-mental-states`
 
+## Writing
+
+- `simplified-engineering-english` — write and review software-engineering prose in a controlled subset of English derived from ASD-STE100.
+
 ## Reviews
 
 - `ml-system-design-review` — review ML/AI system designs and implementation evidence.
