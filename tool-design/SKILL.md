@@ -73,7 +73,7 @@ Choose reduction when the data layer is well-documented and consistently structu
 **Build for Future Models**
 Design minimal architectures that benefit from model improvements rather than sophisticated architectures that lock in current limitations. Ask whether each tool enables new capabilities or constrains reasoning the model could handle on its own -- tools built as "guardrails" often become liabilities as models improve.
 
-See [Architectural Reduction Case Study](./references/architectural_reduction.md) for production evidence.
+See [Architectural Reduction Case Study](skill://tool-design/references/architectural_reduction.md) for production evidence.
 
 ### Tool Description Engineering
 
@@ -277,8 +277,11 @@ This skill owns the tool-interface layer. Adjacent decisions are owned elsewhere
 ## References
 
 Internal references:
-- [Best Practices Reference](./references/best_practices.md) - Read when: designing a new tool from scratch or auditing an existing tool collection for quality gaps
-- [Architectural Reduction Case Study](./references/architectural_reduction.md) - Read when: considering removing specialized tools in favor of primitives, or evaluating whether a complex tool architecture is justified
+- [Best Practices Reference](skill://tool-design/references/best_practices.md) - Read when: designing a new tool from scratch or auditing an existing tool collection for quality gaps
+- [Architectural Reduction Case Study](skill://tool-design/references/architectural_reduction.md) - Read when: considering removing specialized tools in favor of primitives, or evaluating whether a complex tool architecture is justified
+
+Runnable script:
+- [description_generator.py](skill://tool-design/scripts/description_generator.py) - `ToolSpec` description generation, `ToolDescriptionEvaluator`, `ErrorMessageGenerator`, `ToolSchemaBuilder` - Run when: drafting or auditing tool descriptions and schemas
 
 Related skills in this collection:
 - context-fundamentals - Tool context interactions

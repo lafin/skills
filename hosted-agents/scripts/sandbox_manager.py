@@ -345,8 +345,17 @@ class WarmPoolManager:
         warm.sync_complete = True
 
     async def _create_sandbox_from_image(self, image: RepositoryImage) -> Sandbox:
-        """Create a sandbox from an image (infrastructure-specific)."""
-        pass
+        """Create a sandbox from an image.
+
+        Construction is plain bookkeeping; the infrastructure-specific work
+        lives behind the Sandbox I/O methods.
+        """
+        return Sandbox(
+            id=f"sb_{image.image_id}_{int(datetime.utcnow().timestamp() * 1000)}",
+            config=SandboxConfig(repo_url=image.repo_url, base_image=image.image_id),
+            state=SandboxState.READY,
+            created_at=datetime.utcnow(),
+        )
 
 
 class SandboxManager:
@@ -480,7 +489,10 @@ class SandboxManager:
 
     async def _cold_start(self, repo_url: str) -> Sandbox:
         """Start a sandbox from cold (no warm pool available)."""
-        pass
+        image: Optional[RepositoryImage] = self.image_builder.get_latest_image(repo_url)
+        if not image or image.is_stale():
+            image = await self.image_builder.build_image(repo_url)
+        return await self.warm_pool._create_sandbox_from_image(image)
 
 
 class AgentSession:

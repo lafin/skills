@@ -261,7 +261,10 @@ This skill connects to several others in the collection:
 ## References
 
 Internal reference:
-- [Evaluation Framework Reference](./references/evaluation-framework.md) - Read when: building or calibrating a probe-based evaluation pipeline, or when needing scoring rubrics and LLM judge configuration for compression quality assessment
+- [Evaluation Framework Reference](skill://context-compression/references/evaluation-framework.md) - Read when: building or calibrating a probe-based evaluation pipeline, or when needing scoring rubrics and LLM judge configuration for compression quality assessment
+
+Runnable script:
+- [compression_evaluator.py](skill://context-compression/scripts/compression_evaluator.py) - `ProbeGenerator`, `CompressionEvaluator`, `StructuredSummarizer` - Run when: measuring whether a compaction preserved decisions, files, risks, and next actions; `skill://context-compression/tests/test_compression_evaluator.py` is its check
 
 Related skills in this collection:
 - context-degradation - Read when: diagnosing why agent performance drops over long sessions, before applying compression as a mitigation

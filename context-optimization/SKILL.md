@@ -201,7 +201,10 @@ This skill owns token-efficiency tactics and budget policy. Adjacent skills own 
 ## References
 
 Internal reference:
-- [Optimization Techniques Reference](./references/optimization_techniques.md) - Read when: implementing a specific optimization technique and needing detailed code patterns, threshold tables, or integration examples beyond what the skill body provides
+- [Optimization Techniques Reference](skill://context-optimization/references/optimization_techniques.md) - Read when: implementing a specific optimization technique and needing detailed code patterns, threshold tables, or integration examples beyond what the skill body provides
+
+Runnable script:
+- [compaction.py](skill://context-optimization/scripts/compaction.py) - Summarizers, `ObservationStore`, `ContextBudget`, cache metrics - Run when: implementing compaction, observation masking, or prefix-cache measurement
 
 Related skills in this collection:
 - context-fundamentals - Read when: unfamiliar with context window mechanics, token counting, or attention distribution basics

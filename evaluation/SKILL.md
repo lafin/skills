@@ -268,7 +268,10 @@ This skill owns outcome measurement and quality gates. Adjacent skills own speci
 ## References
 
 Internal reference:
-- [Metrics Reference](./references/metrics.md) - Read when: designing specific evaluation metrics, choosing scoring scales, or implementing weighted rubric calculations
+- [Metrics Reference](skill://evaluation/references/metrics.md) - Read when: designing specific evaluation metrics, choosing scoring scales, or implementing weighted rubric calculations
+
+Runnable script:
+- [evaluator.py](skill://evaluation/scripts/evaluator.py) - `RubricDimension`, `AgentEvaluator`, `TestSet`, `EvaluationRunner`, `ProductionMonitor` - Run when: building a regression suite or wiring a quality gate
 
 Internal skills:
 - All other skills connect to evaluation for quality measurement

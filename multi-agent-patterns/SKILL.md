@@ -248,7 +248,10 @@ This skill owns agent topology and coordination protocols. Adjacent skills own p
 ## References
 
 Internal reference:
-- [Frameworks Reference](./references/frameworks.md) - Read when: implementing a specific multi-agent pattern in LangGraph, AutoGen, or CrewAI and needing framework-specific code examples
+- [Frameworks Reference](skill://multi-agent-patterns/references/frameworks.md) - Read when: implementing a specific multi-agent pattern in LangGraph, AutoGen, or CrewAI and needing framework-specific code examples
+
+Runnable script:
+- [coordination.py](skill://multi-agent-patterns/scripts/coordination.py) - `AgentCommunication`, `SupervisorAgent`, `HandoffProtocol`, `ConsensusManager`, `AgentFailureHandler` - Run when: implementing supervisor coordination, handoffs, or failure recovery
 
 Related skills in this collection:
 - context-fundamentals - Read when: needing to understand context window mechanics before designing agent partitioning

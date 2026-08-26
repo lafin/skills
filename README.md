@@ -1,16 +1,25 @@
-# OpenCode Skills
+# omp Skills
 
-This directory contains skills for OpenCode. Configure it as a global skill path:
+Skills for [omp](https://github.com/oh-my-pi). Register this directory in
+`~/.omp/agent/config.yml`:
 
-```json
-{
-  "skills": {
-    "paths": ["/<path>/skills"]
-  }
-}
+```yaml
+skills:
+  customDirectories:
+    - /<path>/skills
+  enableSkillCommands: true
 ```
 
-Restart OpenCode after changing this configuration or any skill file.
+Scanning is non-recursive: each skill is `<this-dir>/<name>/SKILL.md`. Restart
+omp after changing the configuration or any skill file.
+
+Skills load on demand via `skill://<name>`, and their assets via
+`skill://<name>/references/<file>.md`. With `enableSkillCommands`, each skill is
+also invocable as `/skill:<name>`.
+
+`.omp/hooks/pre/leancode.ts` keeps leancode active every turn and registers
+`/leancode lite|full|ultra|off`. It loads when omp runs with this repository as
+the working directory; elsewhere, pass it with `--extension <path>/.omp/hooks/pre/leancode.ts`.
 
 ## Leancode
 
@@ -30,6 +39,7 @@ Restart OpenCode after changing this configuration or any skill file.
 ## Writing
 
 - `simplified-engineering-english` — write and review software-engineering prose in a controlled subset of English derived from ASD-STE100.
+- `lossless-doc-compress` — compress and de-slop design docs, PRDs, and RFCs without losing facts, numbers, decisions, or caveats.
 
 ## Reviews
 
@@ -41,5 +51,6 @@ Restart OpenCode after changing this configuration or any skill file.
 - The Context Engineering skills are derived from [Agent Skills for Context Engineering](https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering) at commit `c578e85e40fe2bda7c1fec91ff64cf5285434934`, © 2025 Context Engineering Agent Skills Contributors, under the MIT License. See [ATTRIBUTION.md](ATTRIBUTION.md) and [LICENSE-context-engineering](LICENSE-context-engineering).
 - `latent-briefing` also draws on work from Ramp Labs.
 - `ml-system-design-review` is based on the ML System Design framework by Kravchenko and Babushkin.
+- `lossless-doc-compress` is imported from [MLSystemDesign](https://github.com/ML-SystemDesign/MLSystemDesign) at commit `61b9bcdb971e7424cdc4d400085338dc35da910e`, under the MIT License.
 - `ai-stage-gate` is a vendor-neutral adaptation inspired by [Hushpar](https://github.com/Hushpar) and the ML System Design skill collection.
 - The Leancode skills are MIT-licensed; no upstream author or source attribution is recorded in their metadata.

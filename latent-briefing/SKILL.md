@@ -148,7 +148,7 @@ If the worker runs behind a hosted text-generation API that does not expose KV t
 ## References
 
 Internal reference:
-- [Attention Matching formulation and task-guided scoring](./references/attention-matching-formulation.md) - Read when: needing the AM objective, how task-guided scoring changes the query source, or why a shared global mask matters for batching
+- [Attention Matching formulation and task-guided scoring](skill://latent-briefing/references/attention-matching-formulation.md) - Read when: needing the AM objective, how task-guided scoring changes the query source, or why a shared global mask matters for batching
 
 Related skills in this collection:
 - context-optimization - Read when: the main need is prefix caching, observation masking, or text-layer compaction rather than worker KV manipulation

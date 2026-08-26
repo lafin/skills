@@ -6,7 +6,7 @@ description: >
   dead flexibility, drive-by refactoring. One line per finding: location, what
   to cut, what replaces it. Use when the user says "review for over-engineering",
   "what can we delete", "is this over-engineered", "simplify review", or invokes
-  /leancode-review. Complements correctness-focused review, this one only hunts
+  /skill:leancode-review. Complements correctness-focused review, this one only hunts
   complexity.
 license: MIT
 ---

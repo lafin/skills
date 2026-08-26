@@ -92,7 +92,7 @@ Hybrid approaches reduce active context by retrieving only relevant subgraphs or
 
 ### Memory Consolidation
 
-Run consolidation periodically to prevent unbounded growth, because unchecked memory accumulation degrades retrieval quality over time. **Invalidate but do not discard** — preserving history matters for temporal queries that need to reconstruct past states. Trigger consolidation on memory count thresholds, degraded retrieval quality, or scheduled intervals. See [Implementation Reference](./references/implementation.md) for working consolidation code.
+Run consolidation periodically to prevent unbounded growth, because unchecked memory accumulation degrades retrieval quality over time. **Invalidate but do not discard** — preserving history matters for temporal queries that need to reconstruct past states. Trigger consolidation on memory count thresholds, degraded retrieval quality, or scheduled intervals. See [Implementation Reference](skill://memory-systems/references/implementation.md) for working consolidation code.
 
 ## Practical Guidance
 
@@ -207,7 +207,10 @@ This skill owns persistent semantic memory. Adjacent skills own scratch storage,
 ## References
 
 Internal references:
-- [Implementation Reference](./references/implementation.md) - Read when: implementing vector stores, property graphs, temporal queries, or memory consolidation logic from scratch
+- [Implementation Reference](skill://memory-systems/references/implementation.md) - Read when: implementing vector stores, property graphs, temporal queries, or memory consolidation logic from scratch
+
+Runnable script:
+- [memory_store.py](skill://memory-systems/scripts/memory_store.py) - `VectorStore`, `PropertyGraph`, `TemporalKnowledgeGraph`, `IntegratedMemorySystem` - Run when: implementing retrieval, temporal validity, or consolidation
 
 Related skills in this collection:
 - context-fundamentals - Read when: designing the context layer that memory feeds into

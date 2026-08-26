@@ -193,7 +193,10 @@ Read this skill first to build the mental models; read the operational skill tha
 ## References
 
 Internal reference:
-- [Context Components Reference](./references/context-components.md) - Read when: debugging a specific context component (system prompts, tool definitions, message history, tool outputs) or implementing chunking, observation masking, or budget allocation tables
+- [Context Components Reference](skill://context-fundamentals/references/context-components.md) - Read when: debugging a specific context component (system prompts, tool definitions, message history, tool outputs) or implementing chunking, observation masking, or budget allocation tables
+
+Runnable script:
+- [context_manager.py](skill://context-fundamentals/scripts/context_manager.py) - Token estimation, `ContextBuilder`, truncation, `ProgressiveDisclosureManager` - Run when: assembling or budgeting a context window in code
 
 Related skills in this collection:
 - context-degradation - Read when: agent performance drops as conversations grow or context fills beyond 60% capacity

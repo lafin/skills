@@ -282,7 +282,10 @@ This skill owns hosted runtime infrastructure. Adjacent skills own the control s
 ## References
 
 Internal reference:
-- [Infrastructure Patterns](./references/infrastructure-patterns.md) - Read when: implementing sandbox lifecycle, image builds, or warm pool logic for the first time
+- [Infrastructure Patterns](skill://hosted-agents/references/infrastructure-patterns.md) - Read when: implementing sandbox lifecycle, image builds, or warm pool logic for the first time
+
+Runnable script:
+- [sandbox_manager.py](skill://hosted-agents/scripts/sandbox_manager.py) - `SandboxManager`, `ImageBuilder`, `WarmPoolManager`, `AgentSession` - Run when: implementing sandbox lifecycle, image builds, or warm-pool logic
 
 Related skills in this collection:
 - multi-agent-patterns - Read when: designing self-spawning or supervisor coordination patterns

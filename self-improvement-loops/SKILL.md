@@ -228,7 +228,7 @@ This skill connects to:
 ## References
 
 Internal reference:
-- [Loop design evidence](./references/loop-design-evidence.md) - Dated per-system results, acceptance-rule details, ablation findings, and documented reward-hacking incidents backing this skill
+- [Loop design evidence](skill://self-improvement-loops/references/loop-design-evidence.md) - Dated per-system results, acceptance-rule details, ablation findings, and documented reward-hacking incidents backing this skill
 
 Related skills in this collection:
 - harness-engineering - Single-loop governance and control surfaces

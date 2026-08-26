@@ -357,10 +357,10 @@ This skill owns formal mental-state modeling. Adjacent skills own different laye
 ## References
 
 Internal references:
-- [BDI Ontology Core](./references/bdi-ontology-core.md) - Read when: implementing BDI class hierarchies or defining ontology properties from scratch
-- [RDF Examples](./references/rdf-examples.md) - Read when: writing Turtle serializations of mental states or debugging triple structure
-- [SPARQL Competency Queries](./references/sparql-competency.md) - Read when: validating an implementation against competency questions or building custom queries
-- [Framework Integration](./references/framework-integration.md) - Read when: deploying BDI models to SEMAS, JADE, or LAG pipelines
+- [BDI Ontology Core](skill://bdi-mental-states/references/bdi-ontology-core.md) - Read when: implementing BDI class hierarchies or defining ontology properties from scratch
+- [RDF Examples](skill://bdi-mental-states/references/rdf-examples.md) - Read when: writing Turtle serializations of mental states or debugging triple structure
+- [SPARQL Competency Queries](skill://bdi-mental-states/references/sparql-competency.md) - Read when: validating an implementation against competency questions or building custom queries
+- [Framework Integration](skill://bdi-mental-states/references/framework-integration.md) - Read when: deploying BDI models to SEMAS, JADE, or LAG pipelines
 
 Primary sources:
 - Zuppiroli et al. "The Belief-Desire-Intention Ontology" (2025) — Read when: implementing formal BDI class hierarchies or validating ontology alignment

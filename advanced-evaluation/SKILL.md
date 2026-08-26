@@ -181,7 +181,7 @@ Adapt rubrics to the domain — use domain-specific terminology. A code readabil
 
 ### Evaluation Pipeline Design
 
-Build production evaluation systems with these layers: Criteria Loader (rubrics + weights) -> Primary Scorer (direct or pairwise) -> Bias Mitigation (position swap, etc.) -> Confidence Scoring (calibration) -> Output (scores + justifications + confidence). See [Evaluation Pipeline Diagram](./references/evaluation-pipeline.md) for the full visual layout.
+Build production evaluation systems with these layers: Criteria Loader (rubrics + weights) -> Primary Scorer (direct or pairwise) -> Bias Mitigation (position swap, etc.) -> Confidence Scoring (calibration) -> Output (scores + justifications + confidence). See [Evaluation Pipeline Diagram](skill://advanced-evaluation/references/evaluation-pipeline.md) for the full visual layout.
 
 ### Decision Framework: Direct vs. Pairwise
 
@@ -387,10 +387,13 @@ This skill owns judge design and bias mitigation. Adjacent skills own broader qu
 ## References
 
 Internal reference:
-- [LLM-as-Judge Implementation Patterns](./references/implementation-patterns.md) - Read when: building an evaluation pipeline from scratch or integrating LLM judges into CI/CD
-- [Bias Mitigation Techniques](./references/bias-mitigation.md) - Read when: evaluation results show inconsistent or suspicious scoring patterns
-- [Metric Selection Guide](./references/metrics-guide.md) - Read when: choosing statistical metrics to validate evaluation reliability
-- [Evaluation Pipeline Diagram](./references/evaluation-pipeline.md) - Read when: designing the architecture of a multi-stage evaluation system
+- [LLM-as-Judge Implementation Patterns](skill://advanced-evaluation/references/implementation-patterns.md) - Read when: building an evaluation pipeline from scratch or integrating LLM judges into CI/CD
+- [Bias Mitigation Techniques](skill://advanced-evaluation/references/bias-mitigation.md) - Read when: evaluation results show inconsistent or suspicious scoring patterns
+- [Metric Selection Guide](skill://advanced-evaluation/references/metrics-guide.md) - Read when: choosing statistical metrics to validate evaluation reliability
+- [Evaluation Pipeline Diagram](skill://advanced-evaluation/references/evaluation-pipeline.md) - Read when: designing the architecture of a multi-stage evaluation system
+
+Runnable script:
+- [evaluation_example.py](skill://advanced-evaluation/scripts/evaluation_example.py) - Direct-scoring, pairwise-comparison, and rubric-generation examples - Run when: wiring an LLM judge and wanting a working implementation to adapt
 
 External research:
 - [Eugene Yan: Evaluating the Effectiveness of LLM-Evaluators](https://eugeneyan.com/writing/llm-evaluators/) - Read when: surveying the state of the art in LLM evaluation

@@ -278,7 +278,10 @@ This skill owns file-backed context storage and retrieval. Adjacent skills own s
 ## References
 
 Internal reference:
-- [Implementation Patterns](./references/implementation-patterns.md) - Read when: implementing scratch pad, plan persistence, or tool output offloading and need concrete code beyond the inline examples
+- [Implementation Patterns](skill://filesystem-context/references/implementation-patterns.md) - Read when: implementing scratch pad, plan persistence, or tool output offloading and need concrete code beyond the inline examples
+
+Runnable script:
+- [filesystem_context.py](skill://filesystem-context/scripts/filesystem_context.py) - `ScratchPadManager`, `AgentPlan`, `ToolOutputHandler` - Run when: implementing scratchpads, plan persistence, or tool-output offloading
 
 Related skills in this collection:
 - context-optimization - Read when: applying token reduction techniques alongside filesystem offloading

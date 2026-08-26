@@ -5,7 +5,7 @@ description: >
   entire codebase instead of a diff: a ranked list of what to delete, simplify,
   or replace with stdlib/native equivalents. Use when the user says "audit this
   codebase", "audit for over-engineering", "what can I delete from this repo",
-  "find bloat", "leancode-audit", or "/leancode-audit". One-shot report, does
+  "find bloat", "leancode-audit", or "/skill:leancode-audit". One-shot report, does
   not apply fixes.
 license: MIT
 ---

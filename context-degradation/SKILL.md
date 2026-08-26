@@ -218,7 +218,10 @@ This skill owns diagnosis and mitigation of active context failures. Adjacent sk
 ## References
 
 Internal reference:
-- [Degradation Patterns Reference](./references/patterns.md) - Read when: debugging a specific degradation pattern and needing implementation-level detection code (attention analysis, poisoning tracking, relevance scoring, recovery procedures)
+- [Degradation Patterns Reference](skill://context-degradation/references/patterns.md) - Read when: debugging a specific degradation pattern and needing implementation-level detection code (attention analysis, poisoning tracking, relevance scoring, recovery procedures)
+
+Runnable script:
+- [degradation_detector.py](skill://context-degradation/scripts/degradation_detector.py) - Attention-distribution measurement, lost-in-middle detection, `PoisoningDetector`, `ContextHealthAnalyzer` - Run when: diagnosing a live context against the patterns in this skill
 
 Related skills in this collection:
 - context-fundamentals - Read when: lacking foundational understanding of context windows, token budgets, or placement mechanics

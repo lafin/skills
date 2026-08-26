@@ -243,7 +243,7 @@ After: two tools (bash + SQL) with higher measured success and shorter average e
 
 Key insight: The semantic layer was already good documentation. Claude just needed access to read files directly.
 
-See [Case Studies](./references/case-studies.md) for detailed analysis.
+See [Case Studies](skill://project-development/references/case-studies.md) for detailed analysis.
 
 ## Guidelines
 
@@ -284,8 +284,11 @@ This skill owns project-shape and pipeline decisions. Adjacent decisions are own
 ## References
 
 Internal references:
-- [Case Studies](./references/case-studies.md) - Read when: evaluating architecture tradeoffs or reviewing real-world pipeline implementations (Karpathy HN Capsule, Vercel d0, Manus patterns)
-- [Pipeline Patterns](./references/pipeline-patterns.md) - Read when: designing a new pipeline stage layout, choosing caching strategies, or debugging stage boundaries
+- [Case Studies](skill://project-development/references/case-studies.md) - Read when: evaluating architecture tradeoffs or reviewing real-world pipeline implementations (Karpathy HN Capsule, Vercel d0, Manus patterns)
+- [Pipeline Patterns](skill://project-development/references/pipeline-patterns.md) - Read when: designing a new pipeline stage layout, choosing caching strategies, or debugging stage boundaries
+
+Runnable script:
+- [pipeline_template.py](skill://project-development/scripts/pipeline_template.py) - Staged batch pipeline with per-item directories; CLI: `python3 pipeline_template.py <acquire|prepare|process|parse|render|all|clean|estimate>` - Run when: laying out a new multi-stage LLM pipeline
 
 Related skills in this collection:
 - tool-design - Tool architecture and reduction patterns

@@ -4,7 +4,7 @@ description: >
   Harvest debt-bearing `lean-debt:` comments into a ledger, so deliberate
   shortcuts and deferrals get tracked instead of rotting into "later means
   never". Use when the user says "leancode debt",
-  "/leancode-debt", "what did leancode defer", "list the shortcuts", "leancode
+  "/skill:leancode-debt", "what did leancode defer", "list the shortcuts", "leancode
   ledger", or "what did we mark to do later". One-shot report, changes nothing.
 license: MIT
 ---
