@@ -2,6 +2,8 @@
 name: simplified-engineering-english
 description: "This skill should be used when writing or reviewing any software-engineering prose that other people or agents must act on: documentation, README files, API reference, requirements, design docs, ADRs, commit messages, changelogs, PR descriptions, issue reports, code comments, error messages, runbooks, and incident reports. It defines Simplified Engineering English (SEE), a controlled subset of English for software engineering derived from ASD-STE100 Simplified Technical English. Use it to remove ambiguity, fix vague or unverifiable claims, enforce one term per concept, and make prose machine-checkable. Route code structure and implementation decisions elsewhere; this skill governs language only."
 license: MIT
+metadata:
+  provenance: repository-original
 ---
 
 # Simplified Engineering English (SEE)

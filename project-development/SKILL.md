@@ -4,7 +4,10 @@ description: "This skill should be used for project-level decisions about LLM-po
 license: MIT
 metadata:
   upstream: "muratcankoylan/Agent-Skills-for-Context-Engineering"
+  upstream_commit: "c578e85e40fe2bda7c1fec91ff64cf5285434934"
   upstream_path: "skills/project-development"
+  adaptation: modified
+  license_notice: LICENSE-context-engineering
 ---
 
 # Project Development Methodology
@@ -136,7 +139,7 @@ Estimate LLM processing costs before starting, because token costs compound quic
 Total cost = (items x tokens_per_item x price_per_token) + API overhead
 ```
 
-For batch processing, estimate input tokens per item (prompt + context), estimate output tokens per item (typical response length), multiply by item count, and add 20-30% buffer for retries and failures.
+For batch processing, estimate input tokens per item (prompt + context), estimate output tokens per item (typical response length), multiply by item count, and add a retry buffer derived from observed failure rates.
 
 Track actual costs during development. If costs exceed estimates significantly, reduce context length through truncation, use smaller models for simpler items, cache and reuse partial results, or add parallel processing to reduce wall-clock time.
 
@@ -158,7 +161,7 @@ See `multi-agent-patterns` skill for detailed architecture guidance.
 
 Start with minimal architecture and add complexity only when production evidence proves it necessary, because over-engineered scaffolding often constrains rather than enables model performance.
 
-Vercel's d0 case study reports improved success after reducing many specialized tools to two primitives: command execution and SQL (claim-project-development-vercel-d0-reduction). The file system agent pattern uses standard Unix utilities instead of custom exploration tools.
+Vercel's d0 case study reports improved results after reducing its text-to-SQL agent to command execution and SQL. The comparison used five internal questions, so treat it as a case study rather than a general rule. See the [dated Vercel evidence](skill://project-development/references/case-studies.md#evidence-vercel-d0-architectural-reduction-december-2025).
 
 **Reduce when:**
 - The data layer is well-documented and consistently structured
@@ -208,7 +211,7 @@ Follow this template in order, because each step validates assumptions before th
    - Plan parallelization approach for the process stage
 
 4. **Cost Estimation**
-   - Calculate items x tokens x price with a 20-30% buffer
+   - Calculate items x tokens x price with a retry buffer derived from observed failures
    - Estimate development time for each pipeline stage
    - Identify infrastructure requirements (API keys, storage, compute)
    - Project ongoing operational costs for production runs
@@ -239,7 +242,7 @@ Task: Text-to-SQL agent for internal analytics.
 
 Before: many specialized tools with lower measured success and longer average execution.
 
-After: two tools (bash + SQL) with higher measured success and shorter average execution (claim-project-development-vercel-d0-reduction).
+After: command execution and SQL produced better reported results on Vercel's five-question internal evaluation. See the [dated Vercel evidence](skill://project-development/references/case-studies.md#evidence-vercel-d0-architectural-reduction-december-2025).
 
 Key insight: The semantic layer was already good documentation. Claude just needed access to read files directly.
 
@@ -288,7 +291,7 @@ Internal references:
 - [Pipeline Patterns](skill://project-development/references/pipeline-patterns.md) - Read when: designing a new pipeline stage layout, choosing caching strategies, or debugging stage boundaries
 
 Runnable script:
-- [pipeline_template.py](skill://project-development/scripts/pipeline_template.py) - Staged batch pipeline with per-item directories; CLI: `python3 pipeline_template.py <acquire|prepare|process|parse|render|all|clean|estimate>` - Run when: laying out a new multi-stage LLM pipeline
+- [pipeline_template.py](skill://project-development/scripts/pipeline_template.py) - Status: Template; Replacement points: implement `fetch_items_from_source`, `call_llm`, and `render_html` for the target source, provider, and format - Staged batch-pipeline structure with sample data and mock model output - Use when: adapting a multi-stage LLM pipeline
 
 Related skills in this collection:
 - tool-design - Tool architecture and reduction patterns

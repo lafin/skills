@@ -1,6 +1,10 @@
 """
 Multi-Agent Coordination Utilities
 
+Status: Example
+Boundary: Planning and worker execution are synchronous rule-based simulations;
+no agents, models, or remote workers are invoked.
+
 Provides reusable building blocks for multi-agent coordination patterns:
 supervisor/orchestrator, peer-to-peer handoffs, consensus mechanisms,
 and failure handling with circuit breakers.
@@ -563,6 +567,10 @@ class AgentFailureHandler:
 
 
 if __name__ == "__main__":
+    print(
+        "Boundary: planning and worker execution are rule-based simulations; "
+        "no agents, models, or remote workers are invoked."
+    )
     print("=== Multi-Agent Coordination Demo ===\n")
 
     # 1. Communication channel

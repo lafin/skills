@@ -4,7 +4,10 @@ description: "This skill should be used when designing multi-agent systems that 
 license: MIT
 metadata:
   upstream: "muratcankoylan/Agent-Skills-for-Context-Engineering"
+  upstream_commit: "c578e85e40fe2bda7c1fec91ff64cf5285434934"
   upstream_path: "skills/multi-agent-patterns"
+  adaptation: modified
+  license_notice: LICENSE-context-engineering
 ---
 
 # Multi-Agent Architecture Patterns
@@ -49,7 +52,7 @@ Reach for multi-agent architectures when a single agent's context fills with acc
 Partition work across multiple context windows so each agent operates in a clean context focused on its subtask. Aggregate results at a coordination layer without any single context bearing the full burden.
 
 **The Token Economics Reality**
-Budget for substantially higher token costs. Production data shows multi-agent systems can cost far more tokens than single-agent chat (claim-multi-agent-token-multiplier):
+Budget for higher token costs than single-agent chat. Anthropic reported that its multi-agent research system used about 15 times as many tokens as ordinary chat, but that ratio is specific to its workload and architecture. See the [dated Anthropic evidence](skill://project-development/references/case-studies.md#evidence-anthropic-multi-agent-research-june-2025).
 
 | Architecture | Token Multiplier | Use Case |
 |--------------|------------------|----------|
@@ -57,9 +60,9 @@ Budget for substantially higher token costs. Production data shows multi-agent s
 | Single agent with tools | Higher than baseline | Tool-using tasks |
 | Multi-agent system | Much higher than baseline | Complex research/coordination |
 
-Browsing-agent evaluation research suggests token usage, tool calls, and model choice dominate performance variance (claim-evaluation-browsecomp-variance). This supports measuring multi-agent setups against single-agent baselines instead of assuming extra agents help.
+Anthropic's BrowseComp analysis attributed most observed performance variance to token usage, with tool calls and model choice also contributing. Treat this as evidence from one research system, and compare each multi-agent design against a single-agent baseline. See the [dated Anthropic evidence](skill://project-development/references/case-studies.md#evidence-anthropic-multi-agent-research-june-2025).
 
-Prioritize model selection alongside architecture design — upgrading to better models often provides larger performance gains than doubling token budgets. BrowseComp data shows that model quality improvements frequently outperform raw token increases. Treat model selection and multi-agent architecture as complementary strategies.
+Prioritize model selection alongside architecture design. Measure whether a stronger model improves results more than additional tokens for the target workload.
 
 **The Parallelization Argument**
 Assign parallelizable subtasks to dedicated agents with fresh contexts rather than processing them sequentially in a single agent. A research task requiring searches across multiple independent sources, analysis of different documents, or comparison of competing approaches benefits from parallel execution. Total real-world time approaches the duration of the longest subtask rather than the sum of all subtasks.
@@ -81,7 +84,7 @@ Choose this pattern when: tasks have clear decomposition, coordination across do
 Expect these trade-offs: strict workflow control and easier human-in-the-loop interventions, but the supervisor context becomes a bottleneck, supervisor failures cascade to all workers, and the "telephone game" problem emerges where supervisors paraphrase sub-agent responses incorrectly.
 
 **The Telephone Game Problem and Solution**
-Anticipate that supervisor architectures initially perform approximately 50% worse than optimized versions due to the telephone game problem (LangGraph benchmarks). Supervisors paraphrase sub-agent responses, losing fidelity with each pass.
+Treat supervisor paraphrasing as a fidelity risk. Measure task outcomes before and after direct forwarding instead of assuming the supervisor preserves specialist output.
 
 Fix this by implementing a `forward_message` tool that allows sub-agents to pass responses directly to users:
 
@@ -224,13 +227,13 @@ def handle_customer_request(request):
 
 ## Gotchas
 
-1. **Supervisor bottleneck scaling** — Supervisor context pressure grows non-linearly with worker count. At 5+ workers, the supervisor spends more tokens processing summaries than workers spend on actual tasks. Set a hard cap on workers per supervisor (3-5) and add a second supervisor tier rather than overloading one.
-2. **Token cost underestimation** — Multi-agent runs cost approximately 15x baseline. Teams consistently underbudget because they estimate per-agent costs without accounting for coordination overhead, retries, and consensus rounds. Budget for 15x and treat anything less as a bonus.
+1. **Supervisor bottleneck scaling** — Supervisor context pressure grows with worker count and result size. Set a measured worker cap per supervisor or add another coordination tier before the supervisor becomes the bottleneck.
+2. **Token cost underestimation** — Anthropic reported about 15 times the token usage of ordinary chat for its multi-agent research system. Use this only as a workload-specific planning signal, and measure coordination overhead, retries, and consensus rounds directly. See the [dated Anthropic evidence](skill://project-development/references/case-studies.md#evidence-anthropic-multi-agent-research-june-2025).
 3. **Sycophantic consensus** — Agents in debate patterns tend to converge on agreeable answers, not correct ones. LLMs have an inherent bias toward agreement. Counter this by assigning explicit adversarial roles and requiring agents to state disagreements before convergence is allowed.
-4. **Agent sprawl** — Adding more agents past 3-5 shows diminishing returns and increases coordination overhead. Each additional agent adds communication channels quadratically. Start with the minimum viable number of agents and add only when a clear context isolation benefit exists.
+4. **Agent sprawl** — Adding agents can produce diminishing returns while increasing coordination overhead. Dense peer-to-peer topologies add pairwise communication channels. Start with the minimum viable number of agents and add one only when a clear context-isolation benefit exists.
 5. **Telephone game in message-passing** — Information degrades through repeated summarization as it passes between agents. Each agent paraphrases and loses nuance. Use filesystem coordination instead of message-passing for state that multiple agents need to access faithfully.
 6. **Error propagation cascades** — One agent's hallucination becomes another agent's "fact." Downstream agents have no way to distinguish upstream hallucinations from genuine information. Add validation checkpoints between agents and never trust upstream output without verification.
-7. **Over-decomposition** — Splitting tasks too finely creates more coordination overhead than the task itself. A 10-step pipeline with 10 agents spends more tokens on handoffs than on actual work. Decompose only when subtasks genuinely benefit from separate contexts.
+7. **Over-decomposition** — Splitting tasks too finely can create more handoff work than task work. Decompose only when subtasks genuinely benefit from separate contexts.
 8. **Missing shared state** — Agents operating without a shared filesystem or state store duplicate work, produce inconsistent outputs, and lose track of what has already been accomplished. Establish shared persistent storage before building multi-agent workflows.
 
 ## Integration
@@ -251,7 +254,7 @@ Internal reference:
 - [Frameworks Reference](skill://multi-agent-patterns/references/frameworks.md) - Read when: implementing a specific multi-agent pattern in LangGraph, AutoGen, or CrewAI and needing framework-specific code examples
 
 Runnable script:
-- [coordination.py](skill://multi-agent-patterns/scripts/coordination.py) - `AgentCommunication`, `SupervisorAgent`, `HandoffProtocol`, `ConsensusManager`, `AgentFailureHandler` - Run when: implementing supervisor coordination, handoffs, or failure recovery
+- [coordination.py](skill://multi-agent-patterns/scripts/coordination.py) - Status: Example; Boundary: uses synchronous rule-based simulations without agents, models, or remote workers - `AgentCommunication`, `SupervisorAgent`, `HandoffProtocol`, `ConsensusManager`, `AgentFailureHandler` - Run when: implementing supervisor coordination, handoffs, or failure recovery
 
 Related skills in this collection:
 - context-fundamentals - Read when: needing to understand context window mechanics before designing agent partitioning

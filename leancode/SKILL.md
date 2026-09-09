@@ -8,12 +8,19 @@ description: >
   asking), simplicity first (YAGNI, reuse, stdlib and native before custom, one
   line before fifty), surgical changes (touch only what the request demands), and
   goal-driven execution (define verifiable success, leave a runnable check).
-  Supports intensity levels: lite, full (default), ultra. Use whenever the user
-  says "leancode", "be lazy", "lazy mode", "lean mode", "simplest solution",
-  "minimal solution", "yagni", "do less", "shortest path", or "surgical", and
-  whenever they complain about over-engineering, bloat, boilerplate, scope
+  Supports intensity levels: lite, full (default), ultra, and off. Use whenever
+  the user says "leancode", "be lazy", "lazy mode", "lean mode", "simplest
+  solution", "minimal solution", "yagni", "do less", "shortest path", or
+  "surgical". "Stop leancode" and "normal mode" select off. Also use when users
+  complain about over-engineering, bloat, boilerplate, scope
   creep, drive-by refactoring, or unnecessary dependencies.
 license: MIT
+metadata:
+  upstream: "multica-ai/andrej-karpathy-skills"
+  upstream_commit: "8462496b34419f20b32778610571ac723e91f94c"
+  upstream_path: "CLAUDE.md"
+  adaptation: inspired
+  provenance_note: "Textual relationship is observed; copying direction is unverified."
 ---
 
 # Leancode
@@ -31,9 +38,16 @@ without a definition of done.
 
 ## Persistence
 
-ACTIVE EVERY RESPONSE. No drift back to over-building. Still active if unsure.
-Off only: "stop leancode" / "normal mode". Default: **full**. Switch:
-`/leancode lite|full|ultra`.
+When an OMP reminder marked `[omp:leancode-state]` is present, its current mode
+is authoritative. `/leancode lite|full|ultra|off` changes that mode until OMP
+restarts, including in-process session changes and reloads. Restart defaults to
+**full**.
+
+Without the hook, **full** is the default. Natural-language instructions also
+work: "leancode lite", "leancode full", "leancode ultra", "stop leancode", and
+"normal mode". The selected mode persists for the conversation. `off` means
+none of this skill's reflexes, output rules, or intensity instructions apply
+until the user explicitly selects `lite`, `full`, or `ultra`.
 
 ## 1. Think Before Coding
 
@@ -148,9 +162,9 @@ Pattern: `[code] → skipped: [X], add when [Y].`
 
 | Level | What change |
 |-------|------------|
-| **lite** | Build what's asked, but name the leaner alternative in one line. User picks. |
-| **full** | The four reflexes enforced. Stdlib and native first. Shortest diff, shortest explanation, one runnable check. Default. |
-| **ultra** | YAGNI extremist. Deletion before addition. Ship the one-liner and challenge the rest of the requirement in the same breath. |
+| **lite** | Apply the four reflexes. Build exactly what was asked; name the leaner alternative in one line and let the user decide. |
+| **full** | Apply the four reflexes. Prefer reuse, stdlib, and native features; use the shortest working diff and explanation; leave one runnable check. Default. |
+| **ultra** | Apply the four reflexes as a YAGNI extremist: delete before adding, ship the smallest working solution, and challenge excess requirements. |
 
 Example: "Add a cache for these API responses."
 
@@ -175,7 +189,7 @@ reflex, not a ceremony.
 
 ## Boundaries
 
-Leancode governs what you build, not how you talk. "stop leancode" / "normal
-mode": revert. Level persists until changed or session end.
+Leancode governs what you build, not how you talk. When it is off, it does not
+influence the task.
 
 The shortest path to done that stays done is the right path.

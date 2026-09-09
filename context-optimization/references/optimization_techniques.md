@@ -12,25 +12,18 @@ The effectiveness of compaction depends on what information is preserved. Critic
 
 ### Token Budget Allocation
 
-Effective context budgeting requires understanding how different context components consume tokens and allocating budget strategically:
-
-| Component | Typical Range | Notes |
-|-----------|---------------|-------|
-| System prompt | 500-2000 tokens | Stable across session |
-| Tool definitions | 100-500 per tool | Grows with tool count |
-| Retrieved documents | Variable | Often largest consumer |
-| Message history | Variable | Grows with conversation |
-| Tool outputs | Variable | Can dominate context |
+Measure each serialized context component with the target model's tokenizer:
+system prompt, tool definitions, retrieved documents, message history, and
+tool outputs. Allocate the window from the observed workload and keep a reserve
+for the response and recovery actions. Do not use one fixed token range across
+models or tasks.
 
 ### Compaction Thresholds
 
-Trigger compaction at appropriate thresholds to maintain performance:
-
-- Warning threshold at 70% of effective context limit
-- Compaction trigger at 80% of effective context limit
-- Aggressive compaction at 90% of effective context limit
-
-The exact thresholds depend on model behavior and task characteristics. Some models show graceful degradation while others exhibit sharp performance cliffs.
+Run degradation probes at increasing context utilization. Set the warning,
+compaction, and emergency thresholds before the first measured quality cliff.
+Record the model, workload, window size, and evaluation version with those
+thresholds.
 
 ## Observation Masking Patterns
 
@@ -137,7 +130,7 @@ def plan_partitioning(task: Dict, context_limit: int) -> Dict:
 
 ### When to Optimize
 
-Consider context optimization when context utilization exceeds 70%, when response quality degrades as conversations extend, when costs increase due to long contexts, or when latency increases with conversation length.
+Consider context optimization when utilization approaches the measured safe limit, response quality degrades as conversations extend, or measured cost or latency no longer meets the workload target.
 
 ### What Optimization to Apply
 
@@ -188,12 +181,12 @@ Track these metrics to understand optimization needs:
 
 ### Alert Thresholds
 
-Set alerts for:
+Set alerts from the accepted workload baseline:
 
-- Context utilization above 80%
-- Cache hit rate below 50%
-- Quality score drop of more than 10%
-- Cost increase above baseline
+- Context utilization approaches the measured safe limit
+- Cache hit rate falls below its baseline
+- Quality score crosses the product's error budget
+- Cost rises beyond the approved variance
 
 ## Integration Patterns
 
@@ -244,29 +237,16 @@ class MemoryAwareOptimizer:
         return current_context
 ```
 
-## Performance Benchmarks
+## Performance Measurement
 
-### Compaction Performance
+Do not apply universal reduction, quality, cache, cost, or latency targets.
+Measure each technique against the same task suite and runtime configuration:
 
-Compaction should reduce token count while preserving quality. Target:
+- **Compaction**: context tokens, task-quality regressions, and compaction latency
+- **Masking**: masked observation tokens, retrieval success, and task quality
+- **Cache optimization**: cache hit rate, cached-token cost, and latency
+- **Partitioning**: total tokens and latency including coordinator and handoff overhead
 
-- 50-70% token reduction for aggressive compaction
-- Less than 5% quality degradation from compaction
-- Less than 10% latency increase from compaction overhead
-
-### Masking Performance
-
-Observation masking should reduce token count significantly:
-
-- 60-80% reduction in masked observations
-- Less than 2% quality impact from masking
-- Near-zero latency overhead
-
-### Cache Performance
-
-KV-cache optimization should improve cost and latency:
-
-- 70%+ cache hit rate for stable workloads
-- 50%+ cost reduction from cache hits
-- 40%+ latency reduction from cache hits
+Keep the optimization only when the target metric improves without crossing a
+quality or correctness limit.
 

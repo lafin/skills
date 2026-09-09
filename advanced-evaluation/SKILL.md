@@ -4,7 +4,10 @@ description: "This skill should be used for advanced LLM evaluation: LLM-as-judg
 license: MIT
 metadata:
   upstream: "muratcankoylan/Agent-Skills-for-Context-Engineering"
+  upstream_commit: "c578e85e40fe2bda7c1fec91ff64cf5285434934"
   upstream_path: "skills/advanced-evaluation"
+  adaptation: modified
+  license_notice: LICENSE-context-engineering
 ---
 
 # Advanced Evaluation
@@ -36,23 +39,23 @@ Do not activate this skill for adjacent work owned by other skills:
 
 Select between two primary approaches based on whether ground truth exists:
 
-**Direct Scoring** — Use when objective criteria exist (factual accuracy, instruction following, toxicity). A single LLM rates one response on a defined scale. Achieves moderate-to-high reliability for well-defined criteria. Watch for score calibration drift and inconsistent scale interpretation.
+**Direct Scoring** — Use when objective criteria exist (factual accuracy, instruction following, toxicity). A single LLM rates one response on a defined scale. Validate reliability against human judgments for the target criteria, and watch for score calibration drift and inconsistent scale interpretation.
 
-**Pairwise Comparison** — Use for subjective preferences (tone, style, persuasiveness). An LLM compares two responses and selects the better one. Pairwise methods often correlate better with human preference than open-ended direct scoring for subjective tasks (claim-advanced-evaluation-position-swap). Watch for position bias and length bias.
+**Pairwise Comparison** — Use for subjective preferences (tone, style, persuasiveness). An LLM compares two responses and selects the better one. Validate agreement with human preference on the target task, and control for position and length effects.
 
 ### The Bias Landscape
 
-Mitigate these systematic biases in every evaluation system:
+Treat these as candidate failure modes to test in each evaluation system:
 
-**Position Bias**: First-position responses get preferential treatment. Mitigate by evaluating twice with swapped positions, then apply majority vote or consistency check.
+**Position Bias**: A judge may favor a response because of its position. Evaluate twice with swapped positions, then apply a consistency check.
 
-**Length Bias**: Longer responses score higher regardless of quality. Mitigate by explicitly prompting to ignore length and applying length-normalized scoring.
+**Length Bias**: A judge may favor a response because it is longer. Prompt the judge to ignore length and test with length-controlled pairs.
 
-**Self-Enhancement Bias**: Models rate their own outputs higher. Mitigate by using different models for generation and evaluation.
+**Self-Enhancement Bias**: A model may favor its own outputs. Compare results with a different judge model.
 
-**Verbosity Bias**: Excessive detail scores higher even when unnecessary. Mitigate with criteria-specific rubrics that penalize irrelevant detail.
+**Verbosity Bias**: A judge may reward unnecessary detail. Use criteria-specific rubrics that penalize irrelevant detail.
 
-**Authority Bias**: Confident tone scores higher regardless of accuracy. Mitigate by requiring evidence citation and adding a fact-checking layer.
+**Authority Bias**: A judge may reward confident tone without verifying accuracy. Require cited evidence and verify factual claims separately.
 
 ### Metric Selection Framework
 
@@ -81,9 +84,9 @@ Weight: [Relative importance, 0-1]
 ```
 
 **Scale Calibration** — Choose scale granularity based on rubric detail:
-- 1-3: Binary with neutral option, lowest cognitive load
-- 1-5: Standard Likert, best balance of granularity and reliability
-- 1-10: Use only with detailed per-level rubrics because calibration is harder
+- 1-3: Coarse scale with a neutral midpoint
+- 1-5: Moderate granularity; define every score level
+- 1-10: Fine granularity; use only with detailed per-level rubrics
 
 **Prompt Structure for Direct Scoring**:
 ```
@@ -338,7 +341,7 @@ strictness: "balanced"
 
 1. **Always require evidence before scores** - Evidence-first prompts make judgments easier to audit and reduce ungrounded numeric scoring
 
-2. **Always swap positions in pairwise comparison** - Single-pass comparison is corrupted by position bias
+2. **Always swap positions in pairwise comparison** - A second pass reveals whether the verdict changes with response order
 
 3. **Match scale granularity to rubric specificity** - Don't use 1-10 without detailed level descriptions
 
@@ -360,19 +363,19 @@ strictness: "balanced"
 
 1. **Scoring without justification**: Scores lack grounding and are difficult to debug. Always require evidence-based justification before the score.
 
-2. **Single-pass pairwise comparison**: Position bias corrupts results when positions are not swapped. Always evaluate twice with swapped positions and check consistency.
+2. **Single-pass pairwise comparison**: A single pass cannot reveal sensitivity to response order. Evaluate twice with swapped positions and check consistency.
 
-3. **Overloaded criteria**: Criteria that measure multiple things at once produce unreliable scores. Enforce one criterion = one measurable aspect.
+3. **Overloaded criteria**: Criteria that measure multiple things at once make disagreements hard to diagnose. Enforce one criterion = one measurable aspect.
 
-4. **Missing edge case guidance**: Evaluators handle ambiguous cases inconsistently without explicit instructions. Include edge cases in rubrics with clear resolution rules.
+4. **Missing edge case guidance**: Evaluators can resolve ambiguous cases differently without explicit instructions. Include edge cases in rubrics with clear resolution rules.
 
 5. **Ignoring confidence calibration**: High-confidence wrong judgments are worse than low-confidence ones. Calibrate confidence to position consistency and evidence strength.
 
-6. **Rubric drift**: Rubrics become miscalibrated as quality standards evolve or model capabilities improve. Schedule periodic rubric reviews and re-anchor score levels against fresh human-annotated examples.
+6. **Rubric drift**: Rubrics can become miscalibrated as quality standards or model behavior changes. Review them periodically and re-anchor score levels against fresh human-annotated examples.
 
-7. **Evaluation prompt sensitivity**: Minor wording changes in evaluation prompts can cause material score swings. Version-control evaluation prompts and run regression tests before deploying prompt changes.
+7. **Evaluation prompt sensitivity**: Prompt wording can affect evaluation results. Version-control evaluation prompts and run regression tests before deploying prompt changes.
 
-8. **Uncontrolled length bias**: Longer responses systematically score higher even when conciseness is preferred. Add explicit length-neutrality instructions to evaluation prompts and validate with length-controlled test pairs.
+8. **Uncontrolled length bias**: A judge may favor longer responses even when conciseness is preferred. Add explicit length-neutrality instructions and validate with length-controlled test pairs.
 
 ## Integration
 
@@ -393,7 +396,7 @@ Internal reference:
 - [Evaluation Pipeline Diagram](skill://advanced-evaluation/references/evaluation-pipeline.md) - Read when: designing the architecture of a multi-stage evaluation system
 
 Runnable script:
-- [evaluation_example.py](skill://advanced-evaluation/scripts/evaluation_example.py) - Direct-scoring, pairwise-comparison, and rubric-generation examples - Run when: wiring an LLM judge and wanting a working implementation to adapt
+- [evaluation_example.py](skill://advanced-evaluation/scripts/evaluation_example.py) - Status: Example; Boundary: returns fixed illustrative evaluator outputs and does not call a model - Direct-scoring, pairwise-comparison, and rubric-generation examples - Run when: wiring an LLM judge and wanting a working implementation to adapt
 
 External research:
 - [Eugene Yan: Evaluating the Effectiveness of LLM-Evaluators](https://eugeneyan.com/writing/llm-evaluators/) - Read when: surveying the state of the art in LLM evaluation

@@ -1,6 +1,9 @@
 """
 Context Management Utilities for Agent Systems.
 
+Status: Example
+Boundary: Token counts are character-ratio approximations, not tokenizer output.
+
 Public API
 ----------
 Functions:

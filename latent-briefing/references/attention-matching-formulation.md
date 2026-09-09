@@ -2,6 +2,12 @@
 
 This note expands the compact treatment in the main skill: the AM objective, what changes under Latent Briefing, and which assumptions matter in practice.
 
+## Evidence scope
+
+This note was checked on 2026-09-09 against [Fast KV Compaction via Attention Matching](https://arxiv.org/abs/2602.16284) and the [Ramp Labs Latent Briefing announcement](https://x.com/RampLabs/status/2042660310851449223). The paper supports the Attention Matching formulation. The announcement is the source for applying task-conditioned scoring and a shared mask to orchestrator-worker transfer.
+
+This repository did not reproduce the reported system or benchmark its quality, latency, or retention rate. Treat the sections below as a formulation and implementation assumptions, not as local efficacy evidence.
+
 ## AM Compaction Objective
 
 Given a full KV cache of size `S`, Attention Matching seeks a smaller cache of size `t < S` whose attention outputs stay close to the original. Per attention head, compacted components `(C1, beta, C2)` satisfy:

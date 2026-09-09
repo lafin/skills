@@ -5,6 +5,7 @@ Dated extracts from OpenAI and Anthropic guidance relevant to long-running and p
 ## OpenAI
 
 ### GPT-5 prompting guide (OpenAI Cookbook, ~August 2025)
+Source: the OpenAI Cookbook page listed below. Scope: GPT-5 agent prompting, autonomy, rubrics, and reasoning effort. Limitation: this is model-specific vendor guidance, not an independent evaluation, and may change.
 
 `https://developers.openai.com/cookbook/examples/gpt-5/gpt-5_prompting_guide`
 
@@ -15,6 +16,7 @@ Dated extracts from OpenAI and Anthropic guidance relevant to long-running and p
 - `reasoning_effort` as the primary autonomy dial; tool preambles (upfront plan plus progress updates) matter more the longer the rollout.
 
 ### GPT-5.1 and GPT-5.2 prompting guides (November 2025, ~December 2025)
+Sources: the two OpenAI Cookbook pages listed below. Scope: GPT-5.1 and GPT-5.2 persistence, completion checks, scope control, and compaction guidance. Limitation: these are model-specific vendor recommendations, not controlled cross-model findings.
 
 `https://developers.openai.com/cookbook/examples/gpt-5/gpt-5-1_prompting_guide`, `https://developers.openai.com/cookbook/examples/gpt-5/gpt-5-2_prompting_guide`
 
@@ -23,6 +25,7 @@ Dated extracts from OpenAI and Anthropic guidance relevant to long-running and p
 - Compaction endpoint guidance for long runs: compact after major milestones, keep prompts functionally identical when resuming to avoid behavior drift.
 
 ### Codex prompting guide (covers GPT-5.1-Codex-Max through gpt-5.3-codex, early-mid 2026)
+Source: the OpenAI Cookbook page listed below. Scope: Codex-family planning, completion, and delivery behavior through the models named in the heading. Limitation: the guidance is model- and date-specific and may not transfer to other agents.
 
 `https://developers.openai.com/cookbook/examples/gpt-5/codex_prompting_guide`
 
@@ -31,6 +34,7 @@ Dated extracts from OpenAI and Anthropic guidance relevant to long-running and p
 - Default expectation: deliver working artifacts, not plans; make reasonable assumptions and complete a working version.
 
 ### GPT-5.5 prompt guidance (April 2026) and GPT-5.6 Sol guidance (June-July 2026)
+Sources: the two OpenAI prompt-guidance pages listed below. Scope: GPT-5.5 and GPT-5.6 Sol prompt design and OpenAI's internal coding-agent evaluations. Limitation: performance results are vendor-reported, model-specific, directional, and not independently reproduced here.
 
 `https://developers.openai.com/api/docs/guides/prompt-guidance`, `https://developers.openai.com/api/docs/guides/prompt-guidance-gpt-5p6`
 
@@ -42,6 +46,7 @@ Dated extracts from OpenAI and Anthropic guidance relevant to long-running and p
 - Layer-of-work discipline for long runs: distinguish research, design, implementation, review, and external coordination so the model does not silently drift between layers.
 
 ### Multi-agent API, GPT-5.6 family (beta, June-July 2026)
+Source: the beta OpenAI multi-agent API page listed below. Scope: GPT-5.6 root-agent and subagent behavior, context isolation, concurrency guidance, and anti-patterns. Limitation: the API was beta guidance and its defaults or recommendations may change.
 
 `https://developers.openai.com/api/docs/guides/tools-multi-agent`
 
@@ -51,6 +56,7 @@ Dated extracts from OpenAI and Anthropic guidance relevant to long-running and p
 - Default concurrency is low (3 recommended for most workloads); the 64-agent CDC configuration is an extreme, not a default.
 
 ### METR predeployment evaluation of GPT-5.6 Sol (June 26, 2026)
+Source: the METR predeployment report listed below. Scope: one GPT-5.6 Sol evaluation, including detected cheating and time-horizon sensitivity. Limitation: it does not establish that persistence prompting causes cheating across models or tasks.
 
 `https://metr.org/blog/2026-06-26-gpt-5-6-sol/`
 
@@ -61,6 +67,7 @@ Dated extracts from OpenAI and Anthropic guidance relevant to long-running and p
 ## Anthropic
 
 ### How we built our multi-agent research system (June 13, 2025)
+Source: the Anthropic engineering post listed below. Scope: Anthropic's production multi-agent research system, delegation format, and effort tiers. Limitation: this is a vendor experience report, not a controlled general benchmark.
 
 `https://www.anthropic.com/engineering/multi-agent-research-system`
 
@@ -70,6 +77,7 @@ Dated extracts from OpenAI and Anthropic guidance relevant to long-running and p
 - Lead-agent plan saved to external memory before spawning; end-state evaluation with a single rubric-based judge for offline scoring.
 
 ### Effective harnesses for long-running agents (November 26, 2025)
+Source: the Anthropic engineering post listed below. Scope: Anthropic's long-running coding-agent harness and observed completion failures. Limitation: recommendations come from that harness and may not transfer unchanged to other environments.
 
 `https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents`
 
@@ -79,6 +87,7 @@ Dated extracts from OpenAI and Anthropic guidance relevant to long-running and p
 - End-to-end verification "as a human user would" (browser automation) required to stop premature completion claims.
 
 ### When to use multi-agent systems (January 23, 2026)
+Source: the Anthropic post listed below. Scope: context-based multi-agent decomposition and fresh-context verification. Limitation: this is vendor guidance rather than an independent cross-model comparison.
 
 `https://claude.com/blog/building-multi-agent-systems-when-and-how-to-use-them`
 
@@ -88,6 +97,7 @@ Dated extracts from OpenAI and Anthropic guidance relevant to long-running and p
 - The "early victory problem" for verifiers and its fixes: concrete criteria ("Run the full test suite and report all failures", not "make sure it works"), negative tests, and explicit anti-shortcut instructions.
 
 ### Prompting best practices and Claude Fable 5 guidance (living docs, current mid-2026)
+Sources: the living Anthropic documentation pages listed below, observed in mid-2026. Scope: Claude prompting, evidence-grounded reporting, context refresh, verification, and de-prescription. Limitation: living documentation and vendor-reported tests are high-volatility and are not independently reproduced here.
 
 `https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices`, `https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-fable-5`
 
@@ -98,7 +108,8 @@ Dated extracts from OpenAI and Anthropic guidance relevant to long-running and p
 - De-prescription warning: skills and prompts written for prior generations are often too prescriptive for current models and can degrade output; replace CRITICAL/MUST stacks with plain decision rules; remove stale anti-laziness scaffolding.
 - Orchestrators may over-delegate; counter-prompt to work directly on simple tasks and delegate only parallel, isolated, or independent workstreams.
 
-## Convergent doctrine
+## Convergent doctrine (compiled 2026-07-11)
+Sources: the dated OpenAI and Anthropic sections above. Scope: recommendations that appeared in both vendors' guidance by the compilation date. Limitation: agreement between vendors is practice guidance, not proof of universal effectiveness, and later model guidance may differ.
 
 Where both vendors agree, treat the point as settled practice:
 

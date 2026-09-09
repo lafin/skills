@@ -4,7 +4,10 @@ description: "This skill should be used when building agent evaluation systems: 
 license: MIT
 metadata:
   upstream: "muratcankoylan/Agent-Skills-for-Context-Engineering"
+  upstream_commit: "c578e85e40fe2bda7c1fec91ff64cf5285434934"
   upstream_path: "skills/evaluation"
+  adaptation: modified
+  license_notice: LICENSE-context-engineering
 ---
 
 # Evaluation Methods for Agent Systems
@@ -39,17 +42,11 @@ Run deterministic validation before LLM judgment whenever the artifact has machi
 
 **Performance Drivers**
 
-Apply browsing-agent research when designing evaluation budgets: token usage, tool calls, and model choice can dominate measured performance variance (claim-evaluation-browsecomp-variance).
+Anthropic's [June 2025 BrowseComp and production research](skill://project-development/references/case-studies.md#evidence-anthropic-multi-agent-research-june-2025) reported that token usage explained most performance variance in its BrowseComp experiments, with tool calls and model choice adding explanatory power. Treat that result as evidence from Anthropic's studied systems, not a universal ranking.
 
-| Factor | Variance Explained | Implication |
-|--------|-------------------|-------------|
-| Token usage | Primary driver | More exploration can improve performance until cost or context quality collapses |
-| Number of tool calls | Secondary driver | More tool use helps only when calls retrieve useful evidence |
-| Model choice | Secondary but multiplicative | Better models often use tokens and tools more efficiently |
-
-Act on these implications when designing evaluations:
+Use it to frame evaluation questions rather than assume the same ordering:
 - **Set realistic token budgets**: Evaluate agents with production-realistic token limits, not unlimited resources.
-- **Compare model upgrades against token increases**: Better models may use tokens more efficiently than weaker models with larger budgets.
+- **Compare model upgrades against token increases**: Measure whether a model upgrade improves outcomes more efficiently than a larger token budget.
 - **Validate multi-agent architectures**: Extra agents add tokens and tool calls; evaluate them against single-agent baselines.
 
 ## Detailed Topics
@@ -82,7 +79,7 @@ Define rubrics covering key dimensions with descriptive levels from excellent to
 
 **Convert Rubrics to Numeric Scores**
 
-Map dimension assessments to numeric scores (0.0 to 1.0), apply per-dimension weights, and calculate weighted overall scores. Set passing thresholds based on use-case requirements, typically 0.7 for general use and 0.9 for high-stakes applications. Store individual dimension scores alongside the aggregate because the breakdown drives targeted improvement.
+Map dimension assessments to numeric scores when downstream comparison requires them, define each score level, apply per-dimension weights, and calculate the aggregate. Derive passing thresholds from use-case risk and accepted baseline behavior. Store individual dimension scores alongside the aggregate because the breakdown drives targeted improvement.
 
 ### Evaluation Methodologies
 
@@ -102,7 +99,7 @@ For agents that mutate persistent state (files, databases, configurations), eval
 
 **Select Representative Samples**
 
-Start with small samples (20-30 cases) during early development when changes have dramatic impacts and low-hanging fruit is abundant. Scale to 50+ cases for reliable signal as the system matures. Sample from real usage patterns, add known edge cases, and ensure coverage across complexity levels.
+Start with the smallest sample that covers known behavior and failure classes. Expand it with representative production cases as the system matures. Sample from real usage patterns, add known edge cases, and report coverage across complexity levels.
 
 **Stratify by Complexity**
 
@@ -132,7 +129,7 @@ Integrate evaluation into the development workflow so evaluations run automatica
 
 **Monitor Production Quality**
 
-Sample production interactions and evaluate them continuously. Set alerts for quality drops below warning (0.85 pass rate) and critical (0.70 pass rate) thresholds. Maintain dashboards showing trend analysis over time windows to detect gradual degradation.
+Sample production interactions and evaluate them continuously. Set warning and critical thresholds from an accepted baseline and the product's error budget. Maintain dashboards over defined time windows to detect gradual degradation.
 
 ## Practical Guidance
 
@@ -142,7 +139,7 @@ Follow this sequence to build an evaluation framework, because skipping early st
 
 1. Define quality dimensions relevant to the use case before writing any evaluation code, because dimensions chosen later tend to reflect what is easy to measure rather than what matters.
 2. Create rubrics with clear, descriptive level definitions so evaluators (human or LLM) produce consistent scores.
-3. Build test sets from real usage patterns and edge cases, stratified by complexity, with at least 50 cases for reliable signal.
+3. Build test sets from real usage patterns and edge cases, stratified by complexity, and report coverage gaps.
 4. Implement automated evaluation pipelines that run on every significant change.
 5. Establish baseline metrics before making changes so improvements can be measured against a known reference.
 6. Run evaluations on all significant changes and compare against the baseline.
@@ -249,7 +246,7 @@ gate:
 3. **Test set contamination**: Eval examples leak into training data or prompt templates, inflating scores. Keep eval sets versioned and separate from any data used in prompts or fine-tuning.
 4. **Metric gaming**: Optimizing for the metric rather than actual quality produces agents that score well but disappoint users. Cross-validate automated metrics against human judgments regularly.
 5. **Single-dimension scoring**: One aggregate number hides critical failures in specific dimensions. Always report per-dimension scores alongside the overall score, and fail the eval if any single dimension falls below its minimum threshold.
-6. **Eval set too small**: Fewer than 50 examples produces unreliable signal with high variance between runs. Scale the eval set to at least 50 cases and report confidence intervals.
+6. **Eval set too small**: Small samples can produce high variance between runs. Report uncertainty and expand the set until the decision is stable enough for the product risk.
 7. **Not stratifying by difficulty**: Easy examples inflate overall scores, masking failures on hard cases. Report scores per complexity stratum and weight the overall score to prevent easy-case dominance.
 8. **Treating eval as one-time**: Evaluation must be continuous, not a launch gate. Agent quality drifts as models update, tools change, and usage patterns evolve. Run evals on every change and on a regular production cadence.
 
@@ -271,7 +268,7 @@ Internal reference:
 - [Metrics Reference](skill://evaluation/references/metrics.md) - Read when: designing specific evaluation metrics, choosing scoring scales, or implementing weighted rubric calculations
 
 Runnable script:
-- [evaluator.py](skill://evaluation/scripts/evaluator.py) - `RubricDimension`, `AgentEvaluator`, `TestSet`, `EvaluationRunner`, `ProductionMonitor` - Run when: building a regression suite or wiring a quality gate
+- [evaluator.py](skill://evaluation/scripts/evaluator.py) - Status: Example; Boundary: uses heuristic scoring and simulated agent output without executing an agent or model - `RubricDimension`, `AgentEvaluator`, `TestSet`, `EvaluationRunner`, `ProductionMonitor` - Run when: building a regression suite or wiring a quality gate
 
 Internal skills:
 - All other skills connect to evaluation for quality measurement

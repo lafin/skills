@@ -4,7 +4,10 @@ description: "This skill should be used when agent work needs file-backed contex
 license: MIT
 metadata:
   upstream: "muratcankoylan/Agent-Skills-for-Context-Engineering"
+  upstream_commit: "c578e85e40fe2bda7c1fec91ff64cf5285434934"
   upstream_path: "skills/filesystem-context"
+  adaptation: modified
+  license_notice: LICENSE-context-engineering
 ---
 
 # Filesystem-Based Context Engineering
@@ -200,7 +203,7 @@ project/
 
 Use consistent naming conventions and include timestamps or IDs in scratch files for disambiguation.
 
-For autonomous research loops, store raw retrieved evidence under the run that consumed it, for example `researcher/runs/<run-id>/sources/evidence/raw/`. Do not leave raw research dumps in the repository root; root-level artifacts become hard to audit and easy to cite without provenance.
+For autonomous research loops, store raw retrieved evidence in a run-scoped `sources/evidence/raw/` directory. Do not leave raw research dumps in the repository root; root-level artifacts become hard to audit and easy to cite without provenance.
 
 ### Token Accounting
 
@@ -260,7 +263,7 @@ Result: Agent can search history file to recover details lost in summarization
 2. **Race conditions in multi-agent file access**: Concurrent writes to the same file corrupt state silently. Enforce per-agent directory isolation or use append-only files with agent-prefixed entries.
 3. **Stale file references after moves/renames**: Agents hold paths from prior turns that no longer exist after refactors or file reorganization. Always verify file existence before reading a cached path; re-discover with glob if the check fails.
 4. **Glob pattern false matches**: Overly broad patterns (e.g., `**/*`) pull irrelevant files into context, wasting tokens and confusing the model. Scope globs to specific directories and extensions.
-5. **File size assumptions**: Reading a file without checking size can dump 100K+ tokens into context in a single tool call. Check file size before reading; use line-range reads for large files.
+5. **File size assumptions**: Reading an unchecked file can consume a large share of the context window in one tool call. Check file size before reading and use line-range reads for large files.
 6. **Missing file existence checks**: Agents assume files exist from prior turns, but they may have been deleted or moved. Always guard reads with existence checks and handle missing-file errors gracefully.
 7. **Scratch pad format drift**: Unstructured scratch pads become unparseable after many writes because format conventions erode over successive appends. Define and enforce a schema (YAML, JSON, or structured markdown) from the first write.
 8. **Hardcoded absolute paths**: Break when repositories are checked out at different locations or when running in containers. Use relative paths from the project root or resolve paths dynamically.
@@ -281,7 +284,7 @@ Internal reference:
 - [Implementation Patterns](skill://filesystem-context/references/implementation-patterns.md) - Read when: implementing scratch pad, plan persistence, or tool output offloading and need concrete code beyond the inline examples
 
 Runnable script:
-- [filesystem_context.py](skill://filesystem-context/scripts/filesystem_context.py) - `ScratchPadManager`, `AgentPlan`, `ToolOutputHandler` - Run when: implementing scratchpads, plan persistence, or tool-output offloading
+- [filesystem_context.py](skill://filesystem-context/scripts/filesystem_context.py) - Status: Example; Boundary: approximates token counts, writes only local sample files, and calls no external service - `ScratchPadManager`, `AgentPlan`, `ToolOutputHandler` - Run when: implementing scratchpads, plan persistence, or tool-output offloading
 
 Related skills in this collection:
 - context-optimization - Read when: applying token reduction techniques alongside filesystem offloading

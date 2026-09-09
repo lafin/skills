@@ -1,6 +1,13 @@
 ---
 name: ai-stage-gate
 description: Use when running a stage-gate or gate review for an AI product, deciding Go/Kill/Pivot at a gate, judging whether an AI initiative is ready to advance to the next stage, triaging a portfolio of AI ideas, or choosing between a full and a fast-track path. Applies a Stage-Gate process built for AI products — incremental investment, dual value-and-technical validation, alignment/ethics/data checks at every gate — to reach an evidence-based gate decision.
+license: MIT
+metadata:
+  upstream: "ML-SystemDesign/MLSystemDesign"
+  upstream_commit: "e439d91dbbd6a303115e42a6b9545563a7c4641f"
+  upstream_path: "skills/ai-stage-gate"
+  adaptation: modified
+  license_notice: LICENSE-ml-system-design
 ---
 
 # AI Stage-Gate Review

@@ -4,7 +4,10 @@ description: "This skill should be used when modeling agent mental states with B
 license: MIT
 metadata:
   upstream: "muratcankoylan/Agent-Skills-for-Context-Engineering"
+  upstream_commit: "c578e85e40fe2bda7c1fec91ff64cf5285434934"
   upstream_path: "skills/bdi-mental-states"
+  adaptation: modified
+  license_notice: LICENSE-context-engineering
 ---
 
 # BDI Mental State Modeling
@@ -340,9 +343,9 @@ If the task is "remember that Alice prefers concise summaries," use `memory-syst
 
 5. **Direct intention-to-action mapping**: Intentions specify plans which contain tasks; actions execute tasks. Skipping the plan layer removes the ability to reuse, reorder, or share execution strategies.
 
-6. **Ontology over-complexity**: Start with 5-10 core classes and properties (Belief, Desire, Intention, WorldState, Plan, plus key relations). Expanding the ontology prematurely inflates prompt context and slows SPARQL queries without improving reasoning quality.
+6. **Ontology over-complexity**: Start with only the classes and properties required by current competency questions. Expanding the ontology prematurely inflates prompt context and query work without demonstrated reasoning benefit.
 
-7. **Reasoning cost explosion**: Keep belief chains to 3 levels or fewer (belief -> desire -> intention). Deeper chains become prohibitively expensive for LLM inference and rarely improve decision quality over shallower alternatives.
+7. **Reasoning cost explosion**: Keep belief chains no deeper than the competency questions require. Measure inference cost and decision quality before adding another layer.
 
 ## Integration
 

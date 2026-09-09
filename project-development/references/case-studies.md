@@ -137,9 +137,11 @@ def parse_grades(text: str) -> dict[str, dict]:
 
 ---
 
-## Case Study 2: Vercel d0 Architectural Reduction
+## Evidence: Vercel d0 Architectural Reduction (December 2025)
 
-**Source**: https://vercel.com/blog/we-removed-80-percent-of-our-agents-tools
+**Source**: [Vercel Engineering, "We removed 80% of our agent's tools"](https://vercel.com/blog/we-removed-80-percent-of-our-agents-tools), published December 2025.
+**Scope**: Vercel's reported comparison of two text-to-SQL agent architectures on five internal analytics questions.
+**Limitation**: This is a vendor-authored case study with a small, internal evaluation set. The results do not establish that tool reduction improves other agents or workloads.
 
 ### Problem Statement
 
@@ -300,9 +302,11 @@ Test across model strengths to verify your harness is not limiting performance. 
 
 ---
 
-## Case Study 4: Anthropic Multi-Agent Research
+## Evidence: Anthropic Multi-Agent Research (June 2025)
 
-**Source**: Anthropic blog "How we built our multi-agent research system"
+**Source**: [Anthropic Engineering, "How we built our multi-agent research system"](https://www.anthropic.com/engineering/built-multi-agent-research-system), published June 2025.
+**Scope**: Anthropic's reported production token usage and its BrowseComp analysis of token usage, tool calls, and model choice.
+**Limitation**: This is a vendor-authored report about Anthropic's research system. Its token ratios and evaluation findings do not establish general multi-agent scaling laws.
 
 ### Problem Statement
 

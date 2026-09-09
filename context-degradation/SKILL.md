@@ -4,7 +4,10 @@ description: "This skill should be used for diagnosing and mitigating context de
 license: MIT
 metadata:
   upstream: "muratcankoylan/Agent-Skills-for-Context-Engineering"
+  upstream_commit: "c578e85e40fe2bda7c1fec91ff64cf5285434934"
   upstream_path: "skills/context-degradation"
+  adaptation: modified
+  license_notice: LICENSE-context-engineering
 ---
 
 # Context Degradation Patterns
@@ -29,11 +32,11 @@ Do not activate this skill for adjacent work owned by other skills:
 
 ## Core Concepts
 
-Structure context placement around the attention U-curve: beginning and end positions receive reliable attention, while middle positions suffer materially reduced recall accuracy in long-context experiments (claim-context-degradation-lost-middle-ruler). This is not a model bug but a consequence of attention mechanics — the first token (often BOS) acts as an "attention sink" that absorbs disproportionate attention budget, leaving middle tokens under-attended as context grows.
+Treat position as an evaluation variable: benchmark whether critical information is recovered from the beginning, middle, and end of the target workload, then place it where measured recall is strongest. Do not assume that every model or task follows the same positional pattern.
 
 Treat context poisoning as a circuit breaker problem. Once a hallucination, tool error, or incorrect retrieved fact enters context, it compounds through repeated self-reference. A poisoned goals section causes every downstream decision to reinforce incorrect assumptions. Detection requires tracking claim provenance; recovery requires truncating to before the poisoning point or restarting with verified-only context.
 
-Filter aggressively before loading context — even a single irrelevant document measurably degrades performance on relevant tasks. Models cannot "skip" irrelevant context; they must attend to everything provided, creating attention competition between relevant and irrelevant content. Move information that might be needed but is not immediately relevant behind tool calls instead of pre-loading it.
+Filter context before loading it. Irrelevant material consumes context capacity and can change model behavior, so keep information that is not immediately relevant behind tool calls.
 
 Isolate task contexts to prevent confusion. When context contains multiple task types or switches between objectives, models incorporate constraints from the wrong task, call tools appropriate for a different context, or blend requirements from multiple sources. Explicit task segmentation with separate context windows eliminates cross-contamination.
 
@@ -43,9 +46,9 @@ Resolve context clash through priority rules, not accumulation. When multiple co
 
 ### Lost-in-Middle: Detection and Placement Strategy
 
-Place critical information at the beginning and end of context, never in the middle. The U-shaped attention curve means middle-positioned information suffers 10-40% reduced recall accuracy. For contexts over 4K tokens, this effect becomes significant.
+Test critical information at the beginning, middle, and end of representative long contexts. If the target model recovers edge-positioned information more reliably, place critical constraints at those measured positions.
 
-Use summary structures that surface key findings at attention-favored positions. Add explicit section headers and structural markers — these help models navigate long contexts by creating attention anchors. When a document must be included in full, prepend a summary of its key points and append the critical conclusions.
+Use explicit section headers and summaries to make position experiments easy to construct and interpret. When a document must be included in full, test whether prepending a summary or appending conclusions improves recovery on the target model.
 
 Monitor for lost-in-middle symptoms: correct information exists in context but the model ignores it, responses contradict provided data, or the model "forgets" instructions given earlier in a long prompt.
 
@@ -59,7 +62,7 @@ Recover by removing poisoned content, not by adding corrections on top. Truncate
 
 ### Context Distraction: Curation Over Accumulation
 
-Curate what enters context rather than relying on models to ignore irrelevant content. Research shows even a single distractor document triggers measurable performance degradation — the effect follows a step function, not a linear curve. Multiple distractors compound the problem.
+Measure the effect of irrelevant documents instead of assuming the model will ignore them. Test a clean context against contexts containing one or more distractors, then set retrieval filters from the observed difference.
 
 Apply relevance filtering before loading retrieved documents. Use namespacing and structural organization to make section boundaries clear. Prefer tool-call-based access over pre-loading: store reference material behind retrieval tools so it enters context only when directly relevant to the current reasoning step.
 
@@ -77,33 +80,27 @@ Implement version filtering to exclude outdated information before it enters con
 
 ### Empirical Benchmarks and Thresholds
 
-Use these benchmarks to set design constraints — not as universal truths. RULER-style evidence shows advertised long-context support does not guarantee satisfactory task performance at that length (claim-context-degradation-lost-middle-ruler). Near-perfect needle-in-haystack scores do not predict real-world long-context performance.
+Treat advertised context-window length as a capacity limit, not a quality guarantee. Benchmark the target workload at progressively larger context sizes, including retrieval and reasoning tasks rather than only simple needle retrieval.
 
 **Model-Specific Degradation Thresholds**
 
-Degradation onset varies significantly by model family and task type. As a general rule, expect degradation to begin at 60-70% of the advertised context window for complex retrieval tasks (RULER benchmark found only 50% of models claiming 32K+ context maintain satisfactory performance at that length). Key patterns:
-
-- **Models with extended thinking** reduce hallucination through step-by-step verification but at higher latency and token cost
-- **Models optimized for agents/coding** tend to have better attention management for tool-output-heavy contexts
-- **Models with very large context windows (1M+)** handle more raw context but still follow U-shaped degradation curves — bigger windows do not eliminate the problem, they delay it
-
-Always benchmark degradation thresholds with your specific workload rather than relying on published benchmarks. Model-specific thresholds go stale with each model update (see Gotcha 2).
+Do not use a general percentage of the advertised window as a degradation threshold. Onset depends on the model version, task, prompt, and context composition. Measure it for the deployed workload and repeat the measurement after model or infrastructure changes.
 
 ### Counterintuitive Findings
 
-Account for these research-backed surprises when designing context strategies:
+Account for these possibilities when designing context experiments:
 
-**Shuffled context can outperform coherent context.** Studies found incoherent (shuffled) haystacks can outperform logically ordered ones for some retrieval tasks (claim-context-degradation-distractor-shuffled). Coherent context may create false associations that confuse retrieval; incoherent context can force exact matching. Do not assume that better-organized context always yields better results — test both arrangements.
+**Shuffled context may behave differently from coherent context.** Compare both arrangements when order is not semantically required; do not assume that more organization improves retrieval.
 
-**Single distractors have outsized impact.** The performance hit from one irrelevant document is disproportionately large compared to adding more distractors after the first. Treat distractor prevention as binary: either keep context clean or accept significant degradation.
+**A single distractor may be enough to change results.** Compare a clean baseline with one-distractor and multi-distractor cases before choosing a relevance threshold.
 
-**Low needle-question similarity accelerates degradation.** Tasks requiring inference across dissimilar content degrade faster with context length than tasks with high surface-level similarity. Design retrieval to maximize semantic overlap between queries and retrieved content.
+**Needle-question similarity may affect retrieval.** Include both high- and low-similarity cases in retrieval tests rather than generalizing from exact-match cases.
 
 ### When Larger Contexts Hurt
 
-Do not assume larger context windows improve performance. Performance remains stable up to a model-specific threshold, then degrades rapidly — the curve is non-linear with a cliff edge, not a gentle slope. For many models, meaningful degradation begins at 8K-16K tokens even when windows support much larger sizes.
+Do not assume that a larger context improves performance. Measure task quality as context grows and define the operating limit from the target model and workload.
 
-Factor in cost: processing a 400K token context costs exponentially more than 200K in both time and compute, not linearly more. For many applications, this makes large-context processing economically impractical.
+Factor in cost: larger contexts can increase both processing time and compute cost. Measure provider pricing and latency at the actual context sizes before choosing a large-context strategy.
 
 Recognize the cognitive bottleneck: even with infinite context, asking a single model to maintain quality across dozens of independent tasks creates degradation that more context cannot solve. Split tasks across sub-agents instead of expanding context.
 
@@ -113,7 +110,7 @@ Recognize the cognitive bottleneck: even with infinite context, asking a single 
 
 Apply these four strategies based on which degradation pattern is active:
 
-**Write** — Save context outside the window using scratchpads, file systems, or external storage. Use when context utilization exceeds 70% of the window. This keeps active context lean while preserving information access through tool calls.
+**Write** — Save context outside the window using scratchpads, file systems, or external storage. Use when utilization approaches the measured safe limit. This keeps active context lean while preserving information access through tool calls.
 
 **Select** — Pull only relevant context into the window through retrieval, filtering, and prioritization. Use when distraction or confusion symptoms appear. Apply relevance scoring before loading; exclude anything below threshold rather than including everything available.
 
@@ -129,30 +126,30 @@ Implement just-in-time context loading: retrieve information only when the curre
 
 **Example 1: Detecting Degradation**
 ```yaml
-# Context grows during long conversation
-turn_1: 1000 tokens
-turn_5: 8000 tokens
-turn_10: 25000 tokens
-turn_20: 60000 tokens (degradation begins)
-turn_30: 90000 tokens (significant degradation)
+# Illustrative measurements; replace with observed workload data
+baseline:
+  context_tokens: measured_value
+  quality_score: measured_value
+larger_context:
+  context_tokens: measured_value
+  quality_score: measured_value
 ```
 
-**Example 2: Mitigating Lost-in-Middle**
+**Example 2: Testing Position Sensitivity**
 ```markdown
-# Organize context with critical info at edges
+# Run the same prompt with critical information in different positions
 
-[CURRENT TASK]                      # At start
+[CURRENT TASK]
 - Goal: Generate quarterly report
 - Deadline: End of week
 
-[DETAILED CONTEXT]                  # Middle (less attention)
-- 50 pages of data
-- Multiple analysis sections
-- Supporting evidence
+[DETAILED CONTEXT]
+- Supporting data
+- Analysis sections
 
-[KEY FINDINGS]                     # At end
-- Revenue up 15%
-- Costs down 8%
+[KEY FINDINGS]
+- Revenue increased
+- Costs decreased
 - Growth in Region A
 ```
 
@@ -180,7 +177,7 @@ conflict:
 ## Guidelines
 
 1. Monitor context length and performance correlation during development
-2. Place critical information at beginning or end of context
+2. Test critical information at beginning, middle, and end positions
 3. Implement compaction triggers before degradation becomes severe
 4. Validate retrieved documents for accuracy before adding to context
 5. Use versioning to prevent outdated information from causing clash
@@ -190,19 +187,19 @@ conflict:
 
 ## Gotchas
 
-1. **Normal variance looks like degradation**: Model output quality fluctuates naturally across runs. Do not diagnose degradation from a single drop in quality — establish a baseline over multiple runs and look for sustained, correlated decline tied to context growth. A 5-10% quality dip on one run is noise; the same dip consistently appearing after 40K tokens is signal.
+1. **Normal variance looks like degradation**: Do not diagnose degradation from a single quality drop. Establish a baseline over repeated runs and look for a sustained decline tied to context growth.
 
-2. **Model-specific thresholds go stale**: The degradation onset values in benchmark tables reflect specific model versions. Provider updates, fine-tuning changes, and infrastructure shifts can move thresholds by 20-50% in either direction. Re-benchmark quarterly and after any major model update rather than treating published thresholds as permanent.
+2. **Model-specific thresholds go stale**: Re-benchmark after model, prompt, or infrastructure changes rather than treating a published threshold as permanent.
 
-3. **Needle-in-haystack scores create false confidence**: A model scoring 99% on needle-in-haystack does not mean it handles 128K tokens well in production. Needle tests measure single-fact retrieval from passive context — real workloads require multi-fact reasoning, instruction following, and synthesis across the full window. Use task-specific benchmarks that mirror actual workload patterns.
+3. **Needle-in-haystack scores create false confidence**: A single-fact retrieval test does not establish production quality on workloads that require multi-fact reasoning, instruction following, or synthesis. Use task-specific benchmarks that mirror the deployed workload.
 
 4. **Contradictory retrieved documents poison silently**: When a RAG pipeline retrieves two documents that disagree on a fact, the model may silently pick one without signaling the conflict. This looks like a correct response but is effectively random. Implement contradiction detection in the retrieval layer before documents enter context.
 
-5. **Prompt quality problems masquerade as degradation**: Poor prompt structure (ambiguous instructions, missing constraints, unclear task framing) produces symptoms identical to context degradation — inconsistent outputs, ignored instructions, wrong tool usage. Before diagnosing degradation, verify the same prompt works correctly at low context lengths. If it fails at 2K tokens, the problem is the prompt, not the context.
+5. **Prompt quality problems masquerade as degradation**: Poor prompt structure can produce the same symptoms as context pressure. Before diagnosing degradation, verify the prompt on a smaller context.
 
-6. **Degradation is non-linear with a cliff edge**: Performance does not degrade gradually — it holds steady until a model-specific threshold, then drops sharply. Systems designed for "graceful degradation" often miss this pattern because monitoring checks assume linear decline. Set compaction triggers well before the cliff (at 70% of known onset), not at the onset itself.
+6. **Assumed curve shape hides failures**: Do not assume degradation is linear or has a universal cliff. Measure quality across context sizes and set compaction triggers before the measured failure region.
 
-7. **Over-organizing context can backfire**: Intuitively, well-structured and coherent context should outperform disorganized content. Research shows shuffled haystacks sometimes outperform coherent ones for retrieval tasks because coherent context creates false associations. Test whether heavy structural formatting actually helps for the specific task — do not assume it does.
+7. **Over-organizing context can backfire**: Compare coherent and shuffled layouts when order is not semantically required. Use the layout that performs better on the target retrieval task.
 
 ## Integration
 
@@ -221,7 +218,7 @@ Internal reference:
 - [Degradation Patterns Reference](skill://context-degradation/references/patterns.md) - Read when: debugging a specific degradation pattern and needing implementation-level detection code (attention analysis, poisoning tracking, relevance scoring, recovery procedures)
 
 Runnable script:
-- [degradation_detector.py](skill://context-degradation/scripts/degradation_detector.py) - Attention-distribution measurement, lost-in-middle detection, `PoisoningDetector`, `ContextHealthAnalyzer` - Run when: diagnosing a live context against the patterns in this skill
+- [degradation_detector.py](skill://context-degradation/scripts/degradation_detector.py) - Status: Example; Boundary: simulates attention and uses heuristics for tokens, poisoning, and hallucination signals instead of model measurements - Attention-distribution measurement, lost-in-middle detection, `PoisoningDetector`, `ContextHealthAnalyzer` - Run when: diagnosing a live context against the patterns in this skill
 
 Related skills in this collection:
 - context-fundamentals - Read when: lacking foundational understanding of context windows, token budgets, or placement mechanics

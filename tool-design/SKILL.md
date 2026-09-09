@@ -4,7 +4,10 @@ description: "This skill should be used for the tool-interface layer of an agent
 license: MIT
 metadata:
   upstream: "muratcankoylan/Agent-Skills-for-Context-Engineering"
+  upstream_commit: "c578e85e40fe2bda7c1fec91ff64cf5285434934"
   upstream_path: "skills/tool-design"
+  adaptation: modified
+  license_notice: LICENSE-context-engineering
 ---
 
 # Tool Design for Agents
@@ -55,14 +58,14 @@ Namespace tools under common prefixes as the collection grows, because agents be
 Build single comprehensive tools instead of multiple narrow tools that overlap. Rather than implementing `list_users`, `list_events`, and `create_event` separately, implement `schedule_event` that finds availability and schedules in one call. The comprehensive tool handles the full workflow internally, removing the agent's burden of chaining calls in the correct order.
 
 **Why Consolidation Works**
-Apply consolidation because agents have limited context and attention. Each tool in the collection competes for attention during tool selection, each description consumes context budget tokens, and overlapping functionality creates ambiguity. Consolidation eliminates redundant descriptions, removes selection ambiguity, and shrinks the effective tool set. Vercel's d0 case study is a concrete example of reducing specialized tools into a smaller primitive tool set with better measured outcomes (claim-tool-design-vercel-d0-reduction).
+Apply consolidation because agents have limited context and attention. Each tool in the collection competes for attention during tool selection, each description consumes context budget tokens, and overlapping functionality creates ambiguity. Consolidation eliminates redundant descriptions, removes selection ambiguity, and shrinks the effective tool set. Vercel reported better results after reducing its d0 text-to-SQL agent to two primitive tools on five internal questions; this result is workload-specific. See the [dated Vercel evidence](skill://project-development/references/case-studies.md#evidence-vercel-d0-architectural-reduction-december-2025).
 
 **When Not to Consolidate**
 Keep tools separate when they have fundamentally different behaviors, serve different contexts, or must be callable independently. Over-consolidation creates a different problem: a single tool with too many parameters and modes becomes hard for agents to parameterize correctly.
 
 ### Architectural Reduction
 
-Push the consolidation principle to its logical extreme by removing most specialized tools in favor of primitive, general-purpose capabilities. Production evidence shows this approach can outperform sophisticated multi-tool architectures.
+Architectural reduction removes specialized tools in favor of primitive, general-purpose capabilities. Vercel reported that this approach improved its d0 evaluation, but the small internal comparison does not establish a general advantage. See the [dated Vercel evidence](skill://project-development/references/case-studies.md#evidence-vercel-d0-architectural-reduction-december-2025).
 
 **The File System Agent Pattern**
 Provide direct file system access through a single command execution tool instead of building custom tools for data exploration, schema lookup, and query validation. The agent uses standard Unix utilities (grep, cat, find, ls) to explore and operate on the system. This works because file systems are a proven abstraction that models understand deeply, standard tools have predictable behavior, agents can chain primitives flexibly rather than being constrained to predefined workflows, and good documentation in files replaces summarization tools.
@@ -73,7 +76,7 @@ Choose reduction when the data layer is well-documented and consistently structu
 **Build for Future Models**
 Design minimal architectures that benefit from model improvements rather than sophisticated architectures that lock in current limitations. Ask whether each tool enables new capabilities or constrains reasoning the model could handle on its own -- tools built as "guardrails" often become liabilities as models improve.
 
-See [Architectural Reduction Case Study](skill://tool-design/references/architectural_reduction.md) for production evidence.
+See [Architectural Reduction Guidance](skill://tool-design/references/architectural_reduction.md) for the implementation pattern and evaluation checklist.
 
 ### Tool Description Engineering
 
@@ -260,7 +263,7 @@ def search(query):
 4. **Inconsistent naming across tools**: Using `id` in one tool, `identifier` in another, and `customer_id` in a third creates confusion. Standardize parameter names across the entire tool collection.
 5. **MCP namespace collisions**: When multiple MCP tool providers register tools with similar names (e.g., two servers both exposing `search`), agents cannot disambiguate. Always use fully qualified `ServerName:tool_name` format and audit for collisions when adding new providers.
 6. **Tool description rot**: Descriptions become inaccurate as underlying APIs evolve -- parameters get added, return formats change, error codes shift. Treat descriptions as code: version them, review them during API changes, and test them against current behavior.
-7. **Over-consolidation**: Making a single tool handle too many workflows produces parameter lists so large that agents struggle to select the right combination. If a tool requires more than 8-10 parameters or serves fundamentally different use cases, split it.
+7. **Over-consolidation**: Making a single tool handle unrelated workflows produces a parameter surface that agents struggle to use. Split it when evaluation shows selection or argument errors caused by fundamentally different use cases.
 8. **Parameter explosion**: Too many optional parameters overwhelm agent decision-making. Each parameter the agent must evaluate adds cognitive load. Provide sensible defaults, group related options into format presets, and move rarely-used parameters into an `options` object.
 9. **Missing error context**: Error messages that say only "failed" or "invalid input" without specifying which input, why it failed, or what a valid input looks like leave agents unable to self-correct. Include the invalid value, the expected format, and a concrete example in every error response.
 
@@ -281,7 +284,7 @@ Internal references:
 - [Architectural Reduction Case Study](skill://tool-design/references/architectural_reduction.md) - Read when: considering removing specialized tools in favor of primitives, or evaluating whether a complex tool architecture is justified
 
 Runnable script:
-- [description_generator.py](skill://tool-design/scripts/description_generator.py) - `ToolSpec` description generation, `ToolDescriptionEvaluator`, `ErrorMessageGenerator`, `ToolSchemaBuilder` - Run when: drafting or auditing tool descriptions and schemas
+- [description_generator.py](skill://tool-design/scripts/description_generator.py) - Status: Example; Boundary: scores descriptions with deterministic text heuristics without a model or live tool runtime - `ToolSpec` description generation, `ToolDescriptionEvaluator`, `ErrorMessageGenerator`, `ToolSchemaBuilder` - Run when: drafting or auditing tool descriptions and schemas
 
 Related skills in this collection:
 - context-fundamentals - Tool context interactions

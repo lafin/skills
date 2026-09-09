@@ -1,6 +1,11 @@
 """
 Sandbox Manager for Hosted Agent Infrastructure.
 
+Status: Template
+Replacement points: Implement Sandbox I/O and snapshots, image creation,
+provider lifecycle operations, and the GitHub token provider for the selected
+sandbox infrastructure. The demo uses placeholder identities and credentials.
+
 Use when: building background coding agents that need sandboxed execution
 environments with pre-built images, warm pools, and session snapshots.
 

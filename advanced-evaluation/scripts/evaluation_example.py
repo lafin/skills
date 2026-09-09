@@ -1,5 +1,8 @@
 """Advanced Evaluation Example
 
+Status: Example
+Boundary: Returns fixed illustrative evaluator outputs; it does not call a model.
+
 Use when: building LLM-as-judge evaluation pipelines, comparing model outputs
 with position-bias mitigation, or generating domain-specific scoring rubrics.
 

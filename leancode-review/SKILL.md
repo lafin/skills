@@ -9,6 +9,8 @@ description: >
   /skill:leancode-review. Complements correctness-focused review, this one only hunts
   complexity.
 license: MIT
+metadata:
+  provenance: repository-original
 ---
 
 Review diffs for unnecessary complexity. One line per finding: location, what

@@ -1,6 +1,10 @@
 """
 Context Compression Evaluation
 
+Status: Example
+Boundary: Judge scoring is a deterministic heuristic stub, and the demo uses a
+mock response function. No model API is called.
+
 Public API for evaluating context compression quality using probe-based
 assessment. This module provides three composable components:
 
@@ -791,6 +795,11 @@ def evaluate_compression_quality(
 
 
 if __name__ == "__main__":
+    print(
+        "Boundary: judge scoring is a heuristic stub, a mock response function is used, "
+        "and token estimation and fact extraction use simplified heuristics; "
+        "no model API is called."
+    )
     # Demo: generate probes and evaluate a sample compression
 
     sample_history = """

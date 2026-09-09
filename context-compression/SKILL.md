@@ -4,7 +4,10 @@ description: "This skill should be used when long-running agent sessions need co
 license: MIT
 metadata:
   upstream: "muratcankoylan/Agent-Skills-for-Context-Engineering"
+  upstream_commit: "c578e85e40fe2bda7c1fec91ff64cf5285434934"
   upstream_path: "skills/context-compression"
+  adaptation: modified
+  license_notice: LICENSE-context-engineering
 ---
 
 # Context Compression Strategies
@@ -15,7 +18,7 @@ When agent sessions generate millions of tokens of conversation history, compres
 
 Activate this skill when:
 - Agent sessions exceed context window limits
-- Codebases exceed context windows (5M+ token systems)
+- Codebases exceed the context window
 - Designing conversation summarization strategies
 - Debugging cases where agents "forget" what files they modified
 - Building evaluation frameworks for compression quality
@@ -33,7 +36,7 @@ Context compression trades token savings against information loss. Select from t
 
 1. **Anchored Iterative Summarization**: Implement this for long-running sessions where file tracking matters. Maintain structured, persistent summaries with explicit sections for session intent, file modifications, decisions, and next steps. When compression triggers, summarize only the newly-truncated span and merge with the existing summary rather than regenerating from scratch. This prevents drift that accumulates when summaries are regenerated wholesale — each regeneration risks losing details the model considers low-priority but the task requires. Structure forces preservation because dedicated sections act as checklists the summarizer must populate, catching silent information loss.
 
-2. **Opaque Compression**: Reserve this for short sessions where re-fetching costs are low and maximum token savings are required. It produces compressed representations optimized for reconstruction fidelity, achieving 99%+ compression ratios but sacrificing interpretability entirely. The tradeoff matters: there is no way to verify what was preserved without running probe-based evaluation, so never use this when debugging or artifact tracking is critical.
+2. **Opaque Compression**: Reserve this for short sessions where re-fetching costs are low and maximum token savings are required. Because its representation is not human-readable, verify preservation with probes and do not use it when debugging or artifact tracking requires direct inspection.
 
 3. **Regenerative Full Summary**: Use this when summary readability is critical and sessions have clear phase boundaries. It generates detailed structured summaries on each compression trigger. The weakness is cumulative detail loss across repeated cycles — each full regeneration is a fresh pass that may deprioritize details preserved in earlier summaries.
 
@@ -41,11 +44,11 @@ Context compression trades token savings against information loss. Select from t
 
 ### Optimize for Tokens-Per-Task, Not Tokens-Per-Request
 
-Measure total tokens consumed from task start to completion, not tokens per individual request. When compression drops file paths, error messages, or decision rationale, the agent must re-explore, re-read files, and re-derive conclusions — wasting far more tokens than the compression saved. A strategy saving 0.5% more tokens per request but causing 20% more re-fetching costs more overall. Track re-fetching frequency as the primary quality signal: if the agent repeatedly asks to re-read files it already processed, compression is too aggressive.
+Measure total tokens consumed from task start to completion, not tokens per individual request. When compression drops file paths, error messages, or decision rationale, the agent must re-explore, re-read files, and re-derive conclusions. For example, a marginal reduction per request can cost more overall if it causes substantial re-fetching. Track re-fetching frequency as a quality signal: repeated requests to re-read already processed files indicate that compression may be too aggressive.
 
 ### Solve the Artifact Trail Problem First
 
-Artifact trail integrity is often the weakest dimension in compression evaluations (claim-context-compression-factory-benchmark). Address this proactively because general summarization cannot reliably maintain it.
+Address artifact preservation explicitly rather than assuming a general-purpose summary will retain file paths, identifiers, and change state.
 
 Preserve these categories explicitly in every compression cycle:
 - Which files were created (full paths)
@@ -82,7 +85,7 @@ Build structured summaries with explicit sections that prevent silent informatio
 3. Update documentation
 ```
 
-Adapt sections to the agent's domain. A debugging agent needs "Root Cause" and "Error Messages"; a migration agent needs "Source Schema" and "Target Schema." The structure matters more than the specific sections — any explicit schema outperforms freeform summarization.
+Adapt sections to the agent's domain. A debugging agent needs "Root Cause" and "Error Messages"; a migration agent needs "Source Schema" and "Target Schema." Evaluate an explicit schema against freeform summaries on the target continuation tasks.
 
 ### Choose Compression Triggers Strategically
 
@@ -90,12 +93,12 @@ When to trigger compression matters as much as how to compress. Select a trigger
 
 | Strategy | Trigger Point | Trade-off |
 |----------|---------------|-----------|
-| Fixed threshold | 70-80% context utilization | Simple but may compress too early |
+| Fixed threshold | Measured safe context limit | Simple but may compress too early |
 | Sliding window | Keep last N turns + summary | Predictable context size |
 | Importance-based | Compress low-relevance sections first | Complex but preserves signal |
 | Task-boundary | Compress at logical task completions | Clean summaries but unpredictable timing |
 
-Default to sliding window with structured summaries for coding agents — it provides the best balance of predictability and quality. Use task-boundary triggers when sessions have clear phase transitions (e.g., research then implementation then testing).
+Choose the trigger from measured session behavior. Sliding windows provide predictable size; task-boundary triggers fit sessions with clear phase transitions.
 
 ### Evaluate Compression with Probes, Not Metrics
 
@@ -112,7 +115,7 @@ Use probe-based evaluation: after compression, pose questions that test whether 
 
 ### Score Compression Across Six Dimensions
 
-Evaluate compression quality for coding agents across these dimensions. Accuracy and artifact-trail preservation tend to separate methods more clearly than lexical similarity (claim-context-compression-factory-benchmark), so compression needs specialized handling beyond general summarization.
+Evaluate compression quality for coding agents across these dimensions:
 
 1. **Accuracy**: Are technical details correct — file paths, function names, error codes?
 2. **Context Awareness**: Does the response reflect current conversation state?
@@ -129,7 +132,7 @@ For codebases or agent systems exceeding context windows, compress through three
 
 1. **Research Phase**: Explore architecture diagrams, documentation, and key interfaces. Compress exploration into a structured analysis of components, dependencies, and boundaries. Output: a single research document that replaces raw exploration.
 
-2. **Planning Phase**: Convert the research document into an implementation specification with function signatures, type definitions, and data flow. A 5M-token codebase compresses to approximately 2,000 words of specification at this stage.
+2. **Planning Phase**: Convert the research document into an implementation specification with function signatures, type definitions, and data flow. The specification should be compact enough to fit alongside the active working files.
 
 3. **Implementation Phase**: Execute against the specification. Context stays focused on the spec plus active working files, not raw codebase exploration. This phase rarely needs further compression because the spec is already compact.
 
@@ -166,13 +169,7 @@ This matters most when the agent cannot distinguish essential complexity (busine
 
 ### Calibrate Compression Ratios by Method
 
-| Method | Compression Ratio | Quality Score | Trade-off |
-|--------|-------------------|---------------|-----------|
-| Anchored Iterative | 98.6% | 3.70 | Best quality, slightly less compression |
-| Regenerative | 98.7% | 3.44 | Good quality, moderate compression |
-| Opaque | 99.3% | 3.35 | Best compression, quality loss |
-
-Use these as source-specific benchmark figures, not universal constants (claim-context-compression-factory-benchmark). For any task where re-fetching costs exist, this tradeoff generally favors structured approaches.
+Measure compression ratio and quality on the target workload. Select a method from those measurements rather than relying on an untraceable cross-method ranking.
 
 ## Examples
 
@@ -226,7 +223,7 @@ The structured response preserves endpoint, error code, and root cause. The aggr
 
 1. Optimize for tokens-per-task, not tokens-per-request
 2. Use structured summaries with explicit sections for file tracking
-3. Trigger compression at 70-80% context utilization
+3. Trigger compression before the measured safe context limit
 4. Implement incremental merging rather than full regeneration
 5. Test compression quality with probe-based evaluation
 6. Track artifact trail separately if file tracking is critical
@@ -264,7 +261,7 @@ Internal reference:
 - [Evaluation Framework Reference](skill://context-compression/references/evaluation-framework.md) - Read when: building or calibrating a probe-based evaluation pipeline, or when needing scoring rubrics and LLM judge configuration for compression quality assessment
 
 Runnable script:
-- [compression_evaluator.py](skill://context-compression/scripts/compression_evaluator.py) - `ProbeGenerator`, `CompressionEvaluator`, `StructuredSummarizer` - Run when: measuring whether a compaction preserved decisions, files, risks, and next actions; `skill://context-compression/tests/test_compression_evaluator.py` is its check
+- [compression_evaluator.py](skill://context-compression/scripts/compression_evaluator.py) - Status: Example; Boundary: uses a heuristic judge stub and mock responses without calling a model API - `ProbeGenerator`, `CompressionEvaluator`, `StructuredSummarizer` - Run when: measuring whether a compaction preserved decisions, files, risks, and next actions; `skill://context-compression/tests/test_compression_evaluator.py` is its check
 
 Related skills in this collection:
 - context-degradation - Read when: diagnosing why agent performance drops over long sessions, before applying compression as a mitigation
@@ -272,7 +269,6 @@ Related skills in this collection:
 - evaluation - Read when: designing evaluation frameworks beyond compression-specific probes, including general LLM-as-judge methodology
 
 External resources:
-- Factory Research: Evaluating Context Compression for AI Agents (December 2025) - Read when: needing benchmark data on compression method comparisons or the 36,000-message evaluation dataset
 - Research on LLM-as-judge evaluation methodology (Zheng et al., 2023) - Read when: implementing or validating LLM judge scoring to understand bias patterns and calibration
 - Netflix Engineering: "The Infinite Software Crisis" - Three-phase workflow and context compression at scale (AI Summit 2025) - Read when: implementing the three-phase compression workflow for large codebases or understanding production-scale context management
 

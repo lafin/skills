@@ -1,5 +1,9 @@
 """Memory System Implementation.
 
+Status: Example
+Boundary: Embeddings are deterministic pseudo-random stub vectors, storage is
+in-memory, and consolidation is not implemented. No embedding model is called.
+
 Provides composable building blocks for agent memory: vector stores with
 metadata indexing, property graphs for entity relationships, and temporal
 knowledge graphs for facts that change over time.
@@ -157,14 +161,15 @@ class VectorStore:
             ]
 
     def _embed(self, text: str) -> np.ndarray:
-        """Generate embedding for text.
+        """Generate an embedding stub for text.
 
-        In production, replace with an actual embedding model. This
-        deterministic stub uses the text hash as a random seed so that
-        identical texts always produce identical vectors. Uses a local
-        RNG to avoid corrupting global numpy random state.
+        In production, replace this with an actual embedding model. This
+        deterministic stub seeds a local generator from a stable SHA-256 digest,
+        so identical texts produce identical vectors across Python processes
+        without modifying NumPy's global random state.
         """
-        rng = np.random.default_rng(hash(text) % (2**32))
+        seed = int.from_bytes(hashlib.sha256(text.encode("utf-8")).digest()[:8], "big")
+        rng = np.random.default_rng(seed)
         return rng.standard_normal(self.dimension)
 
     def _time_key(self, timestamp: Any) -> str:
@@ -588,6 +593,10 @@ class IntegratedMemorySystem:
 
 
 if __name__ == "__main__":
+    print(
+        "Boundary: embeddings are stub vectors, storage is in-memory, and "
+        "consolidation is not implemented; no embedding model is called."
+    )
     # Quick smoke test demonstrating the integrated memory system.
     mem = IntegratedMemorySystem()
     mem.start_session("demo-session")

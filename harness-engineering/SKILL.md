@@ -4,7 +4,10 @@ description: "This skill should be used when designing autonomous agent harnesse
 license: MIT
 metadata:
   upstream: "muratcankoylan/Agent-Skills-for-Context-Engineering"
+  upstream_commit: "c578e85e40fe2bda7c1fec91ff64cf5285434934"
   upstream_path: "skills/harness-engineering"
+  adaptation: modified
+  license_notice: LICENSE-context-engineering
 ---
 
 # Harness Engineering
@@ -216,11 +219,6 @@ This skill connects to:
 - hosted-agents - Background execution needs sandbox, snapshot, and approval boundaries
 
 ## References
-
-Internal references:
-- `researcher/README.md` - Read when implementing the repo-native research-to-skill operating system
-- `researcher/rubrics/harness-change.md` - Read when evaluating changes to an agent harness
-- `researcher/runbooks/autonomous-research-loop.md` - Read when running a source-to-skill loop
 
 External resources:
 - Karpathy `autoresearch` - Constrained autonomous experiment loop with locked evaluation

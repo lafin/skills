@@ -1,6 +1,13 @@
 ---
 name: ml-system-design-review
 description: Use when reviewing ML system design docs, ML/AI project repos, design-doc PRs, RAG/LLM/foundation-model architectures, agentic AI workflows, or production ML readiness. Applies the ML System Design framework by Kravchenko and Babushkin to grade designs, compare docs with code, find critical gaps and low-hanging fruit, and give specific non-cringy praise.
+license: MIT
+metadata:
+  upstream: "ML-SystemDesign/MLSystemDesign"
+  upstream_commit: "90830cd7e52dc2cd6ff2a0d69d96f042759d3430"
+  upstream_path: "skills/ml-system-design-review"
+  adaptation: modified
+  license_notice: LICENSE-ml-system-design
 ---
 
 # ML System Design Review

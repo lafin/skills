@@ -1,6 +1,10 @@
 """
 Filesystem Context Manager -- composable utilities for filesystem-based context engineering.
 
+Status: Example
+Boundary: Token counts use a character-ratio approximation. The demo writes
+only local sample files and does not call external services.
+
 Provides three core patterns for managing agent context through the filesystem:
 1. ScratchPadManager -- offload large tool outputs to files, return compact references
 2. AgentPlan / PlanStep -- persist plans to disk so agents survive context window refreshes

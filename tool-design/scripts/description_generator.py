@@ -1,6 +1,10 @@
 """
 Tool Description Engineering -- Generation and Evaluation Utilities.
 
+Status: Example
+Boundary: Description scoring uses deterministic text heuristics; it does not
+invoke a model or validate behavior against a live tool runtime.
+
 Use when: building, auditing, or iterating on tool descriptions for agent
 systems.  Provides templates for structured descriptions, a scoring evaluator
 that flags vague or incomplete descriptions, error-message generators that

@@ -1,6 +1,10 @@
 """
 Context Optimization Utilities — compaction, masking, budgeting, and cache optimization.
 
+Status: Example
+Boundary: Token counts, summaries, and cache recommendations are illustrative
+heuristics; they do not call a tokenizer, model, or inference service.
+
 Public API
 ----------
 Functions:

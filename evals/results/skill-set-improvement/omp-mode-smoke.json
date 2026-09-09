@@ -1,0 +1,78 @@
+{
+  "schema_version": 1,
+  "captured_at": "2026-09-09T06:41:14.844Z",
+  "runtime": "omp-rpc",
+  "omp_version": "omp/18.1.14",
+  "cwd_role": "repository root",
+  "sequence": [
+    "full (session default)",
+    "lite",
+    "ultra",
+    "off"
+  ],
+  "commands": [
+    {
+      "id": "mode-lite",
+      "agentInvoked": false,
+      "error": null
+    },
+    {
+      "id": "mode-ultra",
+      "agentInvoked": false,
+      "error": null
+    },
+    {
+      "id": "mode-off",
+      "agentInvoked": false,
+      "error": null
+    }
+  ],
+  "ui": [
+    {
+      "method": "setStatus",
+      "statusKey": "leancode",
+      "statusText": "lean:full"
+    },
+    {
+      "method": "setStatus",
+      "statusKey": "leancode",
+      "statusText": "lean:lite"
+    },
+    {
+      "method": "notify",
+      "message": "leancode lite",
+      "notifyType": "info"
+    },
+    {
+      "method": "setStatus",
+      "statusKey": "leancode",
+      "statusText": "lean:ultra"
+    },
+    {
+      "method": "notify",
+      "message": "leancode ultra",
+      "notifyType": "info"
+    },
+    {
+      "method": "setStatus",
+      "statusKey": "leancode",
+      "statusText": "lean:off"
+    },
+    {
+      "method": "notify",
+      "message": "leancode off",
+      "notifyType": "info"
+    }
+  ],
+  "checks": {
+    "ready": true,
+    "all_commands_handled": true,
+    "status_event_count": 4,
+    "notification_messages": [
+      "leancode lite",
+      "leancode ultra",
+      "leancode off"
+    ]
+  },
+  "stderr": ""
+}

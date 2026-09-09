@@ -7,9 +7,11 @@ This document provides implementation details for memory system components.
 ### Basic Vector Store
 
 ```python
-import numpy as np
-from typing import List, Dict, Any
+import hashlib
 import json
+from typing import List, Dict, Any
+
+import numpy as np
 
 
 def cosine_similarity(a: np.ndarray, b: np.ndarray) -> float:
@@ -68,10 +70,10 @@ class VectorStore:
         return results
     
     def _embed(self, text: str) -> np.ndarray:
-        """Generate deterministic pseudo-embedding for demonstration.
-        In production, replace with actual embedding model."""
-        np.random.seed(hash(text) % (2**32))
-        vec = np.random.randn(self.dimension)
+        """Generate a deterministic pseudo-embedding for demonstration.
+        In production, replace with an actual embedding model."""
+        seed = int.from_bytes(hashlib.sha256(text.encode("utf-8")).digest()[:8], "big")
+        vec = np.random.default_rng(seed).standard_normal(self.dimension)
         return vec / (np.linalg.norm(vec) + 1e-8)
     
     def _matches_filters(self, metadata: Dict, filters: Dict) -> bool:

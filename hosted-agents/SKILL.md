@@ -4,12 +4,15 @@ description: "This skill should be used when designing hosted or background agen
 license: MIT
 metadata:
   upstream: "muratcankoylan/Agent-Skills-for-Context-Engineering"
+  upstream_commit: "c578e85e40fe2bda7c1fec91ff64cf5285434934"
   upstream_path: "skills/hosted-agents"
+  adaptation: modified
+  license_notice: LICENSE-context-engineering
 ---
 
 # Hosted Agent Infrastructure
 
-Hosted agents run in remote sandboxed environments rather than on local machines. When designed well, they provide unlimited concurrency, consistent execution environments, and multiplayer collaboration. The critical insight is that session speed should be limited only by model provider time-to-first-token, with all infrastructure setup completed before the user starts their session.
+Hosted agents run in remote sandboxed environments rather than on local machines. They can provide elastic concurrency within provider and account limits, consistent execution environments, and multiplayer collaboration. Move infrastructure setup outside the user-visible request path where the workload permits.
 
 ## When to Activate
 
@@ -29,7 +32,7 @@ Do not activate this skill for adjacent work owned by other skills:
 
 ## Core Concepts
 
-Move agent execution to remote sandboxed environments to eliminate the fundamental limits of local execution: resource contention, environment inconsistency, and single-user constraints. Remote sandboxes unlock unlimited concurrency, reproducible environments, and collaborative workflows because each session gets its own isolated compute with a known-good environment image.
+Move agent execution to remote sandboxed environments when local resource contention, environment inconsistency, or single-machine constraints block the workload. Isolated sandboxes can provide reproducible environments and concurrent sessions within explicit quotas.
 
 Design the architecture in three layers because each layer scales independently. Build sandbox infrastructure for isolated execution, an API layer for state management and client coordination, and client interfaces for user interaction across platforms. Keep these layers cleanly separated so sandbox changes do not ripple into clients.
 
@@ -38,16 +41,16 @@ Design the architecture in three layers because each layer scales independently.
 ### Sandbox Infrastructure
 
 **The Core Challenge**
-Eliminate sandbox spin-up latency because users perceive anything over a few seconds as broken. Development environments require cloning repositories, installing dependencies, and running build steps -- do all of this before the user ever submits a prompt.
+Measure sandbox spin-up latency against the product's user-experience target. Development environments can require repository cloning, dependency installation, and build steps; perform reusable setup before the user submits a prompt when the workload permits.
 
 **Image Registry Pattern**
-Pre-build environment images on a regular cadence (every 30 minutes works well) because this makes synchronization with the latest code a fast delta rather than a full clone. Include in each image:
+Pre-build environment images on a cadence derived from the allowed code and dependency staleness. Include in each image:
 - Cloned repository at a known commit
 - All runtime dependencies installed
 - Initial setup and build commands completed
-- Cached files from running app and test suite once
+- Precomputed caches where safe
 
-When starting a session, spin up a sandbox from the most recent image. The repository is at most 30 minutes out of date, making the remaining git sync fast.
+When starting a session, use the most recent valid image and synchronize the repository before any write. Measure image age and synchronization time.
 
 **Snapshot and Restore**
 Take filesystem snapshots at key points to enable instant restoration for follow-up prompts without re-running setup:
@@ -88,16 +91,16 @@ Require a plugin system that supports runtime interception because this enables 
 ### Speed Optimizations
 
 **Predictive Warm-Up**
-Start warming the sandbox as soon as a user begins typing their prompt, not when they submit it, because the typing interval (5-30 seconds) is enough to complete most setup:
-- Clone latest changes in parallel with user typing
-- Run initial setup before user hits enter
-- For fast spin-up, sandbox can be ready before user finishes typing
+Start warming the sandbox when a user begins composing a prompt, not after submission. Measure whether the available interval covers the setup work:
+- Clone latest changes while the user composes the prompt
+- Run reusable setup before submission
+- Fall back to a visible startup state when warm-up does not finish
 
 **Parallel File Reading**
-Allow the agent to start reading files immediately even if sync from latest base branch is not complete, because in large repositories incoming prompts rarely touch recently-changed files:
-- Agent can research immediately without waiting for git sync
-- Block file edits (not reads) until synchronization completes
-- This separation is safe because read-time data staleness of 30 minutes rarely matters for research
+Allow the agent to start reading files before the latest base-branch sync completes only when the product can tolerate stale reads:
+- Let independent research begin without waiting for git sync
+- Block file edits until synchronization completes
+- Revalidate any read result that affects a write
 
 **Maximize Build-Time Work**
 Move everything possible to the image build step because build-time duration is invisible to users:
@@ -143,7 +146,7 @@ Build a single state system that synchronizes across all clients (chat interface
 ### Multiplayer Support
 
 **Why Multiplayer Matters**
-Design for multiplayer from day one because it is nearly free to add with proper synchronization architecture, and it unlocks high-value workflows:
+Design for multiplayer at the data-model boundary when collaborative sessions are a product requirement. Shared synchronization can lower the marginal implementation cost, but authorization, attribution, and conflict handling remain explicit work:
 - Teaching non-engineers to use AI effectively
 - Live QA sessions with multiple team members
 - Real-time PR review with immediate changes
@@ -249,20 +252,20 @@ If the task is "make the agent loop run for days with locked rubrics and PR appr
 
 ## Guidelines
 
-1. Pre-build environment images on regular cadence (30 minutes is a good default)
+1. Rebuild environment images on a cadence derived from the dependency and code staleness target
 2. Start warming sandboxes when users begin typing, not when they submit
 3. Allow file reads before git sync completes; block only writes
 4. Structure agent framework as server-first with clients as thin wrappers
 5. Isolate state per session to prevent cross-session interference
 6. Attribute commits to the user who prompted, not the app
 7. Track merged PRs as primary success metric
-8. Build for multiplayer from the start; it is nearly free with proper sync architecture
+8. Reuse the session synchronization architecture for multiplayer only after authorization, attribution, and conflict behavior are defined
 
 ## Gotchas
 
-1. **Cold start latency**: First sandbox spin-up takes 30-60s and users perceive this as broken. Use warm pools and predictive warm-up on keystroke to eliminate perceived wait time.
-2. **Image staleness**: Infrequent image rebuilds mean agents run with outdated dependencies or code. Set a 30-minute rebuild cadence and monitor image age; alert if builds fail silently.
-3. **Sandbox cost runaway**: Long-running agents without timeout or budget caps accumulate unexpected costs. Set hard timeout limits (default 4 hours) and per-session cost ceilings.
+1. **Cold start latency**: Measure sandbox spin-up time and the user's tolerated wait. Use warm pools or predictive warm-up when cold starts exceed that target.
+2. **Image staleness**: Infrequent image rebuilds can leave agents with outdated dependencies or code. Derive the rebuild cadence from the staleness target, monitor image age, and alert on failed builds.
+3. **Sandbox cost runaway**: Long-running agents without timeout or budget caps accumulate unexpected costs. Set workload-specific timeout and per-session cost ceilings.
 4. **Auth token expiration mid-session**: Long tasks fail when GitHub tokens expire partway through. Implement token refresh logic and check token validity before sensitive operations like PR creation.
 5. **Git config in sandboxes**: Missing `user.name` or `user.email` causes commit failures in background agents. Always set git identity explicitly during sandbox configuration, never assume it carries over from the image.
 6. **State loss on sandbox recycle**: Agents lose completed work if the sandbox is recycled or times out before results are extracted. Always snapshot before termination and extract artifacts (branches, PRs, files) before letting the sandbox die.
@@ -285,7 +288,7 @@ Internal reference:
 - [Infrastructure Patterns](skill://hosted-agents/references/infrastructure-patterns.md) - Read when: implementing sandbox lifecycle, image builds, or warm pool logic for the first time
 
 Runnable script:
-- [sandbox_manager.py](skill://hosted-agents/scripts/sandbox_manager.py) - `SandboxManager`, `ImageBuilder`, `WarmPoolManager`, `AgentSession` - Run when: implementing sandbox lifecycle, image builds, or warm-pool logic
+- [sandbox_manager.py](skill://hosted-agents/scripts/sandbox_manager.py) - Status: Template; Replacement points: implement sandbox I/O, snapshots, image creation, provider lifecycle operations, and the GitHub token provider - `SandboxManager`, `ImageBuilder`, `WarmPoolManager`, `AgentSession` - Use when: adapting sandbox lifecycle, image-build, or warm-pool patterns
 
 Related skills in this collection:
 - multi-agent-patterns - Read when: designing self-spawning or supervisor coordination patterns

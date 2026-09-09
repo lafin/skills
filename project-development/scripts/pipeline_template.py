@@ -1,6 +1,11 @@
 """
 LLM Batch Processing Pipeline Template.
 
+Status: Template
+Replacement points: Implement fetch_items_from_source, call_llm, and
+render_html for the target data source, model provider, and output format.
+The included versions use sample data and mock model output without credentials.
+
 A composable, staged pipeline architecture for LLM batch processing.
 Each stage is discrete, idempotent, and cacheable. Customize the acquire,
 prepare, process, parse, and render functions for your use case.

@@ -1,6 +1,8 @@
 # The Cycle Double Cover Prompt, Annotated
 
-Status and provenance, as of 2026-07-11:
+## Run provenance (published 2026-07-10; checked 2026-07-11)
+
+Sources: OpenAI's published prompt and proof PDFs linked below. Scope: the prompt text and publisher-reported run metadata. Limitation: the run duration is not independently verified, and the proof had no independent peer review or formalization at the check date; no public ablation establishes which prompt elements affected the result.
 
 - On 2026-07-10 OpenAI published a candidate proof of the Cycle Double Cover Conjecture attributed to GPT-5.6 Sol Ultra, together with the full prompt used. Prompt PDF: `https://cdn.openai.com/pdf/04d1d1e4-bc75-476a-97cf-49055cd98d31/cdc_prompt.pdf`. Proof PDF: `https://cdn.openai.com/pdf/04d1d1e4-bc75-476a-97cf-49055cd98d31/cdc_proof.pdf`.
 - The run used the "multiagent v2" feature with up to 64 concurrent agents and reportedly completed in under one hour, well below the prompt's stated eight-hour effort floor.

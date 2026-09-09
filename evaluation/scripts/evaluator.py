@@ -1,5 +1,9 @@
 """Agent Evaluation Framework for context-engineered agent systems.
 
+Status: Example
+Boundary: Scoring is heuristic and EvaluationRunner generates simulated agent
+output; no agent or model is executed.
+
 Use when: building evaluation pipelines, scoring agent outputs against
 multi-dimensional rubrics, managing test sets, or monitoring production
 agent quality. Provides composable classes that can be used independently
@@ -598,6 +602,10 @@ class ProductionMonitor:
 # ---------------------------------------------------------------------------
 
 if __name__ == "__main__":
+    print(
+        "Boundary: scoring is heuristic and simulated agent output is generated; "
+        "no agent or model is executed."
+    )
     print("=== Agent Evaluation Framework Demo ===\n")
 
     # 1. Create evaluator with default rubric

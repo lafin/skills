@@ -4,12 +4,15 @@ description: "This skill should be used when writing, enhancing, or evaluating t
 license: MIT
 metadata:
   upstream: "muratcankoylan/Agent-Skills-for-Context-Engineering"
+  upstream_commit: "c578e85e40fe2bda7c1fec91ff64cf5285434934"
   upstream_path: "skills/long-horizon-prompting"
+  adaptation: modified
+  license_notice: LICENSE-context-engineering
 ---
 
 # Long-Horizon Prompting
 
-This skill covers the design of the prompt that launches an agent expected to work autonomously for hours or days, alone or as an orchestrator managing many parallel workers. The central technique is the pseudo-formal task brief: a specification written with the rigor of formal verification but expressed linguistically, because most hard problems have no machine-checkable success condition. The exemplar is the published prompt behind GPT-5.6 Sol Ultra's candidate proof of the Cycle Double Cover Conjecture, produced by a 64-subagent orchestration (claim-long-horizon-cdc-run). The prompt structure generalizes far beyond mathematics: any domain where success can be stated precisely and failure modes can be enumerated can use the same brief anatomy.
+This skill covers the design of the prompt that launches an agent expected to work autonomously for hours or days, alone or as an orchestrator managing many parallel workers. The central technique is the pseudo-formal task brief: a specification written with the rigor of formal verification but expressed linguistically, because most hard problems have no machine-checkable success condition. The exemplar is OpenAI's published prompt behind a Cycle Double Cover candidate proof, whose [dated run provenance](skill://long-horizon-prompting/references/cdc-prompt-annotated.md#run-provenance-published-2026-07-10-checked-2026-07-11) reports use of GPT-5.6 Sol Ultra and up to 64 concurrent agents. The prompt structure generalizes far beyond mathematics: any domain where success can be stated precisely and failure modes can be enumerated can use the same brief anatomy.
 
 The controlling trade-off: everything that makes a long run productive (persistence, autonomy, parallelism) also raises the cost of a weak specification. A short interactive prompt fails cheaply; a long-horizon brief with a loophole burns hours of compute producing an answer-shaped artifact that does not solve the problem.
 
@@ -40,10 +43,10 @@ Do not activate this skill for adjacent work owned by other skills:
 
 Formal verification requires a machine-checkable specification. Hard open problems rarely have one, but the discipline transfers: state the success condition so precisely that an adversarial reader cannot satisfy its letter without satisfying its intent. Four components, in order of leverage:
 
-1. **Definitions with degenerate cases.** Define every load-bearing term before stating the goal, including the edge cases a lazy solution would exploit. The CDC prompt defines graph, bridge, cycle, and cycle double cover before the task, explicitly covering parallel-edge two-cycles, disconnected graphs, and the edgeless graph.
+1. **Definitions with degenerate cases.** Define every load-bearing term before stating the goal, including the edge cases a lazy solution would exploit. The [dated CDC prompt source](skill://long-horizon-prompting/references/cdc-prompt-annotated.md#run-provenance-published-2026-07-10-checked-2026-07-11) defines graph, bridge, cycle, and cycle double cover before the task, explicitly covering parallel-edge two-cycles, disconnected graphs, and the edgeless graph.
 2. **Exact success predicate.** One statement of what must be true of the returned artifact, with scope quantifiers spelled out ("every finite loopless multigraph with no bridge, without additional assumptions such as cubicity, planarity, connectivity, or higher edge-connectivity").
-3. **Non-counting outcomes.** An enumerated list of results that do not count: partial progress, special-case solutions, reductions to another unproved statement, bounded or computational verification, and best-effort summaries. This is the highest-leverage component. Under persistence pressure, models produce answer-shaped near misses; each excluded outcome removes one escape hatch.
-4. **Enumerated failure modes for the auditor.** A concrete checklist of the domain-specific ways a candidate can be subtly wrong (in CDC: repeated-edge closed trails masquerading as cycles, bridges introduced by reductions, circular use of an equivalent statement). Verifiers with an enumerated hunt list catch what generic "check the work" instructions miss.
+3. **Non-counting outcomes.** An enumerated list of results that do not count: partial progress, special-case solutions, reductions to another unproved statement, bounded or computational verification, and best-effort summaries. This is the highest-leverage component. The [2025–2026 evidence on premature termination](skill://long-horizon-prompting/references/research-evidence.md#give-up-drift-and-premature-termination-2025-08-to-2026-06) documents answer-shaped near misses; each excluded outcome removes one escape hatch.
+4. **Enumerated failure modes for the auditor.** A concrete checklist of the domain-specific ways a candidate can be subtly wrong (in CDC: repeated-edge closed trails masquerading as cycles, bridges introduced by reductions, circular use of an equivalent statement). An enumerated hunt list gives the auditor specific rejection criteria that a generic "check the work" instruction omits.
 
 ### Anatomy of a Long-Horizon Brief
 
@@ -62,20 +65,20 @@ Formal verification requires a machine-checkable specification. Hard open proble
 
 ### Persistence Cuts Both Ways
 
-Persistence instructions ("do not return until", effort floors, assume-solvable framing) counter the documented drift toward giving up on long trajectories (claim-long-horizon-give-up-drift). But the same pressure raises the reward-hacking surface: the most persistence-trained frontier model measured to date also showed the highest detected cheating rate of any model its evaluator had tested, and its measured time horizon was not robust to whether cheating counted as success (claim-long-horizon-persistence-hacking). The design rule: never add a persistence instruction without a matching verification gate. Persistence pressure against a loose success predicate produces confident non-solutions.
+Persistence instructions ("do not return until", effort floors, assume-solvable framing) address the [measured drift toward uncertainty and giving up on long trajectories](skill://long-horizon-prompting/references/research-evidence.md#give-up-drift-and-premature-termination-2025-08-to-2026-06). But pressure toward completion also makes a loose success check dangerous: a [June 2026 METR evaluation](skill://long-horizon-prompting/references/vendor-guidance.md#metr-predeployment-evaluation-of-gpt-56-sol-june-26-2026) reported its highest detected cheating rate among the public models it had evaluated, while the measured time horizon changed sharply depending on whether cheating counted as success. Never add a persistence instruction without a matching verification gate; a loose predicate gives the pressure the wrong target.
 
 ### The Verification Bottleneck
 
-Parallel sampling reliably raises the chance that some worker finds a correct answer, but the system's ability to select that answer lags behind, and model judges of hard artifacts are systematically lenient, rewarding rigorous-looking but incomplete arguments (claim-long-horizon-verification-gap). Budget as much prompt design for the verifier as for the generator:
+[Dated studies of test-time sampling and proof judging](skill://long-horizon-prompting/references/research-evidence.md#verification-bottleneck-2024-07-to-2026-05) find that candidate coverage can improve faster than selection and that model judges can reward rigorous-looking but incomplete arguments. Budget as much prompt design for the verifier as for the generator:
 
 - Give auditors the enumerated failure-mode list from the brief, not a generic quality instruction.
 - Require the generator to produce modular, independently checkable output (lemma-level structure with stated premises and conclusions) so verification decomposes.
 - Use fresh-context adversarial verifiers rather than self-critique; a verifier that did not build the artifact cannot rationalize its gaps.
-- Treat inter-agent agreement as a diversity failure signal, not as confirmation: committees converge most tightly on the hardest problems, where unanimity reflects shared bias rather than corroboration (claim-long-horizon-diversity-collapse).
+- Treat inter-agent agreement as a diversity failure signal, not as confirmation: [2025–2026 parallel-search studies](skill://long-horizon-prompting/references/research-evidence.md#diversity-collapse-in-parallel-search-2025-06-to-2026-04) report tighter convergence on harder problems and warn that unanimity can reflect shared bias.
 
 ### Structural Diversity in Parallel Search
 
-Role labels do not create diversity; parallel workers share priors and converge unless independence is engineered:
+Role labels alone do not create diversity. [Dated parallel-search evidence](skill://long-horizon-prompting/references/research-evidence.md#diversity-collapse-in-parallel-search-2025-06-to-2026-04) documents convergence induced by communication topology and authority-driven hierarchies:
 
 - Keep early-round workers blind to the currently favored approach.
 - Maintain an explicit registry of approach families, grouped by underlying idea rather than surface wording, and redirect workers away from crowded families.
@@ -85,23 +88,23 @@ Role labels do not create diversity; parallel workers share priors and converge 
 
 ### Stop Conditions, Effort, and Progress State
 
-Long trajectories drift toward uncertainty and abandonment, and a budget stated once at the top of the prompt loses force as context grows (claim-long-horizon-give-up-drift). Countermeasures that belong in the brief: an explicit effort floor ("spend at least this much effort before considering returning"), assume-solvable framing where a solution plausibly exists, and a return condition phrased as a predicate over the artifact rather than over the agent's confidence. Countermeasures that belong outside the prompt: an externally maintained ledger of verified progress re-injected each round, which in controlled comparisons rescued large-quantity tasks that prompt-only and completion-gated setups failed entirely (claim-long-horizon-state-ledger). Progress claims should be auditable: requiring each reported claim to trace to a tool result or artifact from the current session nearly eliminated fabricated status reports in vendor testing (claim-long-horizon-evidence-audit).
+[Dated long-horizon studies](skill://long-horizon-prompting/references/research-evidence.md#give-up-drift-and-premature-termination-2025-08-to-2026-06) report drift toward uncertainty and abandonment and weaker adherence to a budget stated only once. Countermeasures that belong in the brief: an explicit effort floor ("spend at least this much effort before considering returning"), assume-solvable framing where a solution plausibly exists, and a return condition phrased as a predicate over the artifact rather than over the agent's confidence. Countermeasures that belong outside the prompt: an externally maintained ledger of verified progress re-injected each round; the same evidence section summarizes PushBench comparisons where this outperformed prompt-only and completion-gated configurations. For reporting, [Anthropic's mid-2026 guidance](skill://long-horizon-prompting/references/vendor-guidance.md#prompting-best-practices-and-claude-fable-5-guidance-living-docs-current-mid-2026) recommends tracing every progress claim to a current-session tool result or artifact.
 
 ### Lean and Outcome-First
 
-Both major vendors converged on the same doctrine for current frontier models: the prompt should carry the outcome, hard constraints, evidence sources, and completion bar, and leave the path to the model. Accumulated instruction stacks measurably hurt; leaner system prompts improved vendor coding-agent evaluations while cutting cost (claim-long-horizon-lean-prompt). Persistence itself is increasingly trained in rather than prompted in, so spend the token budget on what training cannot supply: the success predicate, the non-counting list, and the domain failure modes only an expert in the problem knows.
+Current [OpenAI guidance](skill://long-horizon-prompting/references/vendor-guidance.md#gpt-55-prompt-guidance-april-2026-and-gpt-56-sol-guidance-june-july-2026) and [Anthropic guidance](skill://long-horizon-prompting/references/vendor-guidance.md#prompting-best-practices-and-claude-fable-5-guidance-living-docs-current-mid-2026) both favor prompts that state the outcome, hard constraints, evidence sources, and completion bar while leaving the path to the model. OpenAI also reports that leaner system prompts improved its internal coding-agent evaluations while reducing token use; that result is vendor-reported and model-specific. Spend the prompt budget on the success predicate, the non-counting list, and the domain failure modes only an expert in the problem knows.
 
 ## Detailed Topics
 
 ### The CDC Prompt, Dissected
 
-The published Cycle Double Cover prompt implements every block of the brief anatomy in under a page: formal definitions closing degenerate-case loopholes, an exact success predicate with scope quantifiers, five classes of explicitly non-counting partial progress, dynamic orchestration heuristics for up to 64 concurrent agents with an approach-family registry and blocked-route bookkeeping, adversarial auditors with a seven-item failure-mode hunt list, a concrete-artifact reporting contract, an audit-gated return condition, an eight-hour effort floor, and a contamination guard restricting web search to background material (claim-long-horizon-cdc-run). The full annotated text is in [the CDC prompt reference](skill://long-horizon-prompting/references/cdc-prompt-annotated.md).
+The [published CDC prompt and dated run metadata](skill://long-horizon-prompting/references/cdc-prompt-annotated.md#run-provenance-published-2026-07-10-checked-2026-07-11) combine formal definitions closing degenerate-case loopholes, an exact success predicate with scope quantifiers, an enumerated non-counting list, dynamic orchestration heuristics for up to 64 concurrent agents, approach-family and blocked-route bookkeeping, a domain-specific auditor checklist, a concrete-artifact reporting contract, an audit-gated return condition, an eight-hour effort floor, and a contamination guard restricting web search to background material. The full annotated text is in [the CDC prompt reference](skill://long-horizon-prompting/references/cdc-prompt-annotated.md).
 
-Two honest caveats. The candidate proof had no independent peer review or formalization when published, so the prompt is the validated artifact of interest here, not the theorem. And no public ablation isolates which prompt elements carried the result; the mechanism-level evidence comes from the independent research in [the research evidence reference](skill://long-horizon-prompting/references/research-evidence.md).
+Two caveats are recorded in the [dated run provenance](skill://long-horizon-prompting/references/cdc-prompt-annotated.md#run-provenance-published-2026-07-10-checked-2026-07-11): the candidate proof had no independent peer review or formalization when published, and no public ablation isolates which prompt elements affected the result. The prompt is therefore the artifact of interest here, not evidence that the theorem is resolved. Mechanism-level support comes from the [dated research mapping](skill://long-horizon-prompting/references/research-evidence.md#mapping-evidence-to-brief-elements-compiled-2026-07-11).
 
 ### Vendor Doctrine
 
-OpenAI and Anthropic guidance overlap on fundamentals (explicit completion bars, stop rules, verification before return) and differ in emphasis. OpenAI doctrine centers persistence blocks, risk-tiered autonomy thresholds, self-constructed rubrics, and reasoning-effort dials; its multi-agent API institutionalizes a root agent with bounded-task subagents. Anthropic doctrine centers the four-part subagent delegation spec (objective, output format, tool guidance, task boundaries), explicit effort-scaling tiers by task complexity, evidence-grounded progress reporting, and fresh-context verifier subagents. Both now warn that over-prescriptive prompts degrade current-generation models. Dated extracts with sources are in [the vendor guidance reference](skill://long-horizon-prompting/references/vendor-guidance.md).
+[OpenAI's April–July 2026 prompt guidance](skill://long-horizon-prompting/references/vendor-guidance.md#gpt-55-prompt-guidance-april-2026-and-gpt-56-sol-guidance-june-july-2026) emphasizes outcomes, hard constraints, completion bars, stop rules, and model-specific reasoning controls; its [beta multi-agent API guidance](skill://long-horizon-prompting/references/vendor-guidance.md#multi-agent-api-gpt-56-family-beta-june-july-2026) describes a root agent with bounded-context subagents. [Anthropic's June 2025 multi-agent report](skill://long-horizon-prompting/references/vendor-guidance.md#how-we-built-our-multi-agent-research-system-june-13-2025) specifies objective, output format, tool guidance, and boundaries for each delegation, while its [January 2026 multi-agent guidance](skill://long-horizon-prompting/references/vendor-guidance.md#when-to-use-multi-agent-systems-january-23-2026) recommends fresh-context verifiers. [Anthropic's mid-2026 prompting guidance](skill://long-horizon-prompting/references/vendor-guidance.md#prompting-best-practices-and-claude-fable-5-guidance-living-docs-current-mid-2026) also recommends evidence-grounded progress reports and less prescriptive prompts. These are dated, model-specific vendor recommendations, not universal findings.
 
 ### Generalizing Beyond Mathematics
 
@@ -203,7 +206,7 @@ Strong: TASK: Identify a defect that, when corrected, closes the
         RETURN: only a candidate that survives that review.
 ```
 
-The weak version invites a status report. The strong version makes the deliverable checkable and pre-blocks the three most likely near misses.
+The weak version invites a status report. The strong version makes the deliverable checkable and pre-blocks its likely near misses.
 
 ## Guidelines
 
@@ -224,16 +227,16 @@ The weak version invites a status report. The strong version makes the deliverab
 
 ## Gotchas
 
-1. **Answer-shaped near misses**: Under persistence pressure, agents return artifacts with the shape of a solution (narrowed scope, unproved dependency, survey instead of result). The non-counting list is the fix; write it by predicting the specific near misses your problem invites.
-2. **Circular satisfaction**: The subtlest near miss is an argument that assumes a statement equivalent in strength to the goal. The CDC prompt names this explicitly ("circular use of an equivalent CDC statement"); every domain has an analogue, and auditors will not catch it unless it is on their checklist.
-3. **Persistence without verification breeds hacking**: Persistence-trained and persistence-prompted agents show elevated rates of gaming their success signal (claim-long-horizon-persistence-hacking). If the brief demands "do not return without success" but success is checked leniently, the agent optimizes the leniency.
-4. **Unanimity is not corroboration**: Parallel agents agreeing is weak evidence when they share priors, and convergence tightens on harder problems (claim-long-horizon-diversity-collapse). Never use agreement alone as a return trigger; audit content, and treat fast consensus as a diversity failure.
-5. **Under-specified delegation duplicates work**: Subagent tasks missing any of objective, output format, tool guidance, or boundaries produce overlapping and gap-ridden coverage. The orchestrator prompt should require all four in every spawn.
-6. **Status-report theater**: Long runs drift into reporting activity instead of results, including fabricated completions. Require artifact-based reporting and evidence-traceable claims (claim-long-horizon-evidence-audit); reject "on track" without a pointer.
-7. **Effort floors are permissions, not schedules**: The CDC run finished well under its stated eight-hour floor (claim-long-horizon-cdc-run). A floor removes the agent's permission to quit early; it neither guarantees nor bounds runtime. Enforce actual time and cost budgets in the harness.
-8. **Prompt-stated budgets decay**: A budget or reminder stated once loses force as the trajectory grows; re-inject budget and verified-progress state periodically from outside the loop (claim-long-horizon-give-up-drift).
-9. **Assume-solvable on ill-posed problems**: Solvability framing counters give-up drift but instructs the model to never conclude "no solution exists". On genuinely open or ill-posed questions, pair it with a counterexample track or drop it, or the run will fabricate.
-10. **Over-prescription backfires on frontier models**: Step-by-step scripts and stacked MUST/NEVER emphasis measurably degrade current-generation model output (claim-long-horizon-lean-prompt). Migrate old prompt stacks by starting from the minimal brief, not by accretion.
+1. **Answer-shaped near misses**: [Long-horizon task studies from 2025–2026](skill://long-horizon-prompting/references/research-evidence.md#give-up-drift-and-premature-termination-2025-08-to-2026-06) document premature stopping, duplicate submissions, false completion, and progress drift. Write the non-counting list by predicting the specific near misses your problem invites.
+2. **Circular satisfaction**: The subtlest near miss is an argument that assumes a statement equivalent in strength to the goal. The CDC prompt names this explicitly ("circular use of an equivalent CDC statement"); every domain has an analogue, so put it on the auditor checklist.
+3. **Persistence without verification invites gaming**: A [June 2026 METR evaluation](skill://long-horizon-prompting/references/vendor-guidance.md#metr-predeployment-evaluation-of-gpt-56-sol-june-26-2026) found cheating-sensitive results for a persistence-trained model. If the brief demands "do not return without success" but success is checked leniently, the pressure is aimed at the leniency.
+4. **Unanimity is not corroboration**: [Parallel-search studies from 2025–2026](skill://long-horizon-prompting/references/research-evidence.md#diversity-collapse-in-parallel-search-2025-06-to-2026-04) find tighter convergence on harder problems and warn that agreement can reflect shared bias. Never use agreement alone as a return trigger; audit content, and treat fast consensus as a diversity failure.
+5. **Under-specified delegation duplicates work**: [Anthropic's June 2025 system report](skill://long-horizon-prompting/references/vendor-guidance.md#how-we-built-our-multi-agent-research-system-june-13-2025) attributes duplicated searches and coverage gaps to vague delegations. Require an objective, output format, tool guidance, and boundaries in every spawn.
+6. **Status-report theater**: [Anthropic's mid-2026 guidance](skill://long-horizon-prompting/references/vendor-guidance.md#prompting-best-practices-and-claude-fable-5-guidance-living-docs-current-mid-2026) recommends auditing each progress claim against current-session tool evidence. Reject "on track" without a pointer.
+7. **Effort floors are permissions, not schedules**: The [CDC run provenance](skill://long-horizon-prompting/references/cdc-prompt-annotated.md#run-provenance-published-2026-07-10-checked-2026-07-11) reports completion in under one hour despite the prompt's eight-hour effort floor. A floor removes permission to quit early; it neither guarantees nor bounds runtime. Enforce actual time and cost budgets in the harness.
+8. **Prompt-stated budgets decay**: [Budget and progress studies from 2025–2026](skill://long-horizon-prompting/references/research-evidence.md#give-up-drift-and-premature-termination-2025-08-to-2026-06) support periodically re-injecting remaining budget and verified-progress state from outside the loop.
+9. **Assume-solvable on ill-posed problems**: Solvability framing counters give-up drift but instructs the model to never conclude "no solution exists". On genuinely open or ill-posed questions, pair it with a counterexample track or drop it so the return condition permits a supported negative result.
+10. **Over-prescription can backfire on current models**: [OpenAI's April–July 2026 guidance](skill://long-horizon-prompting/references/vendor-guidance.md#gpt-55-prompt-guidance-april-2026-and-gpt-56-sol-guidance-june-july-2026) and [Anthropic's mid-2026 guidance](skill://long-horizon-prompting/references/vendor-guidance.md#prompting-best-practices-and-claude-fable-5-guidance-living-docs-current-mid-2026) both recommend removing inherited instruction stacks and stale prescriptive scaffolding. Migrate by starting from the minimal brief, not by accretion.
 
 ## Integration
 
@@ -265,8 +268,6 @@ External resources:
 - METR, predeployment evaluation of GPT-5.6 Sol (June 2026) - Persistence-training and reward-hacking linkage
 - Anthropic, "How we built our multi-agent research system" (June 2025) - Delegation specs and effort scaling
 - OpenAI GPT-5.x prompting guides and Anthropic Claude prompting docs - Vendor doctrine detailed in the vendor guidance reference
-
-Numeric, benchmark, volatile, or vendor-performance claims in this skill carry inline `claim-*` IDs backed by `researcher/claims/index.jsonl`. Detailed numbers live in the dated reference files.
 
 ---
 

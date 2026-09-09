@@ -7,6 +7,8 @@ description: >
   "/skill:leancode-debt", "what did leancode defer", "list the shortcuts", "leancode
   ledger", or "what did we mark to do later". One-shot report, changes nothing.
 license: MIT
+metadata:
+  provenance: repository-original
 ---
 
 `lean:` comments are informational intent, not debt. A debt-bearing deferral

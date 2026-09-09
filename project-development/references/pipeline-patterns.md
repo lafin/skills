@@ -107,9 +107,9 @@ def process_batch(items: list, max_workers: int = 10):
 
 ### Batch Size Considerations
 
-- **Small batches (1-10)**: Sequential processing is fine; overhead of parallelization not worth it
-- **Medium batches (10-100)**: Parallelize with 5-15 workers depending on API rate limits
-- **Large batches (100+)**: Consider chunking with checkpoints; implement resume capability
+- Process sequentially when it meets the latency target.
+- Add bounded parallelism when measured wall-clock time is too high. Set the worker cap to the lowest provider, connection-pool, compute, or budget limit.
+- Add chunks, checkpoints, and resume behavior when one failed item would otherwise force substantial reprocessing.
 
 ### Rate Limiting
 

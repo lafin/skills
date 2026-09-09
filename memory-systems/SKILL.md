@@ -4,7 +4,10 @@ description: "This skill should be used for persistent semantic memory in agent 
 license: MIT
 metadata:
   upstream: "muratcankoylan/Agent-Skills-for-Context-Engineering"
+  upstream_commit: "c578e85e40fe2bda7c1fec91ff64cf5285434934"
   upstream_path: "skills/memory-systems"
+  adaptation: modified
+  license_notice: LICENSE-context-engineering
 ---
 
 # Memory System Design
@@ -30,40 +33,37 @@ Do not activate this skill for adjacent work owned by other skills:
 
 ## Core Concepts
 
-Think of memory as a spectrum from volatile context window to persistent storage. Default to the simplest layer that meets retrieval needs, because benchmark evidence suggests tool complexity matters less than reliable retrieval for some memory workloads (claim-memory-locomo-filesystem-baseline). Add structure (graphs, temporal validity) only when retrieval quality degrades or the agent needs multi-hop reasoning, relationship traversal, or time-travel queries.
+Think of memory as a spectrum from volatile context window to persistent storage. Default to the simplest layer that meets retrieval needs, and measure retrieval quality before adding infrastructure. Add structure (graphs, temporal validity) only when retrieval quality degrades or the agent needs multi-hop reasoning, relationship traversal, or time-travel queries.
 
 ## Detailed Topics
 
-### Production Framework Landscape
+### Select architecture by retrieval need
 
-Select a framework based on the dominant retrieval pattern the agent requires. Use this table to narrow the shortlist, then validate with the benchmark data below.
+Shortlist implementations by the product's required retrieval shape:
 
-| Framework | Architecture | Best For | Trade-off |
-|-----------|-------------|----------|-----------|
-| **Mem0** | Vector store + graph memory, pluggable backends | Multi-tenant systems, broad integrations | Less specialized for multi-agent |
-| **Zep/Graphiti** | Temporal knowledge graph, bi-temporal model | Enterprise requiring relationship modeling + temporal reasoning | Advanced features cloud-locked |
-| **Letta** | Self-editing memory with tiered storage (in-context/core/archival) | Full agent introspection, stateful services | Complexity for simple use cases |
-| **Cognee** | Multi-layer semantic graph via customizable ECL pipeline with customizable Tasks | Evolving agent memory that adapts and learns; multi-hop reasoning | Heavier ingest-time processing |
-| **LangMem** | Memory tools for LangGraph workflows | Teams already on LangGraph | Tightly coupled to LangGraph |
-| **File-system** | Plain files with naming conventions | Simple agents, prototyping | No semantic search, no relationships |
+| Retrieval need | Candidate architecture | Evidence to collect |
+|---|---|---|
+| Exact identifiers and small state | Key-value store or files | Lookup accuracy, durability, operational cost |
+| Semantic similarity | Vector index | Recall on representative queries, ingestion and query latency |
+| Relationships or multi-hop queries | Graph-backed memory | Path accuracy, update cost, schema maintenance |
+| Facts that change over time | Bi-temporal graph or versioned records | Valid-time and transaction-time query accuracy |
+| Agent-managed working state | Tiered in-context and external storage | State retention, edit correctness, recovery behavior |
 
-Choose Zep/Graphiti when the agent needs bi-temporal modeling (tracking both when events occurred and when they were ingested) because its three-tier knowledge graph (episode, semantic entity, community subgraphs) excels at temporal queries. Choose Mem0 when the priority is fast time-to-production with managed infrastructure. Choose Letta when the agent needs deep self-introspection through its Agent Development Environment. Choose Cognee when the agent must build dense multi-layer semantic graphs — it layers text chunks and entity types as nodes with detailed relationship edges, and every core piece (ingestion, entity extraction, post-processing, retrieval) is customizable.
+Choose products only after testing the required row on one representative
+workload. Product feature sets and benchmark results change; record the source
+version and test date with every product-specific decision.
 
-**Benchmark Performance Comparison**
+### Compare candidates on one workload
 
-Consult these benchmarks to set expectations, but treat them as source-specific signals for retrieval dimensions rather than absolute rankings. No single benchmark is definitive.
+Do not rank memory systems by vendor-published results from different
+benchmarks, models, or configurations. For each shortlisted system, run the
+same corpus, queries, model, retrieval budget, and latency measurement. Record
+the benchmark version and configuration with the result.
 
-| System | DMR Accuracy | LoCoMo | HotPotQA (multi-hop) | Latency |
-|--------|-------------|--------|---------------------|---------|
-| Cognee | — | — | Published high score | Variable |
-| Zep (Temporal KG) | Published high score | — | Mid-range across metrics | Low-latency reported |
-| Letta (filesystem) | — | Published filesystem baseline | — | — |
-| Mem0 | — | Published specialized-tool baseline | Lower in one comparison | — |
-| MemGPT | Published high score | — | — | Variable |
-| GraphRAG | Published mid/high range | — | — | Variable |
-| Vector RAG baseline | Published lower range | — | — | Fast |
-
-Key takeaway: compare memory systems by retrieval shape, not brand. Use benchmark numbers as dated evidence that must be rechecked before making product claims; the stable design rule is to start shallow, measure retrieval quality, then add semantic or graph structure only when a simpler layer fails.
+Compare retrieval accuracy for the product's query shapes, temporal and
+multi-hop behavior when required, ingestion cost, latency, and operational
+complexity. Start with the shallowest implementation and add semantic or graph
+structure only when the simpler layer fails a measured requirement.
 
 ### Memory Layers (Decision Points)
 
@@ -185,7 +185,7 @@ results = await cognee.search(
 
 1. **Stuffing everything into context**: Loading all available memories into the prompt is expensive and degrades attention quality. Use just-in-time retrieval with relevance filtering instead.
 2. **Ignoring temporal validity**: Facts go stale. Without validity tracking, outdated information poisons the context and the agent acts on wrong assumptions.
-3. **Over-engineering early**: Simple filesystem-backed memory can outperform more specialized tooling on some benchmarks (claim-memory-locomo-filesystem-baseline). Add sophistication only when simple approaches demonstrably fail.
+3. **Over-engineering early**: Start with the simplest memory layer that satisfies the retrieval requirement. Add sophistication only when measured retrieval failures justify it.
 4. **No consolidation strategy**: Unbounded memory growth degrades retrieval quality over time. Set memory count thresholds or scheduled intervals to trigger consolidation.
 5. **Embedding model mismatch**: Writing memories with one embedding model and reading with another produces poor retrieval because vector spaces are not interchangeable. Pin a single embedding model for each memory store and re-embed all entries if the model changes.
 6. **Graph schema rigidity**: Over-structured graph schemas (rigid node types, fixed relationship labels) break when the domain evolves. Prefer generic relation types and flexible property bags so new entity kinds do not require schema migrations.
@@ -210,7 +210,7 @@ Internal references:
 - [Implementation Reference](skill://memory-systems/references/implementation.md) - Read when: implementing vector stores, property graphs, temporal queries, or memory consolidation logic from scratch
 
 Runnable script:
-- [memory_store.py](skill://memory-systems/scripts/memory_store.py) - `VectorStore`, `PropertyGraph`, `TemporalKnowledgeGraph`, `IntegratedMemorySystem` - Run when: implementing retrieval, temporal validity, or consolidation
+- [memory_store.py](skill://memory-systems/scripts/memory_store.py) - Status: Example; Boundary: uses pseudo-random embeddings and in-memory storage without consolidation or an embedding model - `VectorStore`, `PropertyGraph`, `TemporalKnowledgeGraph`, `IntegratedMemorySystem` - Run when: implementing retrieval, temporal validity, or consolidation
 
 Related skills in this collection:
 - context-fundamentals - Read when: designing the context layer that memory feeds into

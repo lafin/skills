@@ -1,10 +1,13 @@
 ---
 name: lossless-doc-compress
 description: Use when asked to compress, tighten, shorten, condense, or de-slop a design doc, PRD, RFC, architecture note, or similar prose "without losing information". Removes only provable redundancy — filler, hedging, LLM-slop, restated content — never a fact, number, decision, or caveat, and flags every judgment call for the author. Returns a compressed document, a categorized removal log, and a shareable scorecard.
+license: MIT
 metadata:
-  version: "0.1.0"
-  scope: design-doc-lossless-compression
-  reference: https://arseny.info/ml_design_book
+  upstream: "ML-SystemDesign/MLSystemDesign"
+  upstream_commit: "61b9bcdb971e7424cdc4d400085338dc35da910e"
+  upstream_path: "skills/lossless-doc-compress"
+  adaptation: imported
+  license_notice: LICENSE-ml-system-design
 ---
 
 # Lossless Doc Compress

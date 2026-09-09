@@ -2,6 +2,10 @@
 Context Degradation Detection — Public API
 ============================================
 
+Status: Example
+Boundary: Attention, token counts, poisoning, and hallucination signals are
+simulations or heuristics, not measurements from a model.
+
 Detect, measure, and diagnose context degradation patterns in LLM agent systems.
 
 Public API:

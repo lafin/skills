@@ -165,30 +165,6 @@ Be objective and consistent. Focus on what is present in the response, not what 
 }
 ```
 
-## Benchmark Results Reference
-
-Performance across compression methods (based on 36,000+ messages):
-
-| Method | Overall | Accuracy | Context | Artifact | Complete | Continuity | Instruction |
-|--------|---------|----------|---------|----------|----------|------------|-------------|
-| Anchored Iterative | 3.70 | 4.04 | 4.01 | 2.45 | 4.44 | 3.80 | 4.99 |
-| Regenerative | 3.44 | 3.74 | 3.56 | 2.33 | 4.37 | 3.67 | 4.95 |
-| Opaque | 3.35 | 3.43 | 3.64 | 2.19 | 4.37 | 3.77 | 4.92 |
-
-**Key Findings:**
-
-1. **Accuracy gap**: 0.61 points between best and worst methods
-2. **Context awareness gap**: 0.45 points, favoring anchored iterative
-3. **Artifact trail**: Universally weak (2.19-2.45), needs specialized handling
-4. **Completeness and instruction following**: Minimal differentiation
-
-## Statistical Considerations
-
-- Differences of 0.26-0.35 points are consistent across task types and session lengths
-- Pattern holds for both short and long sessions
-- Pattern holds across debugging, feature implementation, and code review tasks
-- Sample size: 36,611 messages across hundreds of compression points
-
 ## Implementation Notes
 
 ### Probe Generation

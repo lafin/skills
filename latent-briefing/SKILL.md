@@ -4,7 +4,10 @@ description: "This skill should be used when the user asks to \"share memory bet
 license: MIT
 metadata:
   upstream: "muratcankoylan/Agent-Skills-for-Context-Engineering"
+  upstream_commit: "c578e85e40fe2bda7c1fec91ff64cf5285434934"
   upstream_path: "skills/latent-briefing"
+  adaptation: modified
+  license_notice: LICENSE-context-engineering
 ---
 
 # Latent Briefing and KV Cache Memory Sharing
@@ -41,8 +44,6 @@ Do not activate this skill for adjacent work owned by other skills:
 2. Aggregate scores into a **shared global mask** instead of per-head independent subsets.
 3. Use a robust threshold such as `median + tau * MAD` rather than fixed top-k per head.
 
-**Reference result shape.** The public write-up reports substantial worker-token reduction, material total-token savings, and low-single-digit-second compaction overhead on long-document QA workloads (claim-latent-briefing-public-results). Treat these numbers as workload-specific evidence, not a general guarantee.
-
 ## Detailed Topics
 
 ### Why Text-Only Mitigations Fall Short
@@ -65,8 +66,7 @@ In the ideal setup, the worker maintains a persistent KV state for the orchestra
 
 1. **Task-guided query vectors.** Use queries from the current worker task prompt, not generic samples from the context. Forward-pass the trajectory plus current task through the worker model, then score trajectory positions by how strongly the task attends to them.
 
-2. **Shared token selection.** Aggregate scores across layers and heads into one per-position score. One shared mask enables batched operations and avoids hundreds of incompatible per-head solves.
-
+2. **Shared token selection.** Aggregate scores across layers and heads into one per-position score. One shared mask enables batched operations and avoids many incompatible per-head solves.
 3. **MAD thresholding.** Keep positions above a robust outlier threshold such as `median + tau * MAD`. Higher `tau` is more aggressive. Optimal settings depend on task regime, trajectory quality, and document length.
 
 ### Infrastructure Preconditions
@@ -86,15 +86,15 @@ Choose the mechanism that matches the bottleneck:
 
 Latent Briefing is not a universal replacement for summarization or retrieval. It is a specialized optimization for systems that already run a controllable orchestrator-worker stack.
 
-### Threshold Regimes
+### Workload-Dependent Tuning
 
-Reported long-document QA results suggest:
+Evaluate these hypotheses on the target workload:
 
-- **Longer documents:** lighter compaction can preserve broader evidence coverage while still saving tokens.
-- **Harder questions:** more aggressive compaction can help when the orchestrator trajectory contains speculative or low-value branches.
+- **Longer documents:** lighter compaction may preserve broader evidence coverage while still saving tokens.
+- **Harder questions:** more aggressive compaction may help when the orchestrator trajectory contains speculative or low-value branches.
 - **Shorter, easier contexts:** moderate compaction may remove redundancy without dropping needed evidence.
 
-These are tuning hypotheses, not portable laws. Re-measure on the target workload.
+These are tuning hypotheses, not established laws.
 
 ## Practical Guidance
 
@@ -132,8 +132,8 @@ If the worker runs behind a hosted text-generation API that does not expose KV t
 
 1. **Infrastructure access is the first gate.** If the runtime cannot inspect and rewrite worker KV state, Latent Briefing is a research idea, not a deployable technique.
 2. **Shared model space matters.** KV compaction is defined in a specific model's attention space. Do not assume latent handoff works cleanly across unrelated model families.
-3. **Threshold is workload-dependent.** One global `tau` rarely works across long vs short context and easy vs hard tasks. Expect accuracy cliffs when compaction becomes too aggressive.
-4. **Benchmark scope is narrow.** Public results focus on long-document QA. Code generation, math, and multi-document synthesis may behave differently.
+3. **Threshold is workload-dependent.** Do not assume one global `tau` works across long vs short context and easy vs hard tasks. Check for accuracy cliffs as compaction becomes more aggressive.
+4. **Benchmark transfer is uncertain.** Validate code generation, math, and multi-document synthesis separately instead of extrapolating from another workload.
 5. **Orchestrator variance can hide the signal.** A stochastic orchestrator can change the trajectory enough to swamp small compaction gains or losses.
 6. **Weak baselines inflate the apparent win.** Compare against strong text-level alternatives before claiming a system-level advantage.
 

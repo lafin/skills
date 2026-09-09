@@ -8,6 +8,8 @@ description: >
   "find bloat", "leancode-audit", or "/skill:leancode-audit". One-shot report, does
   not apply fixes.
 license: MIT
+metadata:
+  provenance: repository-original
 ---
 
 leancode-review, repo-wide. Scan the whole tree instead of a diff. Rank
