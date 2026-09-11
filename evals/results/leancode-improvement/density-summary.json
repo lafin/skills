@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "design": {
+    "cases": "evals/cases/behavior.jsonl",
+    "attempts_per_variant": 1,
+    "model": "openai-codex/gpt-5.6-sol",
+    "profile": "skill-eval-isolated",
+    "thinking": "off",
+    "tools": [],
+    "scope": "exploratory policy ablation; not repository-level efficacy evidence"
+  },
+  "efficiency_threshold": null,
+  "efficiency_threshold_reason": "No threshold was registered before these runs, so efficiency cannot justify adoption.",
+  "variants": {
+    "current": {
+      "run": "density-current",
+      "deterministic_passed": 6,
+      "deterministic_total": 8,
+      "tokens": 42027,
+      "elapsed_seconds": 138.299,
+      "tool_calls": 0,
+      "skill_sha256": "4eac28a7cb610f6c25f94eedd345e1cdd329eee2262587ff8ee8cff3eb490a9f"
+    },
+    "neutral_persona": {
+      "run": "density-neutral-persona",
+      "deterministic_passed": 7,
+      "deterministic_total": 8,
+      "tokens": 41623,
+      "elapsed_seconds": 96.555,
+      "tool_calls": 0,
+      "skill_sha256": "859c627587ec53a44dc12ec5a359b7de7f9db4d94060979225287ec37a7b9bc6"
+    },
+    "deduplicated_rules": {
+      "run": "density-deduplicated",
+      "deterministic_passed": 6,
+      "deterministic_total": 8,
+      "tokens": 40068,
+      "elapsed_seconds": 88.122,
+      "tool_calls": 0,
+      "skill_sha256": "cb546cbd7146a29db0cff9e645eb4b2facbd42e61d03eb6e6c9892c5def668cb"
+    },
+    "neutral_persona_deduplicated_rules": {
+      "run": "density-neutral-deduplicated",
+      "deterministic_passed": 5,
+      "deterministic_total": 8,
+      "tokens": 39346,
+      "elapsed_seconds": 82.718,
+      "tool_calls": 0,
+      "skill_sha256": "fa17e44b1146274eeb8396ce3e35cde7b130aadf15b2e5ea40deec6b96c50116"
+    }
+  },
+  "decision": "reject",
+  "reason": "The combined neutral-and-deduplicated variant regressed deterministic quality. The other variants lack a pre-registered efficiency threshold, long-history evidence, and repository-level non-inferiority evidence. Keep the current prompt."
+}

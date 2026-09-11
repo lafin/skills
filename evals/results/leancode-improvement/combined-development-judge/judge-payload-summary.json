@@ -1,0 +1,10 @@
+{
+  "deterministic_grade_summaries": [
+    "evals/results/leancode-improvement/repository-development-baseline/grade-summary.json",
+    "evals/results/leancode-improvement/combined-development-treatment/grade-summary.json"
+  ],
+  "efficacy_claim": null,
+  "payloads": 42,
+  "schema_version": 3,
+  "swapped_pairs": 21
+}

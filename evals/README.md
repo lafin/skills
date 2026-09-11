@@ -1,14 +1,15 @@
-# Behavior and routing evaluation
+# Behavior, repository, and routing evaluation
 
 This evaluation uses OMP's real noninteractive adapter. `run.py` invokes `omp --mode=rpc`, sends JSONL requests on stdin, captures the complete JSONL event stream and stderr, and extracts the final assistant response, tool events, model, usage, and runtime fields. It does not call a model provider directly.
 
 ## Cases
 
 - `cases/behavior.jsonl` contains eight development cases for `leancode` behavior.
-- `cases/routing-development.jsonl` contains two known cases for each confusable pair, one for each skill.
-- `cases/routing-holdout.jsonl` contains two different held-out cases for each pair. Do not use holdout results to tune a change.
+- `cases/repository-development.jsonl` contains seven editable repository cases.
+- `cases/repository-holdout.jsonl` contains three held-out repository cases. Do not use holdout results to tune a change.
+- `cases/routing-development.jsonl` and `cases/routing-holdout.jsonl` contain distinct cases for each confusable skill pair.
 
-Every case names observable success, prohibited outcomes, and deterministic checks. Behavior prompts request an explicit decision record because these cases measure change scope and verification choices without modifying this repository. Routing requests append both exact candidate names and their captured frontmatter descriptions, then require one exact selection.
+Every case names observable success, prohibited outcomes, and deterministic checks. Repository cases copy an immutable `fixtures/<fixture>/initial` tree into a temporary worktree and run the fixture's `verify.py` against the final tree. Behavior prompts request an explicit decision record because these cases measure change scope and verification choices without modifying this repository. Routing requests append both exact candidate names and their captured frontmatter descriptions, then require one exact selection.
 
 ## Capture real runs
 
@@ -22,8 +23,14 @@ baseline before changing skill text; do not recreate or synthesize it from a
 treatment run.
 
 The dedicated profile must register this repository root under
-`skills.customDirectories`. The manifest records the effective OMP
-configuration and canonical skill hashes.
+`skills.customDirectories`. Before capture, the runner rejects configured MCP
+servers and verifies the requested model, thinking level, skills, extensions,
+sessions, and tool policy. The manifest records the effective OMP
+configuration with secret-bearing values redacted and canonical skill hashes.
+
+Config overlays passed with `--config` are included in the effective-config
+preflight and in every RPC command. Repository verifier processes default to a
+30-second timeout; change it explicitly with `--verifier-timeout`.
 
 ```sh
 MODEL='openai-codex/gpt-5.6-sol'
@@ -37,6 +44,21 @@ python3 evals/run.py \
   --cases evals/cases/routing-holdout.jsonl \
   --condition baseline --model "$MODEL" --profile "$PROFILE" --attempts 3 \
   --tools '' --output evals/results/change-id/holdout-baseline
+```
+
+Repository cases require their explicit editing tool allowlist:
+
+```sh
+python3 evals/run.py \
+  --cases evals/cases/repository-development.jsonl \
+  --condition baseline --model "$MODEL" --profile "$PROFILE" --attempts 3 \
+  --tools read,bash,edit,write,glob,grep \
+  --output evals/results/change-id/repository-development-baseline
+python3 evals/run.py \
+  --cases evals/cases/repository-holdout.jsonl \
+  --condition baseline --model "$MODEL" --profile "$PROFILE" --attempts 3 \
+  --tools read,bash,edit,write,glob,grep \
+  --output evals/results/change-id/repository-holdout-baseline
 ```
 
 After the candidate skill changes are frozen, run the treatment from that checkout with the same arguments except the condition and output directory:
@@ -53,6 +75,9 @@ python3 evals/run.py \
   --tools '' --output evals/results/change-id/holdout-treatment
 ```
 
+Repeat the repository commands with `--condition treatment` and new output
+directories. Never reuse a run directory.
+
 For behavior cases, both arms use the same minimal structured-response system
 prompt and disable discovered rules, extensions, sessions, and tools. Baseline
 disables skills. Treatment exposes only the canonical target and sends
@@ -67,11 +92,28 @@ configuration remain disabled in both conditions.
 
 A run directory is immutable and contains:
 
-- `manifest.json`: condition, timestamp, exact model request, OMP executable and version, repository status, skill commits and content hashes, evaluator hashes, case and config hashes, effective OMP configuration, tool allowlist, and runtime flags.
+- `manifest.json`: condition, timestamp, exact model request, OMP executable and version, repository status, skill commits and content hashes, evaluator hashes, case and config hashes, redacted effective OMP configuration, tool allowlist, and runtime flags.
 - `cases.jsonl`: the exact case snapshot used by the run.
-- `artifacts/<case>/<attempt>.json`: prompt, sanitized argv, raw stdout and stderr, exit code, parsed response, tool policy and trace, observed model and provider, usage, timing, and parse errors.
+- `artifacts/<case>/<attempt>.json`: prompt, sanitized argv, raw stdout and stderr, exit code, parsed response, tool policy and trace, observed model and provider, usage, timing, and parse errors. Repository artifacts also retain the initial and final file snapshots, unified diff, verifier command, raw verifier output, and individual deterministic check results. These raw files can be hundreds of megabytes.
 
-Use a new output directory for every run. Preserve all attempts, including failures. A published claim must commit or otherwise retain both condition directories, their raw artifacts, deterministic grades, and the gate report. Credentials must never be put in prompts, config overlays, or artifacts.
+Use a new output directory for every run. Preserve every attempt, including
+failed and invalid captures. Raw `artifacts/` directories are excluded from Git
+by `.gitignore`; keep them locally or upload the complete run directories to
+external artifact storage. Commit the compact manifests, case snapshots,
+grades, judge outputs, and release reports. Grade summaries contain the raw
+artifact hashes for completed graded runs and can verify a restored bundle.
+Preserve complete run directories for captures that were not graded.
+
+A published efficacy claim must retain both complete condition directories,
+raw artifacts, deterministic grades, and the gate report in durable artifact
+storage. Credentials must never be put in prompts, config overlays, or
+artifacts.
+
+The runner removes secret-named environment variables before it starts OMP.
+It isolates repository writes in a temporary worktree, but it is not an
+operating-system sandbox: an agent with `read` or `bash` can read outside that
+worktree. Run repository cases only with trusted fixtures and prompts, or run
+the entire evaluator in an external sandbox that contains no host credentials.
 
 ## Grade captured artifacts
 
@@ -127,8 +169,26 @@ python3 evals/grade.py gate \
   --development-treatment evals/results/change-id/development-treatment \
   --holdout-baseline evals/results/change-id/holdout-baseline \
   --holdout-treatment evals/results/change-id/holdout-treatment \
+  --routing-holdout-baseline evals/results/change-id/routing-holdout-baseline \
+  --routing-holdout-treatment evals/results/change-id/routing-holdout-treatment \
   --output evals/results/change-id/merge-gate.json
 ```
 
-The gate fails on a critical regression, no deterministic improvement in development, a holdout routing regression, mismatched model/runtime/tool configuration, incomplete pairing, or an unexplained increase in tokens, tool events, or questions. Supply `--correctness-benefit 'observed benefit'` only when raw paired evidence supports the extra cost. Only a passing report contains an efficacy claim; every other report sets it to `null`.
+The gate fails on a critical regression, no deterministic improvement in development, loss of any baseline-passing repository holdout result, any failed routing holdout case, mismatched model/runtime/tool configuration, incomplete pairing, or an unexplained increase in tokens, tool events, or questions. Supply `--correctness-benefit 'observed benefit'` only when raw paired evidence supports the extra cost. Only a passing report contains an efficacy claim; every other report sets it to `null`.
+
+## Verify leancode modes
+
+`mode_smoke.py` drives the real OMP RPC adapter with the production hook. It
+checks `lite`, `full`, `ultra`, and `off`, in-process persistence, extension
+reload persistence, new-process reset to `full`, quoted-marker preservation,
+the requested model identity, and optional same-task behavior.
+The artifact binds the OMP executable, version, hook, smoke script, runner,
+config overlays, and redacted effective profile configuration:
+
+```sh
+python3 evals/mode_smoke.py \
+  --model "$MODEL" --profile "$PROFILE" --thinking off \
+  --behavior-attempts 1 \
+  --output evals/results/change-id/mode-smoke.json
+```
 

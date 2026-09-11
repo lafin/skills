@@ -4,10 +4,12 @@ from __future__ import annotations
 
 import argparse
 import importlib.util
+import os
 import json
 import sys
 import tempfile
 import unittest
+from unittest import mock
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -102,9 +104,15 @@ def captured_artifact(path: Path) -> tuple[dict, dict, dict]:
             "--no-rules",
             "--no-session",
             "--no-extensions",
+            f"--cwd={ROOT}",
+            "--model=provider/model",
+            "--thinking=off",
+            "--max-time=1m",
+            "--profile=isolated",
             "--no-tools",
             "--skills=advanced-evaluation,evaluation",
         ],
+        "rpc_cwd": str(ROOT),
         "rpc_requests": [
             {
                 "id": "routing-case-1-case",
@@ -130,7 +138,14 @@ def captured_artifact(path: Path) -> tuple[dict, dict, dict]:
     manifest = {
         "condition": "baseline",
         "model_requested": "provider/model",
-        "configuration": {"tools": []},
+        "configuration": {
+            "tools": [],
+            "profile": "isolated",
+            "thinking": "off",
+            "max_time": "1m",
+            "config_files": [],
+            "cwd": str(ROOT),
+        },
         "skill_files": {
             name: {"description": description}
             for name, description in descriptions.items()
@@ -188,6 +203,29 @@ class EvaluationHarnessTest(unittest.TestCase):
         self.assertEqual(42, summary["usage"]["totalTokens"])
         self.assertIsNone(summary["usage"]["cacheReadTokens"])
         self.assertEqual({"totalTokens": 32, "cacheReadTokens": None}, summary["final_message_usage"])
+
+    def test_effective_config_redacts_sensitive_values(self) -> None:
+        config = {
+            "auth.token": {"value": "secret", "type": "string", "metadata": "also-secret"},
+            "nested": {
+                "apiKey": "secret",
+                "Authorization": "Bearer secret",
+                "Cookie": {"value": "session=secret"},
+            },
+            "skills.customDirectories": {"value": [str(ROOT)], "type": "array"},
+        }
+
+        redacted = RUN.redact_config(config)
+
+        self.assertEqual("<redacted>", redacted["auth.token"]["value"])
+        self.assertEqual("<redacted>", redacted["nested"]["apiKey"])
+        self.assertEqual("<redacted>", redacted["auth.token"]["metadata"])
+        self.assertEqual("<redacted>", redacted["nested"]["Authorization"])
+        self.assertEqual("<redacted>", redacted["nested"]["Cookie"]["value"])
+        self.assertEqual([str(ROOT)], redacted["skills.customDirectories"]["value"])
+        GRADE.validate_redacted_config(redacted)
+        with self.assertRaisesRegex(ValueError, "unredacted"):
+            GRADE.validate_redacted_config(config)
 
     def test_rpc_command_enforces_condition_skill_and_runtime_scope(self) -> None:
         args = argparse.Namespace(
@@ -265,6 +303,12 @@ class EvaluationHarnessTest(unittest.TestCase):
             artifact["response"] = "SELECTED_SKILL: advanced-evaluation"
             path.write_text(json.dumps(artifact), encoding="utf-8")
             with self.assertRaisesRegex(ValueError, "response does not match raw events"):
+                GRADE.validate_artifact(path, path, case, manifest, 1)
+
+            artifact["response"] = "SELECTED_SKILL: evaluation"
+            artifact["exit_code"] = False
+            path.write_text(json.dumps(artifact), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "incomplete terminal response metadata"):
                 GRADE.validate_artifact(path, path, case, manifest, 1)
 
     def test_missing_terminal_and_tool_violation_fail_grading(self) -> None:
@@ -405,6 +449,132 @@ class EvaluationHarnessTest(unittest.TestCase):
                     )[0]
                 )
 
+    def test_repository_grade_uses_critical_verifier_checks_and_dimensions(self) -> None:
+        case = {
+            "id": "repository-case",
+            "kind": "repository",
+            "split": "development",
+            "target_skill": "leancode",
+            "fixture": "fixture",
+            "checks": [],
+        }
+        artifact = {
+            "schema_version": 3,
+            "condition": "baseline",
+            "attempt": 1,
+            "exit_code": 0,
+            "event_parse_errors": [],
+            "response": "Implemented and verified.",
+            "terminal_state": {"received": True, "terminal_result": "agent_end"},
+            "tool_policy": {"violations": []},
+            "usage": {"totalTokens": 10},
+            "tool_call_count": 1,
+            "elapsed_seconds": 1,
+            "fixture": {
+                "verifier": {
+                    "exit_code": 0,
+                    "checks": [
+                        {
+                            "name": "behavior",
+                            "dimension": "correctness",
+                            "critical": True,
+                            "passed": True,
+                            "detail": "target behavior passed",
+                        }
+                    ],
+                }
+            },
+        }
+
+        passing = GRADE.grade_artifact(case, artifact)
+        self.assertTrue(passing["critical_passed"])
+        self.assertTrue(passing["dimensions"]["correctness"]["passed"])
+        artifact["fixture"]["verifier"]["checks"][0]["passed"] = False
+        failing = GRADE.grade_artifact(case, artifact)
+        self.assertFalse(failing["critical_passed"])
+        self.assertFalse(failing["dimensions"]["correctness"]["passed"])
+
+        self.assertFalse(passing["dimensions"]["reporting"]["measured"])
+        self.assertIsNone(passing["dimensions"]["reporting"]["passed"])
+
+    def test_repository_snapshot_tampering_is_rejected(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "file.txt").write_text("original", encoding="utf-8")
+            snapshot = GRADE.tree_snapshot(root)
+            GRADE.validate_tree_snapshot(snapshot, "snapshot")
+            snapshot["entries"][0]["size"] += 1
+            with self.assertRaisesRegex(ValueError, "hash mismatch"):
+                GRADE.validate_tree_snapshot(snapshot, "snapshot")
+
+    def test_repository_verifier_schema_is_strict(self) -> None:
+        malformed = {
+            "checks": [
+                {
+                    "name": "behavior",
+                    "critical": True,
+                    "passed": True,
+                    "detail": "missing dimension",
+                }
+            ]
+        }
+        with self.assertRaisesRegex(ValueError, "invalid check"):
+            GRADE.parse_verifier_output(json.dumps(malformed))
+
+    def test_repository_command_and_verifier_use_isolated_worktree(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            worktree = root / "worktree"
+            worktree.mkdir()
+            (worktree / "file.txt").write_text("value", encoding="utf-8")
+            verifier = root / "evals/fixtures/fixture/verify.py"
+            verifier.parent.mkdir(parents=True)
+            verifier.write_text("pass\n", encoding="utf-8")
+            snapshot = GRADE.tree_snapshot(worktree)
+            checks = [
+                {
+                    "name": "behavior",
+                    "dimension": "correctness",
+                    "critical": True,
+                    "passed": True,
+                    "detail": "passed",
+                }
+            ]
+            verifier_command = [sys.executable, str(verifier), str(worktree)]
+            source = {
+                "initial_path": "evals/fixtures/fixture/initial",
+                "initial_tree_sha256": snapshot["sha256"],
+                "verifier_path": "evals/fixtures/fixture/verify.py",
+                "verifier_sha256": "0" * 64,
+            }
+            evidence = {
+                "unified_diff": "",
+                "id": "fixture",
+                "worktree": str(worktree),
+                "source": source,
+                "initial_tree": snapshot,
+                "final_tree": snapshot,
+                "diff": GRADE.tree_diff(snapshot, snapshot),
+                "verifier": {
+                    "command": verifier_command,
+                    "cwd": str(worktree),
+                    "exit_code": 0,
+                    "stdout": json.dumps({"checks": checks}),
+                    "stderr": "",
+                    "checks": checks,
+                    "parse_error": None,
+                },
+            }
+            case = {"fixture": "fixture"}
+            manifest = {
+                "configuration": {"cwd": str(root)},
+                "fixture_files": {"fixture": source},
+            }
+            command = ["omp", f"--cwd={worktree}"]
+            GRADE.validate_fixture_artifact(evidence, case, manifest, command)
+            with self.assertRaisesRegex(ValueError, "isolated worktree"):
+                GRADE.validate_fixture_artifact(evidence, case, manifest, ["omp", f"--cwd={root}"])
+
     def test_judge_results_reject_missing_and_duplicate_ids(self) -> None:
         key = {
             "schema_version": 3,
@@ -453,9 +623,157 @@ class EvaluationHarnessTest(unittest.TestCase):
         }
         self.assertIsNone(GRADE.sum_metric(grades, "tokens"))
 
-    def test_merge_gate_keeps_nonzero_failed_gate_contract(self) -> None:
-        self.assertEqual(1, GRADE.main.__code__.co_consts.count("gate") > 0)
 
+
+    def test_capture_environment_removes_secret_named_variables(self) -> None:
+        with mock.patch.dict(
+            os.environ,
+            {"PATH": "/usr/bin", "OPENAI_API_KEY": "secret", "SESSION_COOKIE": "secret"},
+            clear=True,
+        ):
+            self.assertEqual({"PATH": "/usr/bin"}, RUN.capture_environment())
+
+    def test_unified_tree_diff_contains_reviewable_text_changes(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            before = root / "before"
+            after = root / "after"
+            before.mkdir()
+            after.mkdir()
+            (before / "changed.txt").write_text("old\n", encoding="utf-8")
+            (after / "changed.txt").write_text("new\n", encoding="utf-8")
+            (after / "added.txt").write_text("added\n", encoding="utf-8")
+
+            patch = RUN.unified_tree_diff(
+                before,
+                after,
+                RUN.tree_snapshot(before),
+                RUN.tree_snapshot(after),
+            )
+
+            self.assertIn("--- a/changed.txt", patch)
+            self.assertIn("+++ b/changed.txt", patch)
+            self.assertIn("-old", patch)
+            self.assertIn("+new", patch)
+            self.assertIn("+++ b/added.txt", patch)
+
+    def test_verifier_rejects_duplicate_json_keys(self) -> None:
+        with self.assertRaisesRegex(ValueError, "duplicate JSON key"):
+            GRADE.parse_verifier_output('{"checks":[],"checks":[]}')
+
+    def test_visual_claim_check_allows_explicit_unavailability(self) -> None:
+        cases = [
+            json.loads(line)
+            for line in (ROOT / "evals/cases/repository-holdout.jsonl").read_text().splitlines()
+        ]
+        case = next(item for item in cases if item["id"] == "repository-ui-verification")
+        check = next(item for item in case["checks"] if item["name"] == "no_visual_success_claim")
+
+        self.assertTrue(
+            GRADE.apply_check(
+                check,
+                {"response": "The surface could not be visually verified in this environment."},
+            )[0]
+        )
+        self.assertFalse(
+            GRADE.apply_check(
+                check,
+                {"response": "The rendered dialog was visually verified."},
+            )[0]
+        )
+
+    def test_judge_summary_retains_critical_flags_and_rationales(self) -> None:
+        key = {
+            "schema_version": 3,
+            "pairs": {
+                "forward": {
+                    "case_id": "case",
+                    "attempt": 1,
+                    "A": "baseline",
+                    "B": "treatment",
+                    "order": "forward",
+                },
+                "swapped": {
+                    "case_id": "case",
+                    "attempt": 1,
+                    "A": "treatment",
+                    "B": "baseline",
+                    "order": "swapped",
+                },
+            },
+        }
+        results = [
+            {
+                "pair_id": "forward",
+                "winner": "B",
+                "critical_issue": True,
+                "rationale": "forward rationale",
+            },
+            {
+                "pair_id": "swapped",
+                "winner": "A",
+                "critical_issue": False,
+                "rationale": "swapped rationale",
+            },
+        ]
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            key_path = root / "key.json"
+            result_path = root / "results.jsonl"
+            output = root / "summary.json"
+            key_path.write_text(json.dumps(key), encoding="utf-8")
+            result_path.write_text(
+                "".join(json.dumps(result) + "\n" for result in results),
+                encoding="utf-8",
+            )
+
+            summary = GRADE.score_judges(key_path, result_path, output)
+
+        self.assertEqual([True, False], summary["results"][0]["critical_issues"])
+        self.assertEqual(
+            ["forward rationale", "swapped rationale"],
+            summary["results"][0]["rationales"],
+        )
+
+    def test_gate_blocks_offset_holdout_and_routing_regressions(self) -> None:
+        def counts(
+            baseline_passed: int,
+            treatment_passed: int,
+            total: int,
+            regressions: list[str],
+        ) -> dict:
+            return {
+                "baseline_passed": baseline_passed,
+                "treatment_passed": treatment_passed,
+                "total": total,
+                "critical_regressions": [],
+                "regressions": regressions,
+                "baseline_metrics": {"tokens": 10, "tool_events": 1, "questions": 0},
+                "treatment_metrics": {"tokens": 10, "tool_events": 1, "questions": 0},
+            }
+
+        results = [
+            counts(1, 2, 2, []),
+            counts(2, 2, 3, ["holdout:1"]),
+            counts(2, 1, 2, ["routing:1"]),
+        ]
+        with tempfile.TemporaryDirectory() as directory:
+            args = argparse.Namespace(
+                development_baseline=Path("development-baseline"),
+                development_treatment=Path("development-treatment"),
+                holdout_baseline=Path("holdout-baseline"),
+                holdout_treatment=Path("holdout-treatment"),
+                routing_holdout_baseline=Path("routing-baseline"),
+                routing_holdout_treatment=Path("routing-treatment"),
+                correctness_benefit=None,
+                output=Path(directory) / "gate.json",
+            )
+            with mock.patch.object(GRADE, "paired_grade_counts", side_effect=results):
+                report = GRADE.merge_gate(args)
+
+        self.assertEqual("fail", report["decision"])
+        self.assertFalse(report["criteria"]["holdout_preserved"])
+        self.assertFalse(report["criteria"]["routing_holdout_all_passed"])
 
 if __name__ == "__main__":
     unittest.main()

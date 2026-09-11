@@ -1,0 +1,47 @@
+{
+  "current_git_blobs": {
+    ".omp/hooks/pre/leancode.ts": "ecb977c158b41ba85e29aa59871b68f75ae0f05c",
+    "leancode/SKILL.md": "3c24592ea87a36ca97afe440ea25945202fc5aa6"
+  },
+  "files": [
+    "leancode/SKILL.md",
+    ".omp/hooks/pre/leancode.ts"
+  ],
+  "restore_command": [
+    "git",
+    "restore",
+    "--source",
+    "a2384f71dc317446706c66799d26e15e6b18836a",
+    "--",
+    "leancode/SKILL.md",
+    ".omp/hooks/pre/leancode.ts"
+  ],
+  "schema_version": 1,
+  "source_commit": "a2384f71dc317446706c66799d26e15e6b18836a",
+  "source_git_blobs": {
+    ".omp/hooks/pre/leancode.ts": "7e8f955db43254acad3ae2593e320727ba9901ed",
+    "leancode/SKILL.md": "3c24592ea87a36ca97afe440ea25945202fc5aa6"
+  },
+  "verification": {
+    "all_source_blobs_match": true,
+    "both_files_restored": true,
+    "current_hook_differs_from_source": true,
+    "current_pair_differs_from_source": true,
+    "current_skill_matches_source": true,
+    "restored_files": {
+      ".omp/hooks/pre/leancode.ts": {
+        "expected_git_blob": "7e8f955db43254acad3ae2593e320727ba9901ed",
+        "git_blob": "7e8f955db43254acad3ae2593e320727ba9901ed",
+        "matches_source": true,
+        "sha256": "7cb6d5f5333256935bb6bd6e169b4cc352f996256b49c8edcce8f5b0ad969d99"
+      },
+      "leancode/SKILL.md": {
+        "expected_git_blob": "3c24592ea87a36ca97afe440ea25945202fc5aa6",
+        "git_blob": "3c24592ea87a36ca97afe440ea25945202fc5aa6",
+        "matches_source": true,
+        "sha256": "4eac28a7cb610f6c25f94eedd345e1cdd329eee2262587ff8ee8cff3eb490a9f"
+      }
+    },
+    "temporary_restore_only": true
+  }
+}

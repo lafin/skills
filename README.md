@@ -22,8 +22,10 @@ Skills load on demand via `skill://<name>`, and their assets via
 also invocable as `/skill:<name>`.
 
 `.omp/hooks/pre/leancode.ts` keeps leancode active every turn and registers
-`/leancode lite|full|ultra|off`. It loads when omp runs with this repository as
-the working directory; elsewhere, pass it with `--extension <path>/.omp/hooks/pre/leancode.ts`.
+`/leancode lite|full|ultra|off`. The selected mode persists for the current OMP
+process; a new process starts in `full`. The hook loads when OMP runs with this
+repository as the working directory; elsewhere, pass it with
+`--extension <path>/.omp/hooks/pre/leancode.ts`.
 
 ## Validation
 

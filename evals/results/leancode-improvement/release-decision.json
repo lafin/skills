@@ -1,0 +1,119 @@
+{
+  "accepted": {
+    "runtime_hook_hardening": [
+      "Hook-generated reminders carry agent attribution.",
+      "Attributed reminders use a stable ownership marker for replacement.",
+      "Unattributed migration removes only exact known legacy reminders."
+    ]
+  },
+  "decision": "ship_runtime_hardening_only",
+  "efficacy_claim": null,
+  "artifact_storage": {
+    "compact_evidence_source_controlled": true,
+    "raw_artifacts_gitignored": true,
+    "raw_artifacts_location": "local or external artifact storage"
+  },
+  "evaluation_limits": [
+    "Repository attempts use temporary worktrees but no operating-system read sandbox.",
+    "Run untrusted prompts or fixtures only inside an external sandbox without host credentials.",
+    "Historical run manifests bind the evaluator version used at capture; the hardened evaluator does not rewrite those immutable artifacts.",
+    "Raw artifact directories are excluded from Git because individual captures exceed GitHub's file-size limit."
+  ],
+  "evidence": {
+    "combined_gate": {
+      "decision": "fail",
+      "development": {
+        "baseline_passed": 21,
+        "total": 21,
+        "treatment_passed": 20
+      },
+      "holdout": {
+        "baseline_passed": 7,
+        "total": 9,
+        "treatment_passed": 6
+      },
+      "path": "combined-release-gate.json"
+    },
+    "density": {
+      "decision": "reject",
+      "path": "density-summary.json"
+    },
+    "final_collapsed_mode_holdout": {
+      "baseline_passed": 7,
+      "path": "repository-final-holdout-treatment/grade-summary.json",
+      "total": 9,
+      "treatment_passed": 6
+    },
+    "mode_smoke": {
+      "all_checks_passed": true,
+      "path": "mode-smoke-production-v3.json"
+    },
+    "routing": {
+      "development_passed": 78,
+      "development_total": 78,
+      "holdout_passed": 78,
+      "holdout_total": 78
+    }
+  },
+  "holdout": {
+    "decision_case_file_sha256": "aa649030dcd049ee2ddbb54d0a7b62a90f1448f4e63fd0ceac284d10f85a8049",
+    "decision_runs": [
+      "repository-holdout-baseline",
+      "combined-holdout-treatment",
+      "repository-final-holdout-treatment"
+    ],
+    "after_decision_runs_corrected_case_file_sha256": "752de8a3c6840920ff08863e08ddd55680c65a912f47e779a62de2f4f80a8b6f",
+    "decision_runs_regraded": false
+  },
+  "production": {
+    "hook": {
+      "path": ".omp/hooks/pre/leancode.ts",
+      "sha256": "2c38dd3e105f406ab80d390a8b24ac3d9990ab7e339a60d959f07e4a85ec9b0f"
+    },
+    "modes": [
+      "lite",
+      "full",
+      "ultra",
+      "off"
+    ],
+    "skill": {
+      "matches_pre_change_source": true,
+      "path": "leancode/SKILL.md",
+      "sha256": "4eac28a7cb610f6c25f94eedd345e1cdd329eee2262587ff8ee8cff3eb490a9f"
+    }
+  },
+  "rejected": {
+    "combined_prompt_candidates_1_to_4": "Failed development, holdout, critical-regression, and cost gates.",
+    "density_variants": "No variant established repository-level non-inferiority and a preregistered efficiency benefit.",
+    "mode_collapse": "Exploratory modes were not distinct, but the exact collapsed production candidate regressed holdout from 7/9 to 6/9."
+  },
+  "verification": {
+    "bun_hook_tests": {
+      "command": "bun test tests/leancode_hook.test.ts",
+      "failed": 0,
+      "passed": 9
+    },
+    "mode_smoke": {
+      "all_checks_passed": true,
+      "checks": 8,
+      "path": "mode-smoke-production-v3.json"
+    },
+    "python_tests": {
+      "command": "python3 -m unittest discover -s tests",
+      "failed": 0,
+      "passed": 38
+    },
+    "release_evidence_audit": {
+      "complete_local_raw_artifacts": 246,
+      "routing_passed": 156,
+      "routing_total": 156
+    },
+    "shipped_behavior_has_no_observed_critical_regression": true,
+    "skill_validation": {
+      "command": "python3 scripts/validate_skills.py",
+      "result": "validation passed"
+    }
+  },
+  "rollback": "rollback.json",
+  "schema_version": 1
+}

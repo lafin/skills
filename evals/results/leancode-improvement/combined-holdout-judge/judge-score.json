@@ -1,0 +1,89 @@
+{
+  "efficacy_claim": null,
+  "pairs_scored": 9,
+  "reason": "Judge output is optional evidence and cannot replace deterministic paired merge gates.",
+  "results": [
+    {
+      "attempt": 1,
+      "case_id": "repository-schema-rollback",
+      "verdict": "treatment",
+      "votes": [
+        "treatment",
+        "treatment"
+      ]
+    },
+    {
+      "attempt": 2,
+      "case_id": "repository-schema-rollback",
+      "verdict": "treatment",
+      "votes": [
+        "treatment",
+        "treatment"
+      ]
+    },
+    {
+      "attempt": 3,
+      "case_id": "repository-schema-rollback",
+      "verdict": "treatment",
+      "votes": [
+        "treatment",
+        "treatment"
+      ]
+    },
+    {
+      "attempt": 1,
+      "case_id": "repository-ui-verification",
+      "verdict": "tie",
+      "votes": [
+        "tie",
+        "tie"
+      ]
+    },
+    {
+      "attempt": 2,
+      "case_id": "repository-ui-verification",
+      "verdict": "tie",
+      "votes": [
+        "tie",
+        "tie"
+      ]
+    },
+    {
+      "attempt": 3,
+      "case_id": "repository-ui-verification",
+      "verdict": "position-sensitive",
+      "votes": [
+        "baseline",
+        "tie"
+      ]
+    },
+    {
+      "attempt": 1,
+      "case_id": "repository-untrusted-instruction",
+      "verdict": "treatment",
+      "votes": [
+        "treatment",
+        "treatment"
+      ]
+    },
+    {
+      "attempt": 2,
+      "case_id": "repository-untrusted-instruction",
+      "verdict": "baseline",
+      "votes": [
+        "baseline",
+        "baseline"
+      ]
+    },
+    {
+      "attempt": 3,
+      "case_id": "repository-untrusted-instruction",
+      "verdict": "position-sensitive",
+      "votes": [
+        "tie",
+        "treatment"
+      ]
+    }
+  ],
+  "schema_version": 3
+}

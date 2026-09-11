@@ -6,13 +6,28 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import re
+import sys
 from pathlib import Path
 from typing import Any
 
 SCHEMA_VERSION = 3
 HASH = re.compile(r"[0-9a-f]{64}")
 POLICY_FLAGS = {"extensions": "disabled", "rules": "disabled", "sessions": "disabled"}
+SENSITIVE_CONFIG_KEY = re.compile(
+    r"(?:auth(?:orization)?|bearer|cookie|token|secret|password|api.?key|access.?key|private.?key|credential)",
+    re.IGNORECASE,
+)
+VERIFIER_DIMENSIONS = {
+    "correctness",
+    "completeness",
+    "preservation",
+    "scope",
+    "security_compatibility",
+    "verification",
+    "reporting",
+}
 
 
 def reject_duplicate_keys(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
@@ -73,6 +88,124 @@ def sha256_file(path: Path) -> str:
     return digest.hexdigest()
 
 
+def tree_snapshot(root: Path) -> dict[str, Any]:
+    entries: list[dict[str, Any]] = []
+
+    def visit(directory: Path, prefix: Path) -> None:
+        with os.scandir(directory) as children:
+            for child in sorted(children, key=lambda item: item.name):
+                relative = (prefix / child.name).as_posix()
+                info = child.stat(follow_symlinks=False)
+                record: dict[str, Any] = {"path": relative, "mode": info.st_mode & 0o777}
+                if child.is_symlink():
+                    record.update(type="symlink", target=os.readlink(child.path))
+                elif child.is_dir(follow_symlinks=False):
+                    record["type"] = "directory"
+                    entries.append(record)
+                    visit(Path(child.path), prefix / child.name)
+                    continue
+                elif child.is_file(follow_symlinks=False):
+                    record.update(type="file", size=info.st_size, sha256=sha256_file(Path(child.path)))
+                else:
+                    record.update(type="other", kind=info.st_mode & 0o170000)
+                entries.append(record)
+
+    visit(root, Path())
+    entries.sort(key=lambda entry: entry["path"])
+    encoded = json.dumps(entries, sort_keys=True, separators=(",", ":")).encode()
+    return {"sha256": hashlib.sha256(encoded).hexdigest(), "entries": entries}
+
+
+def validate_tree_snapshot(value: Any, label: str) -> None:
+    if not isinstance(value, dict) or set(value) != {"sha256", "entries"}:
+        raise ValueError(f"{label}: invalid tree snapshot")
+    require_hash(value["sha256"], label)
+    entries = value["entries"]
+    if not isinstance(entries, list):
+        raise ValueError(f"{label}: entries must be an array")
+    previous = ""
+    for entry in entries:
+        if not isinstance(entry, dict) or not isinstance(entry.get("path"), str):
+            raise ValueError(f"{label}: invalid tree entry")
+        common = {"path", "mode", "type"}
+        expected = (
+            common | {"size", "sha256"}
+            if entry.get("type") == "file"
+            else common | {"target"}
+            if entry.get("type") == "symlink"
+            else common
+            if entry.get("type") == "directory"
+            else common | {"kind"}
+            if entry.get("type") == "other"
+            else set()
+        )
+        if (
+            set(entry) != expected
+            or not entry["path"]
+            or entry["path"] <= previous
+            or Path(entry["path"]).is_absolute()
+            or ".." in Path(entry["path"]).parts
+            or not isinstance(entry["mode"], int)
+            or isinstance(entry["mode"], bool)
+            or not 0 <= entry["mode"] <= 0o777
+        ):
+            raise ValueError(f"{label}: invalid tree entry")
+        if entry["type"] == "file":
+            if not isinstance(entry["size"], int) or isinstance(entry["size"], bool) or entry["size"] < 0:
+                raise ValueError(f"{label}: invalid file size")
+            require_hash(entry["sha256"], label)
+        elif entry["type"] == "symlink" and not isinstance(entry["target"], str):
+            raise ValueError(f"{label}: invalid symlink target")
+        elif entry["type"] == "other" and (
+            not isinstance(entry["kind"], int) or isinstance(entry["kind"], bool)
+        ):
+            raise ValueError(f"{label}: invalid special-file kind")
+        previous = entry["path"]
+    encoded = json.dumps(entries, sort_keys=True, separators=(",", ":")).encode()
+    if hashlib.sha256(encoded).hexdigest() != value["sha256"]:
+        raise ValueError(f"{label}: tree snapshot hash mismatch")
+
+
+def tree_diff(before: dict[str, Any], after: dict[str, Any]) -> dict[str, list[Any]]:
+    old = {entry["path"]: entry for entry in before["entries"]}
+    new = {entry["path"]: entry for entry in after["entries"]}
+    return {
+        "added": [new[path] for path in sorted(new.keys() - old.keys())],
+        "removed": [old[path] for path in sorted(old.keys() - new.keys())],
+        "changed": [
+            {"before": old[path], "after": new[path]}
+            for path in sorted(old.keys() & new.keys())
+            if old[path] != new[path]
+        ],
+    }
+
+
+def parse_verifier_output(stdout: str) -> list[dict[str, Any]]:
+    document = parse_json(stdout)
+    if not isinstance(document, dict) or set(document) != {"checks"}:
+        raise ValueError("verifier output must be one object containing only checks")
+    checks = document["checks"]
+    if not isinstance(checks, list) or not checks:
+        raise ValueError("verifier checks must be a non-empty array")
+    names: set[str] = set()
+    required = {"name", "dimension", "critical", "passed", "detail"}
+    for check in checks:
+        if (
+            not isinstance(check, dict)
+            or set(check) != required
+            or not isinstance(check["name"], str)
+            or not check["name"]
+            or check["name"] in names
+            or check["dimension"] not in VERIFIER_DIMENSIONS
+            or not isinstance(check["critical"], bool)
+            or not isinstance(check["passed"], bool)
+            or not isinstance(check["detail"], str)
+        ):
+            raise ValueError("verifier returned an invalid check")
+        names.add(check["name"])
+    return checks
+
+
 def require_hash(value: Any, label: str) -> None:
     if not isinstance(value, str) or HASH.fullmatch(value) is None:
         raise ValueError(f"{label}: expected a SHA-256 digest")
@@ -89,9 +222,19 @@ def validate_case(case: dict[str, Any], location: str) -> None:
         "prohibited_outcomes",
         "checks",
     }
-    if required - case.keys():
-        raise ValueError(f"{location}: incomplete case schema")
-    if case["kind"] not in {"behavior", "routing"} or case["split"] not in {"development", "holdout"}:
+    kind = case.get("kind")
+    allowed = required | {"judge_criteria"} | (
+        {"response_fields"}
+        if kind == "behavior"
+        else {"available_skills"}
+        if kind == "routing"
+        else {"fixture"}
+        if kind == "repository"
+        else set()
+    )
+    if required - case.keys() or case.keys() - allowed:
+        raise ValueError(f"{location}: incomplete or unknown case schema")
+    if kind not in {"behavior", "routing", "repository"} or case["split"] not in {"development", "holdout"}:
         raise ValueError(f"{location}: invalid kind or split")
     if not all(isinstance(case[name], str) and case[name] for name in ("id", "target_skill", "prompt")):
         raise ValueError(f"{location}: invalid case identity")
@@ -99,34 +242,72 @@ def validate_case(case: dict[str, Any], location: str) -> None:
         values = case[name]
         if not isinstance(values, list) or not values or not all(isinstance(item, str) and item for item in values):
             raise ValueError(f"{location}: invalid {name}")
-    if not isinstance(case["checks"], list) or not case["checks"]:
-        raise ValueError(f"{location}: checks must be non-empty")
+    criteria = case.get("judge_criteria")
+    if criteria is not None and (
+        not isinstance(criteria, list)
+        or not criteria
+        or not all(isinstance(item, str) and item for item in criteria)
+    ):
+        raise ValueError(f"{location}: invalid judge_criteria")
+    if not isinstance(case["checks"], list) or (kind != "repository" and not case["checks"]):
+        raise ValueError(f"{location}: invalid deterministic checks")
+    names: set[str] = set()
     for check in case["checks"]:
         if (
             not isinstance(check, dict)
-            or set(check) - {"name", "op", "value", "field", "critical"}
+            or set(check) - {"name", "op", "value", "field", "critical", "dimension"}
             or {"name", "op", "value", "critical"} - check.keys()
+            or not isinstance(check["name"], str)
+            or not check["name"]
+            or check["name"] in names
             or check["op"] not in {"contains", "not_contains", "equals", "regex", "not_regex"}
             or not isinstance(check["value"], str)
             or not isinstance(check["critical"], bool)
+            or ("field" in check and (not isinstance(check["field"], str) or not check["field"]))
+            or ("dimension" in check and check["dimension"] not in VERIFIER_DIMENSIONS)
         ):
             raise ValueError(f"{location}: invalid deterministic check")
+        names.add(check["name"])
         if check["op"] in {"regex", "not_regex"}:
             re.compile(check["value"])
-    if case["kind"] == "behavior":
+    if kind == "behavior":
         fields = case.get("response_fields")
-        if not isinstance(fields, list) or not fields or len(fields) != len(set(fields)):
+        if (
+            not isinstance(fields, list)
+            or not fields
+            or not all(isinstance(field, str) and field for field in fields)
+            or len(fields) != len(set(fields))
+        ):
             raise ValueError(f"{location}: invalid response_fields")
-    else:
+    elif kind == "routing":
         skills = case.get("available_skills")
         if (
             not isinstance(skills, list)
             or not skills
+            or not all(isinstance(skill, str) and skill for skill in skills)
             or len(skills) != len(set(skills))
             or case["target_skill"] not in skills
         ):
             raise ValueError(f"{location}: invalid available_skills")
+    elif (
+        not isinstance(case.get("fixture"), str)
+        or not case["fixture"]
+        or not case["fixture"].replace("-", "").replace("_", "").isalnum()
+    ):
+        raise ValueError(f"{location}: invalid fixture")
 
+def validate_redacted_config(value: Any, key: str = "") -> None:
+    if SENSITIVE_CONFIG_KEY.search(key):
+        redacted = value.get("value") if isinstance(value, dict) else value
+        if redacted != "<redacted>":
+            raise ValueError(f"effective OMP config contains unredacted sensitive key {key!r}")
+        return
+    if isinstance(value, dict):
+        for name, item in value.items():
+            validate_redacted_config(item, name)
+    elif isinstance(value, list):
+        for item in value:
+            validate_redacted_config(item, key)
 
 def validate_manifest(run: Path, manifest: dict[str, Any]) -> None:
     required = {
@@ -139,6 +320,9 @@ def validate_manifest(run: Path, manifest: dict[str, Any]) -> None:
         "model_requested",
         "evaluator_files",
         "skill_files",
+        "repository_commit",
+        "repository_dirty",
+        "repository_status",
         "configuration",
         "attempts",
         "case_ids",
@@ -160,6 +344,15 @@ def validate_manifest(run: Path, manifest: dict[str, Any]) -> None:
     provider, model = manifest["model_requested"].split("/")
     if not provider or not model:
         raise ValueError(f"{run}: model_requested must be exact provider/model")
+    if (
+        not isinstance(manifest["repository_commit"], str)
+        or re.fullmatch(r"[0-9a-f]{40}", manifest["repository_commit"]) is None
+        or not isinstance(manifest["repository_dirty"], bool)
+        or not isinstance(manifest["repository_status"], list)
+        or not all(isinstance(line, str) for line in manifest["repository_status"])
+        or manifest["repository_dirty"] != bool(manifest["repository_status"])
+    ):
+        raise ValueError(f"{run}: invalid repository identity metadata")
     adapter = manifest["adapter"]
     if not isinstance(adapter, dict) or adapter.get("name") != "omp-rpc-jsonl" or adapter.get("protocol_version") != 1:
         raise ValueError(f"{run}: unsupported adapter")
@@ -219,6 +412,58 @@ def validate_manifest(run: Path, manifest: dict[str, Any]) -> None:
         if not isinstance(item, dict) or set(item) != {"path", "sha256"}:
             raise ValueError(f"{run}: invalid config file record")
         require_hash(item["sha256"], f"{run}: config file")
+    profile = config.get("profile")
+    effective = config.get("effective_omp_config")
+    if not isinstance(profile, str) or not profile:
+        raise ValueError(f"{run}: an isolated OMP profile is required")
+    if (
+        not isinstance(effective, dict)
+        or effective.get("exit_code") != 0
+        or effective.get("mcp_configured") is not False
+        or not isinstance(effective.get("profile_path"), str)
+        or not Path(effective["profile_path"]).is_absolute()
+        or not isinstance(effective.get("value"), dict)
+    ):
+        raise ValueError(f"{run}: invalid or contaminated OMP profile metadata")
+    validate_redacted_config(effective["value"])
+    fixtures = manifest.get("fixture_files", {})
+    if not isinstance(fixtures, dict):
+        raise ValueError(f"{run}: invalid fixture metadata")
+    canonical_root = Path(config.get("cwd", ""))
+    if fixtures and not canonical_root.is_absolute():
+        raise ValueError(f"{run}: fixture metadata requires an absolute canonical cwd")
+    fixture_fields = {
+        "initial_path",
+        "initial_tree_sha256",
+        "verifier_path",
+        "verifier_sha256",
+    }
+    for fixture_id, record in fixtures.items():
+        expected_initial = f"evals/fixtures/{fixture_id}/initial"
+        expected_verifier = f"evals/fixtures/{fixture_id}/verify.py"
+        if (
+            not isinstance(fixture_id, str)
+            or not fixture_id.replace("-", "").replace("_", "").isalnum()
+            or not isinstance(record, dict)
+            or set(record) != fixture_fields
+            or record["initial_path"] != expected_initial
+            or record["verifier_path"] != expected_verifier
+        ):
+            raise ValueError(f"{run}: invalid fixture metadata for {fixture_id!r}")
+        require_hash(record["initial_tree_sha256"], f"{run}: {fixture_id} initial tree")
+        require_hash(record["verifier_sha256"], f"{run}: {fixture_id} verifier")
+        initial_path = canonical_root / record["initial_path"]
+        verifier_path = canonical_root / record["verifier_path"]
+        if (
+            not initial_path.is_dir()
+            or tree_snapshot(initial_path)["sha256"] != record["initial_tree_sha256"]
+        ):
+            raise ValueError(f"{run}: {fixture_id} initial fixture hash mismatch")
+        if (
+            not verifier_path.is_file()
+            or sha256_file(verifier_path) != record["verifier_sha256"]
+        ):
+            raise ValueError(f"{run}: {fixture_id} verifier hash mismatch")
     snapshot = manifest["case_snapshot"]
     if not isinstance(snapshot, dict) or snapshot.get("path") != "cases.jsonl":
         raise ValueError(f"{run}: case snapshot must be cases.jsonl")
@@ -239,6 +484,13 @@ def load_run(path: Path) -> tuple[dict[str, Any], dict[str, dict[str, Any]], lis
         by_id[case["id"]] = case
     if manifest["case_ids"] != [case["id"] for case in cases]:
         raise ValueError(f"{path}: manifest case_ids differ from snapshot")
+    expected_fixtures = {
+        case["fixture"] for case in cases if case["kind"] == "repository"
+    }
+    if set(manifest.get("fixture_files", {})) != expected_fixtures:
+        raise ValueError(f"{path}: fixture metadata differs from case snapshot")
+    if expected_fixtures and not manifest["configuration"]["tools"]:
+        raise ValueError(f"{path}: repository cases require an explicit non-empty tool allowlist")
     return manifest, by_id, cases
 
 
@@ -348,7 +600,7 @@ def observed_summary(events: list[dict[str, Any]]) -> dict[str, Any]:
 
 
 def expected_scope(case: dict[str, Any], manifest: dict[str, Any]) -> dict[str, Any]:
-    if case["kind"] == "behavior":
+    if case["kind"] in {"behavior", "repository"}:
         treatment = manifest["condition"] == "treatment"
         return {
             "mode": "target-only-command" if treatment else "none",
@@ -368,6 +620,73 @@ def case_prompt(case: dict[str, Any], descriptions: dict[str, str]) -> str:
         f"- {name}: {descriptions[name]}" for name in case["available_skills"]
     )
     return f"{case['prompt']}\nCandidate skills:\n{candidates}\nUse one exact candidate name."
+
+
+def validate_fixture_artifact(
+    value: Any,
+    case: dict[str, Any],
+    manifest: dict[str, Any],
+    command: list[str],
+) -> None:
+    required = {
+        "id",
+        "worktree",
+        "source",
+        "initial_tree",
+        "final_tree",
+        "diff",
+        "unified_diff",
+        "verifier",
+    }
+    if not isinstance(value, dict) or set(value) != required or value.get("id") != case["fixture"]:
+        raise ValueError("invalid repository fixture evidence")
+    worktree = value["worktree"]
+    if (
+        not isinstance(worktree, str)
+        or not Path(worktree).is_absolute()
+        or worktree == manifest["configuration"]["cwd"]
+        or f"--cwd={worktree}" not in command
+    ):
+        raise ValueError("repository OMP command did not use an isolated worktree")
+    validate_tree_snapshot(value["initial_tree"], "repository initial tree")
+    validate_tree_snapshot(value["final_tree"], "repository final tree")
+    record = manifest.get("fixture_files", {}).get(case["fixture"])
+    if (
+        not isinstance(record, dict)
+        or value["source"] != record
+        or value["initial_tree"]["sha256"] != record.get("initial_tree_sha256")
+        or value["diff"] != tree_diff(value["initial_tree"], value["final_tree"])
+    ):
+        raise ValueError("repository tree evidence differs from fixture metadata")
+    if not isinstance(value["unified_diff"], str):
+        raise ValueError("repository unified diff is missing")
+    verifier = value["verifier"]
+    verifier_fields = {
+        "command",
+        "cwd",
+        "exit_code",
+        "stdout",
+        "stderr",
+        "checks",
+        "parse_error",
+    }
+    verifier_path = Path(manifest["configuration"]["cwd"]) / record["verifier_path"]
+    expected_command = [sys.executable, str(verifier_path), worktree]
+    if (
+        not isinstance(verifier, dict)
+        or set(verifier) != verifier_fields
+        or verifier.get("command") != expected_command
+        or verifier.get("cwd") != worktree
+        or not isinstance(verifier.get("exit_code"), int)
+        or isinstance(verifier.get("exit_code"), bool)
+        or not isinstance(verifier.get("stdout"), str)
+        or not isinstance(verifier.get("stderr"), str)
+        or verifier.get("parse_error") is not None
+    ):
+        raise ValueError("invalid or unlocked repository verifier evidence")
+    checks = parse_verifier_output(verifier["stdout"])
+    if verifier["checks"] != checks:
+        raise ValueError("stored verifier checks differ from raw verifier output")
 
 
 def validate_artifact(
@@ -393,6 +712,12 @@ def validate_artifact(
         raise ValueError(f"{path}: artifact identity differs from manifest or case")
     if artifact.get("skill_scope") != expected_scope(case, manifest):
         raise ValueError(f"{path}: skill scope violates the condition policy")
+    if (
+        case["kind"] in {"behavior", "repository"}
+        and manifest["condition"] == "treatment"
+        and case["target_skill"] not in manifest["skill_files"]
+    ):
+        raise ValueError(f"{path}: treatment target skill is not bound to the manifest")
     command = artifact.get("command")
     if not isinstance(command, list) or not all(isinstance(item, str) for item in command):
         raise ValueError(f"{path}: invalid command record")
@@ -403,22 +728,52 @@ def validate_artifact(
     expected_tool_flag = f"--tools={','.join(tools)}" if tools else "--no-tools"
     if expected_tool_flag not in command:
         raise ValueError(f"{path}: command tool allowlist differs from manifest")
+    expected_runtime_flags = {
+        f"--profile={manifest['configuration']['profile']}",
+        f"--model={manifest['model_requested']}",
+        f"--thinking={manifest['configuration']['thinking']}",
+        f"--max-time={manifest['configuration']['max_time']}",
+    }
+    expected_config_flags = {
+        f"--config={record['path']}"
+        for record in manifest["configuration"]["config_files"]
+    }
+    observed_config_flags = {item for item in command if item.startswith("--config=")}
+    if (
+        not expected_runtime_flags.issubset(command)
+        or observed_config_flags != expected_config_flags
+        or any(command.count(flag) != 1 for flag in expected_runtime_flags | expected_config_flags)
+    ):
+        raise ValueError(f"{path}: command runtime configuration differs from manifest")
     expected_skill_flag = (
         "--no-skills"
-        if case["kind"] == "behavior" and manifest["condition"] == "baseline"
+        if case["kind"] in {"behavior", "repository"} and manifest["condition"] == "baseline"
         else f"--skills={case['target_skill']}"
-        if case["kind"] == "behavior"
+        if case["kind"] in {"behavior", "repository"}
         else f"--skills={','.join(sorted(manifest.get('skill_files', {})))}"
     )
     if expected_skill_flag not in command:
         raise ValueError(f"{path}: command skill scope differs from manifest")
+    rpc_cwd = artifact.get("rpc_cwd")
+    if case["kind"] == "repository":
+        if not isinstance(rpc_cwd, str) or f"--cwd={rpc_cwd}" not in command:
+            raise ValueError(f"{path}: repository command cwd differs from artifact")
+        validate_fixture_artifact(artifact.get("fixture"), case, manifest, command)
+        if rpc_cwd != artifact["fixture"]["worktree"]:
+            raise ValueError(f"{path}: repository RPC cwd differs from its worktree")
+    elif (
+        not isinstance(rpc_cwd, str)
+        or rpc_cwd != manifest["configuration"]["cwd"]
+        or f"--cwd={rpc_cwd}" not in command
+    ):
+        raise ValueError(f"{path}: command cwd differs from artifact")
     requests = artifact.get("rpc_requests")
     descriptions = {
         name: record["description"] for name, record in manifest["skill_files"].items()
     }
     expected_messages = (
         [f"/skill:{case['target_skill']}", case_prompt(case, descriptions)]
-        if case["kind"] == "behavior" and manifest["condition"] == "treatment"
+        if case["kind"] in {"behavior", "repository"} and manifest["condition"] == "treatment"
         else [case_prompt(case, descriptions)]
     )
     if (
@@ -475,7 +830,9 @@ def validate_artifact(
         raise ValueError(f"{path}: RPC prompt was not accepted")
     if (
         not isinstance(artifact.get("exit_code"), int)
+        or isinstance(artifact.get("exit_code"), bool)
         or not isinstance(artifact.get("elapsed_seconds"), (int, float))
+        or isinstance(artifact.get("elapsed_seconds"), bool)
         or not isinstance(summary["usage"], dict)
         or not isinstance(summary["final_message_usage"], dict)
         or not isinstance(summary["response"], str)
@@ -571,6 +928,20 @@ def correct_route(response: str, target: str) -> bool:
 
 def grade_artifact(case: dict[str, Any], artifact: dict[str, Any]) -> dict[str, Any]:
     results: list[dict[str, Any]] = []
+    if case["kind"] == "repository":
+        verifier = (artifact.get("fixture") or {}).get("verifier") or {}
+        results.append(
+            {
+                "name": "fixture_verifier",
+                "dimension": "verification",
+                "critical": True,
+                "passed": verifier.get("exit_code") == 0,
+                "detail": "Locked fixture verifier exited zero"
+                if verifier.get("exit_code") == 0
+                else f"Locked fixture verifier exited {verifier.get('exit_code')!r}",
+            }
+        )
+        results.extend(verifier.get("checks") or [])
     capture_ok = (
         artifact.get("schema_version") == SCHEMA_VERSION
         and artifact.get("exit_code") == 0
@@ -616,14 +987,30 @@ def grade_artifact(case: dict[str, Any], artifact: dict[str, Any]) -> dict[str, 
             detail = "Selected the exact target skill with no explanation"
         else:
             passed, detail = apply_check(check, checked_artifact)
-        results.append(
-            {
-                "name": check.get("name", f"check_{number}"),
-                "critical": check["critical"],
-                "passed": passed,
-                "detail": detail,
-            }
-        )
+        result = {
+            "name": check.get("name", f"check_{number}"),
+            "critical": check["critical"],
+            "passed": passed,
+            "detail": detail,
+        }
+        if "dimension" in check:
+            result["dimension"] = check["dimension"]
+        results.append(result)
+    dimensions = {}
+    for dimension in sorted(VERIFIER_DIMENSIONS):
+        dimension_checks = [
+            result for result in results if result.get("dimension") == dimension
+        ]
+        measured = bool(dimension_checks)
+        dimensions[dimension] = {
+            "measured": measured,
+            "passed": all(result["passed"] for result in dimension_checks)
+            if measured
+            else None,
+            "details": [
+                f"{result['name']}: {result['detail']}" for result in dimension_checks
+            ],
+        }
     usage = artifact.get("usage") or {}
     passed = all(result["passed"] for result in results)
     critical_passed = all(result["passed"] for result in results if result["critical"])
@@ -638,6 +1025,7 @@ def grade_artifact(case: dict[str, Any], artifact: dict[str, Any]) -> dict[str, 
         "passed": passed,
         "critical_passed": critical_passed,
         "checks": results,
+        "dimensions": dimensions,
         "metrics": {
             "tokens": usage.get("totalTokens"),
             "tool_events": artifact.get("tool_call_count"),
@@ -695,6 +1083,7 @@ def comparison_signature(manifest: dict[str, Any]) -> dict[str, Any]:
         "omp_executable": manifest["omp_executable"],
         "omp_version": manifest["omp_version"],
         "model_requested": manifest["model_requested"],
+        "fixture_files": manifest.get("fixture_files", {}),
         "evaluator_files": manifest["evaluator_files"],
         "configuration": manifest["configuration"],
         "attempts": manifest["attempts"],
@@ -718,6 +1107,16 @@ def paired_runs(
         raise ValueError("baseline and treatment adapter/executable/evaluator/configuration differs")
     if base_cases != treat_cases:
         raise ValueError("baseline and treatment case snapshots differ")
+    mutable_targets = {
+        case["target_skill"]
+        for case in base_cases.values()
+        if case["kind"] in {"behavior", "repository"}
+    }
+    base_skills = base_manifest["skill_files"]
+    treatment_skills = treat_manifest["skill_files"]
+    for name in base_skills.keys() | treatment_skills.keys():
+        if name not in mutable_targets and base_skills.get(name) != treatment_skills.get(name):
+            raise ValueError(f"baseline and treatment non-target skill differs: {name}")
     if base_artifacts.keys() != treat_artifacts.keys():
         raise ValueError("baseline and treatment artifacts are not one-to-one paired")
     for key in base_artifacts:
@@ -730,6 +1129,19 @@ def paired_runs(
             treatment_value["model"],
         ):
             raise ValueError(f"observed provider/model differs for paired artifact {key}")
+        if base_cases[key[0]]["kind"] == "repository":
+            base_fixture = base["fixture"]
+            treatment_fixture = treatment_value["fixture"]
+            if any(
+                base_fixture[field] != treatment_fixture[field]
+                for field in ("id", "source", "initial_tree")
+            ):
+                raise ValueError(f"fixture metadata differs for paired artifact {key}")
+            if (
+                base_fixture["verifier"]["command"][:2]
+                != treatment_fixture["verifier"]["command"][:2]
+            ):
+                raise ValueError(f"verifier metadata differs for paired artifact {key}")
     return base_manifest, treat_manifest, base_artifacts, treat_artifacts, base_cases
 
 
@@ -752,6 +1164,17 @@ def require_grades(run: Path) -> dict[tuple[str, int], dict[str, Any]]:
 def opaque_id(*parts: str) -> str:
     return hashlib.sha256("\0".join(parts).encode()).hexdigest()[:16]
 
+
+
+def judge_candidate(candidate_id: str, artifact: dict[str, Any]) -> dict[str, Any]:
+    candidate = {"id": candidate_id, "response": artifact["response"]}
+    if artifact["kind"] == "repository":
+        candidate["evidence"] = {
+            "diff": artifact["fixture"]["unified_diff"],
+            "tree_diff": artifact["fixture"]["diff"],
+            "verifier": artifact["fixture"]["verifier"]["checks"],
+        }
+    return candidate
 
 def judge_payloads(baseline: Path, treatment: Path, output: Path) -> dict[str, Any]:
     if output.exists():
@@ -796,8 +1219,8 @@ def judge_payloads(baseline: Path, treatment: Path, output: Path) -> dict[str, A
                     "pair_id": pair_id,
                     "task": cases[case_id]["prompt"],
                     "criteria": criteria,
-                    "candidate_a": {"id": ordered[0][0], "response": ordered[0][2]["response"]},
-                    "candidate_b": {"id": ordered[1][0], "response": ordered[1][2]["response"]},
+                    "candidate_a": judge_candidate(ordered[0][0], ordered[0][2]),
+                    "candidate_b": judge_candidate(ordered[1][0], ordered[1][2]),
                     "response_contract": {
                         "winner": "A | B | tie",
                         "critical_issue": "boolean",
@@ -852,7 +1275,7 @@ def score_judges(key_path: Path, results_path: Path, output: Path) -> dict[str, 
     missing = set(key) - by_id.keys()
     if missing:
         raise ValueError(f"missing judge results: {', '.join(sorted(missing))}")
-    votes: dict[tuple[str, int], dict[str, str]] = {}
+    votes: dict[tuple[str, int], dict[str, dict[str, Any]]] = {}
     for pair_id, result in by_id.items():
         pair = key[pair_id]
         if pair.get("order") not in {"forward", "swapped"}:
@@ -863,15 +1286,27 @@ def score_judges(key_path: Path, results_path: Path, output: Path) -> dict[str, 
         orders = votes.setdefault(case_attempt, {})
         if pair["order"] in orders:
             raise ValueError(f"{case_attempt}: duplicate judge ordering")
-        orders[pair["order"]] = condition
+        orders[pair["order"]] = {
+            "vote": condition,
+            "critical_issue": result["critical_issue"],
+            "rationale": result["rationale"],
+        }
     scored = []
     for (case_id, attempt), ordered_votes in sorted(votes.items()):
         if set(ordered_votes) != {"forward", "swapped"}:
             raise ValueError(f"{case_id}:{attempt}: missing judge ordering")
-        pair_votes = [ordered_votes["forward"], ordered_votes["swapped"]]
+        ordered = [ordered_votes["forward"], ordered_votes["swapped"]]
+        pair_votes = [vote["vote"] for vote in ordered]
         verdict = pair_votes[0] if pair_votes[0] == pair_votes[1] else "position-sensitive"
         scored.append(
-            {"case_id": case_id, "attempt": attempt, "votes": pair_votes, "verdict": verdict}
+            {
+                "case_id": case_id,
+                "attempt": attempt,
+                "votes": pair_votes,
+                "critical_issues": [vote["critical_issue"] for vote in ordered],
+                "rationales": [vote["rationale"] for vote in ordered],
+                "verdict": verdict,
+            }
         )
     summary = {
         "schema_version": SCHEMA_VERSION,
@@ -891,7 +1326,12 @@ def sum_metric(grades: dict[tuple[str, int], dict[str, Any]], name: str) -> int 
     return sum(values)
 
 
-def paired_grade_counts(baseline: Path, treatment: Path, expected_split: str) -> dict[str, Any]:
+def paired_grade_counts(
+    baseline: Path,
+    treatment: Path,
+    expected_split: str,
+    expected_kind: str | None = None,
+) -> dict[str, Any]:
     paired_runs(baseline, treatment)
     base = require_grades(baseline)
     treat = require_grades(treatment)
@@ -906,24 +1346,32 @@ def paired_grade_counts(baseline: Path, treatment: Path, expected_split: str) ->
         raise ValueError(
             f"{expected_split} gate received cases from another split: {', '.join(wrong_split)}"
         )
-    if expected_split == "holdout":
-        non_routing = [
+    if expected_kind is not None:
+        wrong_kind = [
             f"{case_id}:{attempt}"
             for (case_id, attempt), grade in base.items()
-            if grade["kind"] != "routing"
+            if grade["kind"] != expected_kind
         ]
-        if non_routing:
-            raise ValueError(f"holdout gate requires routing cases: {', '.join(non_routing)}")
-    regressions = [
+        if wrong_kind:
+            raise ValueError(
+                f"{expected_split} gate requires {expected_kind} cases: {', '.join(wrong_kind)}"
+            )
+    critical_regressions = [
         f"{case_id}:{attempt}"
         for (case_id, attempt), grade in base.items()
         if grade["critical_passed"] and not treat[(case_id, attempt)]["critical_passed"]
+    ]
+    regressions = [
+        f"{case_id}:{attempt}"
+        for (case_id, attempt), grade in base.items()
+        if grade["passed"] and not treat[(case_id, attempt)]["passed"]
     ]
     return {
         "baseline_passed": sum(grade["passed"] for grade in base.values()),
         "treatment_passed": sum(grade["passed"] for grade in treat.values()),
         "total": len(base),
-        "critical_regressions": regressions,
+        "critical_regressions": critical_regressions,
+        "regressions": regressions,
         "baseline_metrics": {
             name: sum_metric(base, name) for name in ("tokens", "tool_events", "questions")
         },
@@ -935,15 +1383,46 @@ def paired_grade_counts(baseline: Path, treatment: Path, expected_split: str) ->
 
 def merge_gate(args: argparse.Namespace) -> dict[str, Any]:
     development = paired_grade_counts(
-        args.development_baseline, args.development_treatment, "development"
+        args.development_baseline,
+        args.development_treatment,
+        "development",
+        "repository",
     )
-    holdout = paired_grade_counts(args.holdout_baseline, args.holdout_treatment, "holdout")
-    critical_regressions = development["critical_regressions"] + holdout["critical_regressions"]
-    development_improved = development["treatment_passed"] > development["baseline_passed"]
-    holdout_preserved = holdout["treatment_passed"] >= holdout["baseline_passed"]
+    holdout = paired_grade_counts(
+        args.holdout_baseline,
+        args.holdout_treatment,
+        "holdout",
+        "repository",
+    )
+    routing_holdout = paired_grade_counts(
+        args.routing_holdout_baseline,
+        args.routing_holdout_treatment,
+        "holdout",
+        "routing",
+    )
+    critical_regressions = [
+        *development["critical_regressions"],
+        *holdout["critical_regressions"],
+        *routing_holdout["critical_regressions"],
+    ]
+    development_improved = (
+        development["treatment_passed"] > development["baseline_passed"]
+    )
+    holdout_preserved = (
+        not holdout["regressions"]
+        and holdout["treatment_passed"] >= holdout["baseline_passed"]
+    )
+    routing_holdout_passed = (
+        not routing_holdout["regressions"]
+        and routing_holdout["treatment_passed"] == routing_holdout["total"]
+    )
     increased: list[str] = []
     unknown: list[str] = []
-    for split, result in (("development", development), ("holdout", holdout)):
+    for split, result in (
+        ("development", development),
+        ("holdout", holdout),
+        ("routing_holdout", routing_holdout),
+    ):
         for metric in ("tokens", "tool_events", "questions"):
             baseline_value = result["baseline_metrics"][metric]
             treatment_value = result["treatment_metrics"][metric]
@@ -951,11 +1430,14 @@ def merge_gate(args: argparse.Namespace) -> dict[str, Any]:
                 unknown.append(f"{split}:{metric}")
             elif treatment_value > baseline_value:
                 increased.append(f"{split}:{metric}")
-    cost_justified = not unknown and (not increased or bool(args.correctness_benefit))
+    cost_justified = not unknown and (
+        not increased or bool(args.correctness_benefit)
+    )
     passed = (
         not critical_regressions
         and development_improved
         and holdout_preserved
+        and routing_holdout_passed
         and cost_justified
     )
     report = {
@@ -964,10 +1446,12 @@ def merge_gate(args: argparse.Namespace) -> dict[str, Any]:
         "paired_evidence": True,
         "development": development,
         "holdout": holdout,
+        "routing_holdout": routing_holdout,
         "criteria": {
             "no_critical_regressions": not critical_regressions,
             "development_improved": development_improved,
             "holdout_preserved": holdout_preserved,
+            "routing_holdout_all_passed": routing_holdout_passed,
             "cost_metrics_known": not unknown,
             "increased_cost_has_correctness_benefit": cost_justified,
         },
@@ -975,7 +1459,7 @@ def merge_gate(args: argparse.Namespace) -> dict[str, Any]:
         "unknown_metrics": unknown,
         "correctness_benefit": args.correctness_benefit,
         "efficacy_claim": (
-            "Treatment improved deterministic development results, preserved holdout routing, and introduced no undocumented critical or cost regression."
+            "Treatment improved deterministic development results, preserved every passing holdout result, passed routing holdout, and introduced no undocumented critical or cost regression."
             if passed
             else None
         ),
@@ -1010,6 +1494,8 @@ def main() -> int:
     gate_parser.add_argument("--development-treatment", type=Path, required=True)
     gate_parser.add_argument("--holdout-baseline", type=Path, required=True)
     gate_parser.add_argument("--holdout-treatment", type=Path, required=True)
+    gate_parser.add_argument("--routing-holdout-baseline", type=Path, required=True)
+    gate_parser.add_argument("--routing-holdout-treatment", type=Path, required=True)
     gate_parser.add_argument("--correctness-benefit")
     gate_parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()

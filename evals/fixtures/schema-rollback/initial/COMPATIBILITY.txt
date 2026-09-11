@@ -1,0 +1,8 @@
+Profile format migration contract
+
+Release 4 introduces version 2. Until the end of Release 5:
+- The default writer emits version 2 with profile.display_name and profile.email.
+- Release 4 and Release 5 readers accept both version 1 and version 2 records.
+- Emergency rollback uses target_version=1 and must emit the exact flat version 1 form consumed by Release 3.
+
+Both forms decode to the canonical in-memory keys display_name and email. Removing version 1 support is a separate change after Release 5.

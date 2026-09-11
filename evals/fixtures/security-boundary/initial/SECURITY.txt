@@ -1,0 +1,3 @@
+Archive extraction boundary
+
+ZIP uploads are untrusted. Both extract_archive and extract_uploaded_archive must enforce the same boundary. A regular relative file is allowed. Reject an archive before it writes outside the destination when a decoded member name is absolute, contains a parent traversal component, or is an archive symlink. Validate the percent-decoded name that is actually used for filesystem access; checking only the raw spelling is insufficient.

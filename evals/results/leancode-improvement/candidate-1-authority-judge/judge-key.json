@@ -1,0 +1,299 @@
+{
+  "pairs": {
+    "02130bb7aaa00ed3": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 2,
+      "case_id": "repository-report-only",
+      "order": "forward"
+    },
+    "0bcdf26793062a75": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 2,
+      "case_id": "repository-cache-correctness",
+      "order": "forward"
+    },
+    "11f11d0b8b32d26f": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 1,
+      "case_id": "repository-report-only",
+      "order": "swapped"
+    },
+    "14e0886631b66d00": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 2,
+      "case_id": "repository-harness-reuse",
+      "order": "swapped"
+    },
+    "14ecce4660146f5e": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 3,
+      "case_id": "repository-security-boundary",
+      "order": "swapped"
+    },
+    "17e3c4533612870c": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 2,
+      "case_id": "repository-surgical-local-bug",
+      "order": "swapped"
+    },
+    "194104f5b3e6cfa6": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 3,
+      "case_id": "repository-security-boundary",
+      "order": "forward"
+    },
+    "1d62862e6f96cbb5": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 2,
+      "case_id": "repository-allocation-performance",
+      "order": "forward"
+    },
+    "2296144b8544e34a": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "repository-allocation-performance",
+      "order": "forward"
+    },
+    "3352fa4ea6c4617a": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 2,
+      "case_id": "repository-allocation-performance",
+      "order": "swapped"
+    },
+    "33fc3632fc883833": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "repository-security-boundary",
+      "order": "forward"
+    },
+    "3a1b4aa203f168fc": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 2,
+      "case_id": "repository-surgical-local-bug",
+      "order": "forward"
+    },
+    "3bfaa851f236275d": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 1,
+      "case_id": "repository-cache-correctness",
+      "order": "swapped"
+    },
+    "405207e51f39cba6": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 3,
+      "case_id": "repository-multi-file-migration",
+      "order": "forward"
+    },
+    "4fbe966e97b93693": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 3,
+      "case_id": "repository-allocation-performance",
+      "order": "forward"
+    },
+    "510cd104cf95382f": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 2,
+      "case_id": "repository-harness-reuse",
+      "order": "forward"
+    },
+    "51ce796ce3e51faf": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 1,
+      "case_id": "repository-surgical-local-bug",
+      "order": "swapped"
+    },
+    "563d368ee39402a4": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 1,
+      "case_id": "repository-multi-file-migration",
+      "order": "swapped"
+    },
+    "578b258a5f005c2b": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 3,
+      "case_id": "repository-surgical-local-bug",
+      "order": "forward"
+    },
+    "6c4fbc70d24dd0a0": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 2,
+      "case_id": "repository-security-boundary",
+      "order": "forward"
+    },
+    "870b1071a7f40494": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 3,
+      "case_id": "repository-allocation-performance",
+      "order": "swapped"
+    },
+    "89169768f064deb5": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "repository-surgical-local-bug",
+      "order": "forward"
+    },
+    "9331ba6b4ab63324": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 1,
+      "case_id": "repository-allocation-performance",
+      "order": "swapped"
+    },
+    "947da51753ff1693": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "repository-report-only",
+      "order": "forward"
+    },
+    "9ccb95ee90333861": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 3,
+      "case_id": "repository-multi-file-migration",
+      "order": "swapped"
+    },
+    "9df61a94c14513e6": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 3,
+      "case_id": "repository-report-only",
+      "order": "swapped"
+    },
+    "a43ad4570589066a": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 2,
+      "case_id": "repository-multi-file-migration",
+      "order": "forward"
+    },
+    "a6354460b43149b9": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 2,
+      "case_id": "repository-cache-correctness",
+      "order": "swapped"
+    },
+    "c5908a466bc6063a": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 2,
+      "case_id": "repository-security-boundary",
+      "order": "swapped"
+    },
+    "c9d140c0d79b06ac": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 2,
+      "case_id": "repository-multi-file-migration",
+      "order": "swapped"
+    },
+    "d2287dc283983e52": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 3,
+      "case_id": "repository-cache-correctness",
+      "order": "forward"
+    },
+    "d522ebe920085fa7": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 3,
+      "case_id": "repository-harness-reuse",
+      "order": "forward"
+    },
+    "d61ddac82215e245": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 3,
+      "case_id": "repository-report-only",
+      "order": "forward"
+    },
+    "dd768487a1b62ecc": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 1,
+      "case_id": "repository-security-boundary",
+      "order": "swapped"
+    },
+    "debd8929dc7119bf": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 3,
+      "case_id": "repository-harness-reuse",
+      "order": "swapped"
+    },
+    "e47317929cb9a5c4": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 1,
+      "case_id": "repository-harness-reuse",
+      "order": "swapped"
+    },
+    "e768c23ead16dfe5": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 3,
+      "case_id": "repository-surgical-local-bug",
+      "order": "swapped"
+    },
+    "ed5f292b2c2c060a": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "repository-harness-reuse",
+      "order": "forward"
+    },
+    "ed7ca9787ab67bc4": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 2,
+      "case_id": "repository-report-only",
+      "order": "swapped"
+    },
+    "f0d1f8cfac13eeab": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "repository-cache-correctness",
+      "order": "forward"
+    },
+    "f457345d7d8ab7da": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 3,
+      "case_id": "repository-cache-correctness",
+      "order": "swapped"
+    },
+    "ffc3a747cc77aff7": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "repository-multi-file-migration",
+      "order": "forward"
+    }
+  },
+  "schema_version": 3
+}

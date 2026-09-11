@@ -140,6 +140,17 @@ class ValidateSkillsTest(unittest.TestCase):
         self.assertIn("[reference-heading]", result.stdout)
         self.assertIn("Add that heading", result.stdout)
 
+    def test_accepts_import_from_nested_fixture_root(self) -> None:
+        fixture = self.root / "evals" / "fixture"
+        tests = fixture / "tests"
+        tests.mkdir(parents=True)
+        (fixture / "helper.py").write_text("VALUE = 1\n", encoding="utf-8")
+        (tests / "test_helper.py").write_text("import helper\n", encoding="utf-8")
+
+        result = self.run_validator()
+
+        self.assertEqual(0, result.returncode, result.stdout)
+
     def test_missing_root_exits_two(self) -> None:
         result = self.run_validator(self.root / "absent")
         self.assertEqual(2, result.returncode)

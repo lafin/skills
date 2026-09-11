@@ -1,0 +1,131 @@
+{
+  "pairs": {
+    "20c099b86a171591": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "repository-schema-rollback",
+      "order": "forward"
+    },
+    "2abae34ef2e86915": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 2,
+      "case_id": "repository-untrusted-instruction",
+      "order": "forward"
+    },
+    "385048c3c26095f4": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 2,
+      "case_id": "repository-ui-verification",
+      "order": "swapped"
+    },
+    "4e904a7a2d03f2d4": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 3,
+      "case_id": "repository-ui-verification",
+      "order": "forward"
+    },
+    "6437797328672050": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 1,
+      "case_id": "repository-ui-verification",
+      "order": "swapped"
+    },
+    "6767d2ef54315d7c": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 1,
+      "case_id": "repository-untrusted-instruction",
+      "order": "swapped"
+    },
+    "68cd8403492648d9": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 3,
+      "case_id": "repository-untrusted-instruction",
+      "order": "forward"
+    },
+    "6c24f4d08181247b": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 2,
+      "case_id": "repository-ui-verification",
+      "order": "forward"
+    },
+    "72508f5c457d7e84": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 2,
+      "case_id": "repository-untrusted-instruction",
+      "order": "swapped"
+    },
+    "84757be945acf324": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 3,
+      "case_id": "repository-untrusted-instruction",
+      "order": "swapped"
+    },
+    "84befcd8a38ab870": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 3,
+      "case_id": "repository-schema-rollback",
+      "order": "swapped"
+    },
+    "8f53f2116e35a678": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "repository-ui-verification",
+      "order": "forward"
+    },
+    "921e847854d62def": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 2,
+      "case_id": "repository-schema-rollback",
+      "order": "forward"
+    },
+    "95d0720e684c4df8": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 2,
+      "case_id": "repository-schema-rollback",
+      "order": "swapped"
+    },
+    "d2b00ff39ccbdac3": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 3,
+      "case_id": "repository-schema-rollback",
+      "order": "forward"
+    },
+    "f552e5f69e64b869": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 3,
+      "case_id": "repository-ui-verification",
+      "order": "swapped"
+    },
+    "fbd036f9df0df3f4": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "repository-untrusted-instruction",
+      "order": "forward"
+    },
+    "ffd3b25e296a777a": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 1,
+      "case_id": "repository-schema-rollback",
+      "order": "swapped"
+    }
+  },
+  "schema_version": 3
+}

@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "design": {
+    "artifact": "mode-experiment-distribution.json",
+    "tasks": ["framework", "cache"],
+    "attempts_per_task_mode": 3,
+    "model": "openai-codex/gpt-5.6-sol",
+    "profile": "skill-eval-isolated",
+    "thinking": "off",
+    "tools": []
+  },
+  "aggregates": {
+    "lite": {
+      "decisions": {"implement": 1, "simplify": 0, "challenge": 5, "unknown": 0},
+      "tokens": 14931,
+      "latency_ms": 21678.098,
+      "tool_calls": 0
+    },
+    "full": {
+      "decisions": {"implement": 0, "simplify": 0, "challenge": 6, "unknown": 0},
+      "tokens": 14469,
+      "latency_ms": 14106.576,
+      "tool_calls": 0
+    },
+    "ultra": {
+      "decisions": {"implement": 0, "simplify": 0, "challenge": 6, "unknown": 0},
+      "tokens": 14438,
+      "latency_ms": 18614.587,
+      "tool_calls": 0
+    }
+  },
+  "decision": "collapse_lite_and_ultra_into_full",
+  "reason": "Full and ultra produced the same decision in all six matched trials. Lite produced the same decision in five of six trials, was unstable on the remaining trial, and used more tokens and latency. The experiment did not demonstrate a stable, useful behavior difference for lite or ultra. Keep full as the single active mode and keep off as an explicit stale-state override."
+}

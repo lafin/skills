@@ -305,9 +305,11 @@ def declared_imports(root: Path) -> set[str]:
 
 
 def is_local_import(path: Path, module: str, root: Path) -> bool:
-    for directory in (path.parent, root):
+    for directory in path.parents:
         if (directory / f"{module}.py").is_file() or (directory / module / "__init__.py").is_file():
             return True
+        if directory == root:
+            break
     return False
 
 

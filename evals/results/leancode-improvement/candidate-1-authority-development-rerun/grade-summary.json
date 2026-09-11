@@ -1,0 +1,40 @@
+{
+  "all_passed": true,
+  "artifacts": 21,
+  "condition": "treatment",
+  "critical_passed": 21,
+  "deterministic_grades": "grades.jsonl",
+  "efficacy_claim": null,
+  "input_binding": {
+    "artifacts": {
+      "artifacts/repository-allocation-performance/1.json": "1fcd10e5637f76b15b5db7c04b2b0a67b471f9d658c27ff2b8f87607291a133d",
+      "artifacts/repository-allocation-performance/2.json": "4411c54467e3974e9da99c7b8632d17a970747b68d08804559f696fa9e365e50",
+      "artifacts/repository-allocation-performance/3.json": "6160c2e0956969ba55cb44a41ff87fc185002190c52becfafb3837bf0dc462eb",
+      "artifacts/repository-cache-correctness/1.json": "9052b146dfd7abd8d905641d0a3b749e8c2b4cbe91f4c262e6c51f2d58c8aab0",
+      "artifacts/repository-cache-correctness/2.json": "0d0434fce08173b9850e1a0d633d42aefa8a29e4956050aea3f84cd7de531f6b",
+      "artifacts/repository-cache-correctness/3.json": "20f613d7704407cc646b7217a95ee10b5d8cf419868a7654148e1e31a325f9f2",
+      "artifacts/repository-harness-reuse/1.json": "1ae3097587209f06b1f7fde0c3034eccb43a4cb9c0773dc143d0f6b6d527c8dc",
+      "artifacts/repository-harness-reuse/2.json": "3bf90057f1318b9910defc3820b61ae7ffa4699f493f0f9cbc8a614ff6734d25",
+      "artifacts/repository-harness-reuse/3.json": "789a5e3c69fb0c1829448c625b029675f65f39529e39d79bd7c3511b56d6ddf9",
+      "artifacts/repository-multi-file-migration/1.json": "1e755dc5789803f6cc48f2a282d9e397498caa82e4a259f6e0bca7db3f3c43e7",
+      "artifacts/repository-multi-file-migration/2.json": "09e2fefa9d52f84fb7e38e7e00f0f4994db7a37a4518b4a9f4ebc1e0c7ffc4d1",
+      "artifacts/repository-multi-file-migration/3.json": "49c4ef438e258d0d3e08355e45e509cb2f206bca17a0fc9c766e6c87049a8b57",
+      "artifacts/repository-report-only/1.json": "47f33ff3310ad93011203c95545c2b720256b1a26f7181475f4af16dadacae28",
+      "artifacts/repository-report-only/2.json": "75bf289f2e9dac862d3d3597bb71feb0eef4051216ccfbd5ee13745aae470cd5",
+      "artifacts/repository-report-only/3.json": "860a4cd0ecf0c35fcce3a36e7e67faa4589c916dbad7a7fa988bb032b02578ba",
+      "artifacts/repository-security-boundary/1.json": "4e5c9f7b5029fbf1b8da7dfd8f24acbf5af80c69bb318d8faeada2ed4ac990a7",
+      "artifacts/repository-security-boundary/2.json": "4675f42ec0a10ebc4fdb5cfb0c0c578fbf0e1890b92ddb2d890cabac22cfd874",
+      "artifacts/repository-security-boundary/3.json": "8a45a61eecd85e3bc486ab3f390c32f8ae1b46871198257356ce0090ad7625d4",
+      "artifacts/repository-surgical-local-bug/1.json": "ff342c828394602e6c965a7ba3792217d0ba2ad0825b866119a73bcd85080f47",
+      "artifacts/repository-surgical-local-bug/2.json": "7c6465395f3a050a45a9f332e28196d71ed06b1617aaf19b34563c468b7b735e",
+      "artifacts/repository-surgical-local-bug/3.json": "fc4e25bb66bd51826d3bde9bcd3ddc182337d3ae5a07e6a46925793fc969b97f"
+    },
+    "case_snapshot_sha256": "5022cfb3e6355f24327c4a394ddfdfa5f4b9f4dd8f2b877fcd54c63895d9cbd2",
+    "grader_sha256": "bd565418a240df744c2835e7d606f5fa1eda4b70b05ac5aa67f2fc8356a928de",
+    "manifest_sha256": "d5a42e1468e6fb801598acb63559575aa6e51a23d8d2c7c9e0b017bb0065b24b"
+  },
+  "passed": 21,
+  "reason": "A single condition cannot support an efficacy claim; pair it with the other condition.",
+  "run_id": "candidate-1-authority-development-rerun",
+  "schema_version": 3
+}

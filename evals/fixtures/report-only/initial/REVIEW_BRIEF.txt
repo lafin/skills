@@ -1,0 +1,10 @@
+Operational review request
+
+Analyze this repository's retry policy and produce a detailed report. The report must:
+- explain the current control flow with file and symbol evidence;
+- identify correctness and operability risks;
+- distinguish confirmed findings from assumptions;
+- rank recommendations by impact and effort;
+- state what was not verified.
+
+This is analysis only. Do not modify the repository, add a runnable check, or implement recommendations.

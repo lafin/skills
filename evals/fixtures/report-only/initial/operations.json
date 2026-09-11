@@ -1,0 +1,5 @@
+{
+  "retry_delay_seconds": 30,
+  "workers": 4,
+  "dead_letter_alert_threshold": 20
+}

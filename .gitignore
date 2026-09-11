@@ -1,1 +1,4 @@
 __pycache__
+
+# Raw evaluation captures are retained locally or in external artifact storage.
+evals/results/**/artifacts/

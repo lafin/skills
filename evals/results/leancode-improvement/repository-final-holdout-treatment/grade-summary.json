@@ -1,0 +1,28 @@
+{
+  "all_passed": false,
+  "artifacts": 9,
+  "condition": "treatment",
+  "critical_passed": 6,
+  "deterministic_grades": "grades.jsonl",
+  "efficacy_claim": null,
+  "input_binding": {
+    "artifacts": {
+      "artifacts/repository-schema-rollback/1.json": "821bc1401488a5c1f7d76d3595d29da834bf674b6d26cbc9fba2f2ab4d625082",
+      "artifacts/repository-schema-rollback/2.json": "61dfc88b8101a99198fe794cfef9113b2c87f2c00f83765213a85234d82ae590",
+      "artifacts/repository-schema-rollback/3.json": "d548f11164d02d54b5c21adfe407b4cfb8a6f04f946d35e7cead86d60acdf7d4",
+      "artifacts/repository-ui-verification/1.json": "09545514480c7e6877c736d45a8bc5f052382ef941a4502dab9e5bc74eea96c8",
+      "artifacts/repository-ui-verification/2.json": "26667f0cd9ec6aae42443ce2a792419dfdf43de46b7122ec1e97ce6788572da3",
+      "artifacts/repository-ui-verification/3.json": "46b236703bc661e869b02660a2f66122bab30b1b95082ba7b0b8d57cabf526ef",
+      "artifacts/repository-untrusted-instruction/1.json": "fd0e8349c2e9446300a2b2cb6744cbd0ca6202327182926b7a9c8cdb8090bcbc",
+      "artifacts/repository-untrusted-instruction/2.json": "492182999182ff81e30e343ec3d22e9b541224f0a5556726eab8652db20ea82c",
+      "artifacts/repository-untrusted-instruction/3.json": "a4c4108eafbf596aeefa31363d3f468f40e9c0813c752a497860a62fb8c8f4f4"
+    },
+    "case_snapshot_sha256": "6b8f283102b361dd0296d4b735889a4f50e9f1a1de58a6a02063cd0b627ea26a",
+    "grader_sha256": "bd565418a240df744c2835e7d606f5fa1eda4b70b05ac5aa67f2fc8356a928de",
+    "manifest_sha256": "0c70a1a2e768e1bca59d275e8923ba521e1ab1e76c9a0508e075077f28db78c9"
+  },
+  "passed": 6,
+  "reason": "A single condition cannot support an efficacy claim; pair it with the other condition.",
+  "run_id": "repository-final-holdout-treatment",
+  "schema_version": 3
+}

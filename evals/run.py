@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Status: Reusable. Capture real OMP behavior and routing runs as artifacts."""
+"""Status: Reusable. Capture real OMP behavior, routing, and repository runs."""
 
 from __future__ import annotations
 
 import argparse
+import difflib
 import hashlib
 import json
 import os
@@ -11,6 +12,7 @@ import re
 import selectors
 import shutil
 import subprocess
+import sys
 import tempfile
 import time
 from datetime import datetime, timezone
@@ -21,6 +23,19 @@ import yaml
 
 SCHEMA_VERSION = 3
 CHECK_OPS = {"contains", "not_contains", "equals", "regex", "not_regex"}
+SENSITIVE_CONFIG_KEY = re.compile(
+    r"(?:auth(?:orization)?|bearer|cookie|token|secret|password|api.?key|access.?key|private.?key|credential)",
+    re.IGNORECASE,
+)
+VERIFIER_DIMENSIONS = {
+    "correctness",
+    "completeness",
+    "preservation",
+    "scope",
+    "security_compatibility",
+    "verification",
+    "reporting",
+}
 BEHAVIOR_SYSTEM_PROMPT = (
     "You are a coding assistant. Answer the case directly. Emit exactly the requested "
     "newline-separated fields with no preamble or suffix. ABSTRACTION means a new "
@@ -50,15 +65,23 @@ def validate_case(case: Any, location: str) -> dict[str, Any]:
     if not isinstance(case, dict):
         raise ValueError(f"{location}: case must be an object")
     kind = case.get("kind")
-    allowed = COMMON_CASE_FIELDS | ({"response_fields"} if kind == "behavior" else {"available_skills"} if kind == "routing" else set())
+    allowed = COMMON_CASE_FIELDS | (
+        {"response_fields"}
+        if kind == "behavior"
+        else {"available_skills"}
+        if kind == "routing"
+        else {"fixture"}
+        if kind == "repository"
+        else set()
+    )
     missing = {"id", "kind", "split", "target_skill", "prompt", "observable_success", "prohibited_outcomes", "checks"} - case.keys()
     extra = case.keys() - allowed
     if missing:
         raise ValueError(f"{location}: missing {', '.join(sorted(missing))}")
     if extra:
         raise ValueError(f"{location}: unknown fields: {', '.join(sorted(extra))}")
-    if kind not in {"behavior", "routing"}:
-        raise ValueError(f"{location}: kind must be behavior or routing")
+    if kind not in {"behavior", "routing", "repository"}:
+        raise ValueError(f"{location}: kind must be behavior, routing, or repository")
     if case["split"] not in {"development", "holdout"}:
         raise ValueError(f"{location}: split must be development or holdout")
     for name in ("id", "target_skill", "prompt"):
@@ -70,14 +93,14 @@ def validate_case(case: Any, location: str) -> dict[str, Any]:
     if "judge_criteria" in case:
         nonempty_strings(case["judge_criteria"], f"{location}: judge_criteria")
     checks = case["checks"]
-    if not isinstance(checks, list) or not checks:
-        raise ValueError(f"{location}: checks must be a non-empty array")
+    if not isinstance(checks, list) or (kind != "repository" and not checks):
+        raise ValueError(f"{location}: checks must be an array and must be non-empty outside repository cases")
     check_names: set[str] = set()
     for index, check in enumerate(checks, 1):
         check_location = f"{location}: check {index}"
         if not isinstance(check, dict):
             raise ValueError(f"{check_location} must be an object")
-        unknown = check.keys() - {"name", "op", "value", "field", "critical"}
+        unknown = check.keys() - {"name", "op", "value", "field", "critical", "dimension"}
         missing_check = {"name", "op", "value", "critical"} - check.keys()
         if unknown or missing_check:
             raise ValueError(f"{check_location}: invalid fields")
@@ -90,6 +113,8 @@ def validate_case(case: Any, location: str) -> dict[str, Any]:
             raise ValueError(f"{check_location}: value must be a string and critical must be boolean")
         if "field" in check and (not isinstance(check["field"], str) or not check["field"]):
             raise ValueError(f"{check_location}: field must be a non-empty string")
+        if "dimension" in check and check["dimension"] not in VERIFIER_DIMENSIONS:
+            raise ValueError(f"{check_location}: invalid dimension")
         if check["op"] in {"regex", "not_regex"}:
             try:
                 re.compile(check["value"])
@@ -99,12 +124,18 @@ def validate_case(case: Any, location: str) -> dict[str, Any]:
         nonempty_strings(case.get("response_fields"), f"{location}: response_fields")
         if len(set(case["response_fields"])) != len(case["response_fields"]):
             raise ValueError(f"{location}: response_fields must be unique")
-    else:
+    elif kind == "routing":
         nonempty_strings(case.get("available_skills"), f"{location}: available_skills")
         if len(set(case["available_skills"])) != len(case["available_skills"]):
             raise ValueError(f"{location}: available_skills must be unique")
         if case["target_skill"] not in case["available_skills"]:
             raise ValueError(f"{location}: target_skill must be in available_skills")
+    elif (
+        not isinstance(case.get("fixture"), str)
+        or not case["fixture"]
+        or safe_name(case["fixture"]) != case["fixture"]
+    ):
+        raise ValueError(f"{location}: fixture must be a safe non-empty identifier")
     return case
 
 
@@ -126,10 +157,23 @@ def load_cases(paths: list[Path]) -> list[dict[str, Any]]:
     return cases
 
 
-def run_text(command: list[str], cwd: Path) -> tuple[int, str, str]:
-    completed = subprocess.run(
-        command, cwd=cwd, stdin=subprocess.DEVNULL, text=True, capture_output=True, check=False
-    )
+def run_text(
+    command: list[str], cwd: Path, timeout: float | None = None
+) -> tuple[int, str, str]:
+    try:
+        completed = subprocess.run(
+            command,
+            cwd=cwd,
+            stdin=subprocess.DEVNULL,
+            text=True,
+            capture_output=True,
+            check=False,
+            timeout=timeout,
+        )
+    except subprocess.TimeoutExpired as error:
+        stdout = error.stdout if isinstance(error.stdout, str) else ""
+        stderr = error.stderr if isinstance(error.stderr, str) else ""
+        return 124, stdout, f"{stderr}\ncommand timed out after {timeout:g} seconds".lstrip()
     return completed.returncode, completed.stdout, completed.stderr
 
 
@@ -144,6 +188,148 @@ def sha256_file(path: Path) -> str:
         for chunk in iter(lambda: handle.read(65536), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def tree_snapshot(root: Path) -> dict[str, Any]:
+    entries: list[dict[str, Any]] = []
+
+    def visit(directory: Path, prefix: Path) -> None:
+        with os.scandir(directory) as children:
+            for child in sorted(children, key=lambda item: item.name):
+                relative = (prefix / child.name).as_posix()
+                info = child.stat(follow_symlinks=False)
+                record: dict[str, Any] = {"path": relative, "mode": info.st_mode & 0o777}
+                if child.is_symlink():
+                    record.update(type="symlink", target=os.readlink(child.path))
+                elif child.is_dir(follow_symlinks=False):
+                    record["type"] = "directory"
+                    entries.append(record)
+                    visit(Path(child.path), prefix / child.name)
+                    continue
+                elif child.is_file(follow_symlinks=False):
+                    record.update(type="file", size=info.st_size, sha256=sha256_file(Path(child.path)))
+                else:
+                    record.update(type="other", kind=info.st_mode & 0o170000)
+                entries.append(record)
+
+    visit(root, Path())
+    entries.sort(key=lambda entry: entry["path"])
+    encoded = json.dumps(entries, sort_keys=True, separators=(",", ":")).encode()
+    return {"sha256": hashlib.sha256(encoded).hexdigest(), "entries": entries}
+
+
+def tree_diff(before: dict[str, Any], after: dict[str, Any]) -> dict[str, list[Any]]:
+    old = {entry["path"]: entry for entry in before["entries"]}
+    new = {entry["path"]: entry for entry in after["entries"]}
+    return {
+        "added": [new[path] for path in sorted(new.keys() - old.keys())],
+        "removed": [old[path] for path in sorted(old.keys() - new.keys())],
+        "changed": [
+            {"before": old[path], "after": new[path]}
+            for path in sorted(old.keys() & new.keys())
+            if old[path] != new[path]
+        ],
+    }
+
+def unified_tree_diff(
+    before_root: Path,
+    after_root: Path,
+    before: dict[str, Any],
+    after: dict[str, Any],
+) -> str:
+    old = {entry["path"]: entry for entry in before["entries"]}
+    new = {entry["path"]: entry for entry in after["entries"]}
+    changed = sorted(
+        path
+        for path in old.keys() | new.keys()
+        if old.get(path) != new.get(path)
+        and (old.get(path, {}).get("type") != "directory" or new.get(path, {}).get("type") != "directory")
+    )
+    patches: list[str] = []
+    for relative in changed:
+        before_entry = old.get(relative)
+        after_entry = new.get(relative)
+
+        def text_lines(root: Path, entry: dict[str, Any] | None) -> list[str] | None:
+            if entry is None:
+                return []
+            if entry.get("type") != "file" or entry.get("size", 0) > 1_048_576:
+                return None
+            data = (root / relative).read_bytes()
+            if b"\0" in data:
+                return None
+            try:
+                return data.decode("utf-8").splitlines(keepends=True)
+            except UnicodeDecodeError:
+                return None
+
+        before_lines = text_lines(before_root, before_entry)
+        after_lines = text_lines(after_root, after_entry)
+        if before_lines is None or after_lines is None:
+            patches.append(
+                f"--- a/{relative}\n+++ b/{relative}\n"
+                f"@@ binary-or-nonregular @@\n-{json.dumps(before_entry, sort_keys=True)}\n"
+                f"+{json.dumps(after_entry, sort_keys=True)}\n"
+            )
+            continue
+        patches.extend(
+            difflib.unified_diff(
+                before_lines,
+                after_lines,
+                fromfile=f"a/{relative}" if before_entry else "/dev/null",
+                tofile=f"b/{relative}" if after_entry else "/dev/null",
+            )
+        )
+    return "".join(patches)
+
+
+def reject_duplicate_keys(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+    document: dict[str, Any] = {}
+    for key, value in pairs:
+        if key in document:
+            raise ValueError(f"duplicate JSON key: {key}")
+        document[key] = value
+    return document
+
+
+def parse_verifier_output(stdout: str) -> list[dict[str, Any]]:
+    document = json.loads(stdout, object_pairs_hook=reject_duplicate_keys)
+    if not isinstance(document, dict) or set(document) != {"checks"}:
+        raise ValueError("verifier output must be one object containing only checks")
+    checks = document["checks"]
+    if not isinstance(checks, list) or not checks:
+        raise ValueError("verifier checks must be a non-empty array")
+    names: set[str] = set()
+    required = {"name", "dimension", "critical", "passed", "detail"}
+    for check in checks:
+        if (
+            not isinstance(check, dict)
+            or set(check) != required
+            or not isinstance(check["name"], str)
+            or not check["name"]
+            or check["name"] in names
+            or check["dimension"] not in VERIFIER_DIMENSIONS
+            or not isinstance(check["critical"], bool)
+            or not isinstance(check["passed"], bool)
+            or not isinstance(check["detail"], str)
+        ):
+            raise ValueError("verifier returned an invalid check")
+        names.add(check["name"])
+    return checks
+
+
+def fixture_record(root: Path, fixture_id: str) -> dict[str, Any]:
+    base = root / "evals" / "fixtures" / fixture_id
+    initial = base / "initial"
+    verifier = base / "verify.py"
+    if not initial.is_dir() or not verifier.is_file():
+        raise ValueError(f"fixture {fixture_id!r} must contain initial/ and verify.py")
+    return {
+        "initial_path": f"evals/fixtures/{fixture_id}/initial",
+        "initial_tree_sha256": tree_snapshot(initial)["sha256"],
+        "verifier_path": f"evals/fixtures/{fixture_id}/verify.py",
+        "verifier_sha256": sha256_file(verifier),
+    }
 
 def skill_description(path: Path) -> str:
     text = path.read_text(encoding="utf-8")
@@ -267,7 +453,7 @@ def repository_catalog(cwd: Path) -> list[str]:
 
 
 def skill_scope(case: dict[str, Any], condition: str, catalog: list[str] | None = None) -> dict[str, Any]:
-    if case["kind"] == "behavior":
+    if case["kind"] in {"behavior", "repository"}:
         return {
             "mode": "none" if condition == "baseline" else "target-only-command",
             "skills": [] if condition == "baseline" else [case["target_skill"]],
@@ -286,7 +472,10 @@ def case_prompt(case: dict[str, Any], descriptions: dict[str, str] | None = None
 
 
 def build_command(
-    args: argparse.Namespace, case: dict[str, Any], catalog: list[str] | None = None
+    args: argparse.Namespace,
+    case: dict[str, Any],
+    catalog: list[str] | None = None,
+    cwd: Path | None = None,
 ) -> list[str]:
     command = [
         args.omp,
@@ -294,7 +483,7 @@ def build_command(
         "--no-rules",
         "--no-session",
         "--no-extensions",
-        f"--cwd={args.cwd}",
+        f"--cwd={cwd or args.cwd}",
         f"--model={args.model}",
         f"--thinking={args.thinking}",
         f"--max-time={args.max_time}",
@@ -309,7 +498,7 @@ def build_command(
     for config in args.config:
         command.append(f"--config={config}")
     command.append(f"--tools={args.tools}" if args.tools else "--no-tools")
-    if case["kind"] == "behavior":
+    if case["kind"] in {"behavior", "repository"}:
         command.append("--no-skills" if args.condition == "baseline" else f"--skills={case['target_skill']}")
     else:
         skills = catalog if catalog is not None else repository_catalog(args.cwd)
@@ -322,6 +511,15 @@ def seconds(value: str) -> float:
     if not match:
         raise ValueError("--max-time must be seconds or a number followed by s, m, or h")
     return float(match.group(1)) * {"": 1, "s": 1, "m": 60, "h": 3600}[match.group(2)]
+
+def capture_environment() -> dict[str, str]:
+    return {
+        name: value
+        for name, value in os.environ.items()
+        if SENSITIVE_CONFIG_KEY.search(name) is None
+    }
+
+
 
 
 def rpc_capture(
@@ -343,6 +541,7 @@ def rpc_capture(
             stderr=stderr_file,
             text=True,
             bufsize=1,
+            env=capture_environment(),
         )
         assert process.stdin is not None and process.stdout is not None
         selector = selectors.DefaultSelector()
@@ -426,22 +625,67 @@ def rpc_capture(
     return code, "".join(stdout_lines), stderr, events, parse_errors, terminal_state
 
 
+def redact_config(value: Any, key: str = "", inherited_sensitive: bool = False) -> Any:
+    sensitive = inherited_sensitive or bool(SENSITIVE_CONFIG_KEY.search(key))
+    if isinstance(value, dict):
+        return {
+            name: redact_config(item, name, sensitive)
+            for name, item in value.items()
+        }
+    if isinstance(value, list):
+        return [redact_config(item, key, sensitive) for item in value]
+    return "<redacted>" if sensitive else value
+
+
 def effective_config(args: argparse.Namespace) -> dict[str, Any]:
-    command = [args.omp]
-    if args.profile:
-        command.extend(["--profile", args.profile])
-    command.extend(["config", "list", "--json"])
+    command = [
+        args.omp,
+        "--profile",
+        args.profile,
+        *(f"--config={path}" for path in args.config),
+        "config",
+        "list",
+        "--json",
+    ]
     code, stdout, stderr = run_text(command, args.cwd)
     try:
         parsed = json.loads(stdout) if code == 0 else None
     except json.JSONDecodeError:
         parsed = None
+    if not isinstance(parsed, dict):
+        raise ValueError(f"cannot read effective OMP profile configuration: {stderr.strip()}")
+    custom_directories = (parsed.get("skills.customDirectories") or {}).get("value")
+    if not isinstance(custom_directories, list) or str(args.cwd) not in {
+        str(Path(path).resolve()) for path in custom_directories if isinstance(path, str)
+    }:
+        raise ValueError(
+            f"profile {args.profile!r} must register {args.cwd} in skills.customDirectories"
+        )
+    path_command = [args.omp, "--profile", args.profile, "config", "path"]
+    path_code, path_stdout, path_stderr = run_text(path_command, args.cwd)
+    profile_path = Path(path_stdout.strip())
+    if path_code or not profile_path.is_absolute():
+        raise ValueError(f"cannot resolve OMP profile path: {path_stderr.strip()}")
+    mcp_path = profile_path / "mcp.json"
+    if mcp_path.exists():
+        try:
+            mcp_config = json.loads(mcp_path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as error:
+            raise ValueError(f"{mcp_path}: invalid MCP configuration: {error}") from error
+        if mcp_config:
+            raise ValueError(f"profile {args.profile!r} must not configure MCP servers")
+    for name in (".mcp.json", "mcp.json"):
+        project_mcp = args.cwd / name
+        if project_mcp.exists():
+            raise ValueError(f"evaluation repository must not configure MCP servers: {project_mcp}")
     return {
         "command": command,
         "exit_code": code,
-        "value": parsed,
-        "raw_stdout": "" if parsed is not None else stdout,
+        "value": redact_config(parsed),
+        "raw_stdout": "",
         "raw_stderr": stderr,
+        "profile_path": str(profile_path),
+        "mcp_configured": False,
     }
 
 
@@ -459,9 +703,9 @@ def main() -> int:
     parser.add_argument("--output", type=Path, required=True, help="New immutable artifact directory for one condition")
     parser.add_argument("--cwd", type=Path, default=Path(__file__).resolve().parents[1])
     parser.add_argument("--omp", default="omp")
-    parser.add_argument("--profile")
+    parser.add_argument("--profile", required=True)
     parser.add_argument("--config", type=Path, action="append", default=[])
-    parser.add_argument("--tools", default="read", help="Explicit comma-separated OMP tool allowlist; empty disables tools")
+    parser.add_argument("--tools", help="Explicit comma-separated OMP tool allowlist; defaults to read for non-repository cases")
     parser.add_argument(
         "--system-prompt",
         help="Optional full OMP system-prompt override; omit to preserve skill discovery instructions",
@@ -469,6 +713,7 @@ def main() -> int:
     parser.add_argument("--thinking", default="off")
     parser.add_argument("--max-time", default="10m")
     parser.add_argument("--attempts", type=int, default=1)
+    parser.add_argument("--verifier-timeout", type=float, default=30.0)
     args = parser.parse_args()
 
     args.cwd = args.cwd.resolve()
@@ -480,11 +725,29 @@ def main() -> int:
         parser.error("--output must not exist; run directories are immutable")
     try:
         cases = load_cases(args.cases)
+        repository_cases = [case for case in cases if case["kind"] == "repository"]
+        if repository_cases and args.tools is None:
+            raise ValueError("--tools must be explicitly provided for repository cases")
+        args.tools = "read" if args.tools is None else args.tools
         timeout = seconds(args.max_time) + 30
         catalog = repository_catalog(args.cwd)
-        allowed_tools = [tool for tool in args.tools.split(",") if tool]
-        if len(allowed_tools) != len(set(allowed_tools)) or any(tool.strip() != tool for tool in allowed_tools):
-            raise ValueError("--tools must be a comma-separated list of unique exact tool names")
+        tool_parts = [] if args.tools == "" else args.tools.split(",")
+        if (
+            any(not tool for tool in tool_parts)
+            or len(tool_parts) != len(set(tool_parts))
+            or any(tool.strip() != tool for tool in tool_parts)
+        ):
+            raise ValueError("--tools must be a comma-separated list of unique non-empty exact tool names")
+        allowed_tools = tool_parts
+        args.tools = ",".join(allowed_tools)
+        if repository_cases and not allowed_tools:
+            raise ValueError("--tools must contain at least one tool for repository cases")
+        if args.verifier_timeout <= 0:
+            raise ValueError("--verifier-timeout must be positive")
+        fixtures = {
+            case["fixture"]: fixture_record(args.cwd, case["fixture"])
+            for case in repository_cases
+        }
         for path in args.config:
             if not path.is_file():
                 raise ValueError(f"config file does not exist: {path}")
@@ -493,6 +756,7 @@ def main() -> int:
         if version_code:
             raise ValueError(f"cannot execute OMP: {version_stderr.strip()}")
         executable_hash = sha256_file(executable)
+        profile_config = effective_config(args)
     except (OSError, ValueError, json.JSONDecodeError) as error:
         parser.error(str(error))
 
@@ -539,6 +803,7 @@ def main() -> int:
             "grade.py": sha256_file(Path(__file__).with_name("grade.py")),
         },
         "case_files": case_files,
+        "fixture_files": fixtures,
         "configuration": {
             "cwd": str(args.cwd),
             "profile": args.profile,
@@ -548,12 +813,14 @@ def main() -> int:
             "system_prompt": args.system_prompt,
             "behavior_system_prompt": args.system_prompt or BEHAVIOR_SYSTEM_PROMPT,
             "routing_system_prompt": args.system_prompt,
+            "repository_system_prompt": args.system_prompt,
             "max_time": args.max_time,
+            "verifier_timeout": args.verifier_timeout,
             "extensions": "disabled",
             "rules": "disabled",
             "sessions": "disabled",
             "canonical_skill_root": ".",
-            "effective_omp_config": effective_config(args),
+            "effective_omp_config": profile_config,
         },
         "attempts": args.attempts,
         "case_ids": [case["id"] for case in cases],
@@ -574,68 +841,123 @@ def main() -> int:
         case_dir = artifact_dir / safe_name(case["id"])
         case_dir.mkdir()
         for attempt in range(1, args.attempts + 1):
-            command = build_command(args, case, catalog)
-            request_prefix = f"{safe_name(case['id'])}-{attempt}"
-            requests = []
-            if case["kind"] == "behavior" and args.condition == "treatment":
+            temporary: tempfile.TemporaryDirectory | None = None
+            execution_cwd = args.cwd
+            fixture_evidence: dict[str, Any] | None = None
+            verifier_ok = True
+            try:
+                if case["kind"] == "repository":
+                    temporary = tempfile.TemporaryDirectory(prefix=f"omp-eval-{case['fixture']}-")
+                    execution_cwd = Path(temporary.name) / "worktree"
+                    source = args.cwd / fixtures[case["fixture"]]["initial_path"]
+                    shutil.copytree(source, execution_cwd, symlinks=True)
+                    initial_tree = tree_snapshot(execution_cwd)
+                    if initial_tree["sha256"] != fixtures[case["fixture"]]["initial_tree_sha256"]:
+                        raise ValueError(f"copied fixture {case['fixture']!r} differs from its source")
+
+                command = build_command(args, case, catalog, execution_cwd)
+                request_prefix = f"{safe_name(case['id'])}-{attempt}"
+                requests = []
+                if case["kind"] in {"behavior", "repository"} and args.condition == "treatment":
+                    requests.append(
+                        {"id": f"{request_prefix}-skill", "type": "prompt", "message": f"/skill:{case['target_skill']}"}
+                    )
                 requests.append(
-                    {"id": f"{request_prefix}-skill", "type": "prompt", "message": f"/skill:{case['target_skill']}"}
+                    {
+                        "id": f"{request_prefix}-case",
+                        "type": "prompt",
+                        "message": case_prompt(case, descriptions),
+                    }
                 )
-            requests.append(
-                {
-                    "id": f"{request_prefix}-case",
-                    "type": "prompt",
-                    "message": case_prompt(case, descriptions),
+                started_at = datetime.now(timezone.utc).isoformat()
+                started = time.monotonic()
+                code, stdout, stderr, events, parse_errors, terminal_state = rpc_capture(
+                    command, execution_cwd, requests, timeout
+                )
+                elapsed = time.monotonic() - started
+                summary = summarize_events(events)
+                tool_policy = {
+                    "allowed": allowed_tools,
+                    "observed": summary["tool_names"],
+                    "violations": [tool for tool in summary["tool_names"] if tool not in allowed_tools],
                 }
-            )
-            started_at = datetime.now(timezone.utc).isoformat()
-            started = time.monotonic()
-            code, stdout, stderr, events, parse_errors, terminal_state = rpc_capture(
-                command, args.cwd, requests, timeout
-            )
-            elapsed = time.monotonic() - started
-            summary = summarize_events(events)
-            tool_policy = {
-                "allowed": allowed_tools,
-                "observed": summary["tool_names"],
-                "violations": [tool for tool in summary["tool_names"] if tool not in allowed_tools],
-            }
-            artifact = {
-                "schema_version": SCHEMA_VERSION,
-                "case_id": case["id"],
-                "kind": case["kind"],
-                "split": case["split"],
-                "condition": args.condition,
-                "attempt": attempt,
-                "started_at": started_at,
-                "elapsed_seconds": elapsed,
-                "command": command,
-                "rpc_requests": requests,
-                "prompt": case["prompt"],
-                "skill_scope": skill_scope(case, args.condition, catalog),
-                "tool_policy": tool_policy,
-                "terminal_state": terminal_state,
-                "exit_code": code,
-                "raw_stdout": stdout,
-                "raw_stderr": stderr,
-                "events": events,
-                "event_parse_errors": parse_errors,
-                **summary,
-            }
-            path = case_dir / f"{attempt}.json"
-            path.write_text(json.dumps(artifact, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-            capture_ok = (
-                code == 0
-                and not parse_errors
-                and bool(summary["response"])
-                and isinstance(summary["provider"], str)
-                and isinstance(summary["model"], str)
-                and terminal_state["received"]
-                and terminal_state["terminal_result"] == "agent_end"
-                and not tool_policy["violations"]
-            )
-            failures += not capture_ok
-            print(f"{case['id']} attempt {attempt}: exit={code} terminal={terminal_state['terminal_result']} response={bool(summary['response'])}")
+                if case["kind"] == "repository":
+                    final_tree = tree_snapshot(execution_cwd)
+                    verifier_path = args.cwd / fixtures[case["fixture"]]["verifier_path"]
+                    verifier_command = [sys.executable, str(verifier_path), str(execution_cwd)]
+                    verifier_code, verifier_stdout, verifier_stderr = run_text(
+                        verifier_command, execution_cwd, args.verifier_timeout
+                    )
+                    verifier_error = None
+                    try:
+                        verifier_checks = parse_verifier_output(verifier_stdout)
+                    except (json.JSONDecodeError, ValueError) as error:
+                        verifier_checks = []
+                        verifier_error = str(error)
+                    verifier_ok = verifier_code == 0 and verifier_error is None
+                    fixture_evidence = {
+                        "id": case["fixture"],
+                        "worktree": str(execution_cwd),
+                        "source": fixtures[case["fixture"]],
+                        "initial_tree": initial_tree,
+                        "final_tree": final_tree,
+                        "diff": tree_diff(initial_tree, final_tree),
+                        "unified_diff": unified_tree_diff(
+                            source, execution_cwd, initial_tree, final_tree
+                        ),
+                        "verifier": {
+                            "command": verifier_command,
+                            "cwd": str(execution_cwd),
+                            "exit_code": verifier_code,
+                            "stdout": verifier_stdout,
+                            "stderr": verifier_stderr,
+                            "checks": verifier_checks,
+                            "parse_error": verifier_error,
+                        },
+                    }
+                artifact = {
+                    "schema_version": SCHEMA_VERSION,
+                    "case_id": case["id"],
+                    "kind": case["kind"],
+                    "split": case["split"],
+                    "condition": args.condition,
+                    "attempt": attempt,
+                    "started_at": started_at,
+                    "elapsed_seconds": elapsed,
+                    "command": command,
+                    "rpc_cwd": str(execution_cwd),
+                    "rpc_requests": requests,
+                    "prompt": case["prompt"],
+                    "skill_scope": skill_scope(case, args.condition, catalog),
+                    "tool_policy": tool_policy,
+                    "terminal_state": terminal_state,
+                    "exit_code": code,
+                    "raw_stdout": stdout,
+                    "raw_stderr": stderr,
+                    "events": events,
+                    "event_parse_errors": parse_errors,
+                    **summary,
+                }
+                if fixture_evidence is not None:
+                    artifact["fixture"] = fixture_evidence
+                path = case_dir / f"{attempt}.json"
+                path.write_text(json.dumps(artifact, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+                capture_ok = (
+                    code == 0
+                    and not parse_errors
+                    and bool(summary["response"])
+                    and isinstance(summary["provider"], str)
+                    and isinstance(summary["model"], str)
+                    and terminal_state["received"]
+                    and terminal_state["terminal_result"] == "agent_end"
+                    and not tool_policy["violations"]
+                    and verifier_ok
+                )
+                failures += not capture_ok
+                print(f"{case['id']} attempt {attempt}: exit={code} terminal={terminal_state['terminal_result']} response={bool(summary['response'])}")
+            finally:
+                if temporary is not None:
+                    temporary.cleanup()
     print(f"captured {len(cases) * args.attempts} artifacts in {args.output}; capture failures={failures}")
     return 1 if failures else 0
 

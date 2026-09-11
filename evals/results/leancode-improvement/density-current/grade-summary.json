@@ -1,0 +1,27 @@
+{
+  "all_passed": false,
+  "artifacts": 8,
+  "condition": "treatment",
+  "critical_passed": 6,
+  "deterministic_grades": "grades.jsonl",
+  "efficacy_claim": null,
+  "input_binding": {
+    "artifacts": {
+      "artifacts/behavior-implementation-test/1.json": "bef502aed1843bdad97fee9933a5f8b3d0ff8638af8843e4475a02e43aebf7f5",
+      "artifacts/behavior-material-choice/1.json": "6e5c5873d80d2623e6d7639c8ad406257d14e164c42fc2870f2acaa25e0a99ec",
+      "artifacts/behavior-no-test-harness/1.json": "8b1699718c01be2ecc87a372a154c1613af16eff002879f8f8dd6d5ff783a8b9",
+      "artifacts/behavior-safe-default/1.json": "3073d66219ea8b0411a08f6c363d6dda52d22dd1ce379b5d726c49b2881acfca",
+      "artifacts/behavior-single-implementation/1.json": "6dc768f7c04f51d1fc004bf5b625035a19b1110a49e58dec6118f1f8717c2863",
+      "artifacts/behavior-surgical-defect/1.json": "51151dd0f20ca80be4b825a7fc5dff27d85ef5ee1e1baa57a39b2cd52be07dab",
+      "artifacts/behavior-trust-boundary/1.json": "87ecf877efb44067c6b695dc153f92b6ca68971d511fc62da33d9b8082dd4662",
+      "artifacts/behavior-visual-unavailable/1.json": "ab9e87338ec63952b72abe7b5541693734a65651283a31476df0942717682354"
+    },
+    "case_snapshot_sha256": "3dfe6536d99e7fb667d8517dcaaecaf889b0c9f95bc3f39682960e4d7670f085",
+    "grader_sha256": "bd565418a240df744c2835e7d606f5fa1eda4b70b05ac5aa67f2fc8356a928de",
+    "manifest_sha256": "e4a0e27a2bb58c69dc9557a1ab5006e3d8b3421f28a1be3a5816c13407002285"
+  },
+  "passed": 6,
+  "reason": "A single condition cannot support an efficacy claim; pair it with the other condition.",
+  "run_id": "density-current",
+  "schema_version": 3
+}
