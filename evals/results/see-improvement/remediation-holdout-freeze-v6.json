@@ -1,0 +1,41 @@
+{
+  "frozen_at": "2026-09-11T14:34:24Z",
+  "candidate_freeze": {
+    "path": "evals/results/see-improvement/remediation-freeze-v6.json",
+    "sha256": "f8b57af546236bd2644e042d615b0bedfab510ce61e19a10da0d7f84e3c9b488"
+  },
+  "holdout": {
+    "path": "evals/cases/see-behavior-independent-holdout-v6.jsonl",
+    "sha256": "2dbcf6ea3e19f132391e5b4ed85a671539122edec0667162b194ed1380976b45",
+    "records": 12,
+    "families": {
+      "procedure/runbook": 3,
+      "requirement/contract": 3,
+      "explanation/reference": 3,
+      "error/incident": 3
+    },
+    "variants": {
+      "ordinary": 4,
+      "adversarial": 4,
+      "noop": 4
+    }
+  },
+  "response_blind_audit": {
+    "mechanical_validation": "pass",
+    "independent_auditor": "HoldoutV6ScoutAudit",
+    "corrections_before_freeze": [
+      "Accepted halt as a faithful status-12 stop action.",
+      "Required exactly one authorized [REDACTED] token."
+    ],
+    "semantic_only_dispositions": [
+      "Contradictory extra port obligations remain judge criteria; an incomplete verb blacklist would create false positives.",
+      "Contradictory extra Owner permission remains judge criteria; a lexical guard would reject conditional Steward permissions.",
+      "Contradictory extra failure claims remain judge criteria; positive deterministic preservation plus semantic review is the conservative contract."
+    ]
+  },
+  "evaluator": {
+    "evals/run.py": "be310d7d73869c11412724d66d66105850b22cd3210e4c753f1cbc4aa443cca0",
+    "evals/grade.py": "b194f75962c5cfdc798773c3ddb3394522fe72fefef9baaa02c17f9dcd50cb9e"
+  },
+  "candidate_skill_sha256": "f0de48ca9c9b9fb9c1f4bf161ef8484456daed8868ddf769a38ee5eeae7b9b4a"
+}

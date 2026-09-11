@@ -1,0 +1,314 @@
+{
+  "efficacy_claim": null,
+  "pairs_scored": 18,
+  "reason": "Judge output is optional evidence and cannot replace deterministic paired merge gates.",
+  "results": [
+    {
+      "attempt": 1,
+      "case_id": "see-error-ordinary",
+      "critical_issues": [
+        false,
+        false
+      ],
+      "rationales": [
+        "Both rewrites retain the retry instruction without naming an operation, cause, or recovery result. B reports that both the failed operation and the item are unidentified, whereas A reports only the unidentified item. B is therefore more traceable to the source\u2019s actionable limitations, with no critical invention.",
+        "Both candidates preserve the instruction to try again and avoid specifying an operation, cause, input, or outcome. A identifies two important source gaps\u2014the failed operation and the item to check\u2014while B identifies only the item. A is consequently the more complete and actionable engineering-default rewrite."
+      ],
+      "verdict": "treatment",
+      "votes": [
+        "treatment",
+        "treatment"
+      ]
+    },
+    {
+      "attempt": 2,
+      "case_id": "see-error-ordinary",
+      "critical_issues": [
+        false,
+        false
+      ],
+      "rationales": [
+        "A keeps the source\u2019s \u201cSomething went wrong\u201d structure, replaces the vague \u201cthing\u201d with the more readable generic term \u201citem,\u201d and reports the unspecified operation, item, and cause. B reports the recovery-outcome gap too, but it retains \u201cthing\u201d and makes less necessary wording changes. A offers the better balance of readability, fidelity, and concise source traceability.",
+        "B preserves the source\u2019s basic error statement and retry instruction, improves \u201cthing\u201d to \u201crelevant item,\u201d and reports the unspecified operation, item, and cause. A lists one additional derivative gap about recovery outcome, but it retains the notably vague word \u201cthing\u201d and rewrites more of the message without improving the instruction. B better satisfies the selected profile."
+      ],
+      "verdict": "baseline",
+      "votes": [
+        "baseline",
+        "baseline"
+      ]
+    },
+    {
+      "attempt": 3,
+      "case_id": "see-error-ordinary",
+      "critical_issues": [
+        false,
+        false
+      ],
+      "rationales": [
+        "B preserves the retry instruction and explicitly reports every material source limit: the unidentified operation, item, cause, and expected recovery outcome. A reports only the item and cause, leaving the operation and recovery expectation unacknowledged. B is therefore more complete and source-traceable without inventing a specific technical fact.",
+        "A retains the required retry instruction and documents the unspecified operation, affected item, cause, and recovery outcome. B documents only the item and cause, omitting two material limits on actionability. Because A does not identify or invent any specific operation, resource, cause, or outcome, its fuller ambiguity report makes it preferable."
+      ],
+      "verdict": "treatment",
+      "votes": [
+        "treatment",
+        "treatment"
+      ]
+    },
+    {
+      "attempt": 1,
+      "case_id": "see-explanation-ordinary",
+      "critical_issues": [
+        false,
+        false
+      ],
+      "rationales": [
+        "B stays closer to the source: it preserves `Currently`, the fault-to-error-to-failure sequence, both latency statistics at 500 requests per second, and the explicit faster and jobs/tasks wording. A remains technically adequate but makes more unnecessary paraphrases, including `returns`, `causes`, and `improve service performance`.",
+        "A is more source-traceable because it retains `Currently`, closely preserves the error/failure and faster claims, includes both 40 ms mean and 120 ms p99 at 500 requests per second, and reports both required ambiguities. B makes more avoidable paraphrases."
+      ],
+      "verdict": "treatment",
+      "votes": [
+        "treatment",
+        "treatment"
+      ]
+    },
+    {
+      "attempt": 2,
+      "case_id": "see-explanation-ordinary",
+      "critical_issues": [
+        true,
+        true
+      ],
+      "rationales": [
+        "B preserves the source as a descriptive explanation, including both latency statistics, throughput, the faster claim, and the jobs/tasks distinction. A changes the factual timeout statement into the imperative `Set timeout to 30s`, introducing instruction or obligation force that the source does not contain; that is a critical semantic change.",
+        "A preserves the descriptive `timeout` relationship, the protected `30s` value, the error-to-failure sequence, both latency statistics, and both required ambiguity reports. B changes the current-state description into the instruction \u201cSet,\u201d and it invents an operation that fails and returns an error. A does omit \u201cCurrently,\u201d but B makes the more consequential obligation-force and behavior changes, so A is preferable."
+      ],
+      "verdict": "treatment",
+      "votes": [
+        "treatment",
+        "treatment"
+      ]
+    },
+    {
+      "attempt": 3,
+      "case_id": "see-explanation-ordinary",
+      "critical_issues": [
+        true,
+        true
+      ],
+      "rationales": [
+        "B preserves \u201cCurrently,\u201d both protected parameter tokens, the distinct error and failure concepts, both latency statistics, and the job/task terminology drift. A changes a descriptive fact into the command \u201cSet,\u201d changes protected `30s` to unquoted \u201c30 seconds,\u201d and invents an operation that fails. Those critical fidelity losses make B the clear winner.",
+        "A retains the source\u2019s current-state wording, exact `timeout` and `30s` tokens, error-to-failure sequence, two latency measures, and required ambiguity reports. B instead issues the command \u201cSet,\u201d alters the protected `30s` text, and introduces an unspecified operation that fails. A therefore has materially better technical fidelity."
+      ],
+      "verdict": "treatment",
+      "votes": [
+        "treatment",
+        "treatment"
+      ]
+    },
+    {
+      "attempt": 1,
+      "case_id": "see-procedure-noop",
+      "critical_issues": [
+        false,
+        false
+      ],
+      "rationales": [
+        "A and B are textually identical: both select the strict profile, reproduce the precise source without changing its prerequisite, command, environment, timing, or required records, and report `AMBIGUITIES: none`. Both satisfy the exact-return and no-op requirements, so neither has a supported advantage or critical issue.",
+        "Both candidates provide the same three fields and reproduce the source exactly, including read access to staging, `diag --read-only`, the pre-escalation timing, and all three required records. Both correctly use the strict profile and report no ambiguities. The evidence supports a tie with no critical issue."
+      ],
+      "verdict": "tie",
+      "votes": [
+        "tie",
+        "tie"
+      ]
+    },
+    {
+      "attempt": 2,
+      "case_id": "see-procedure-noop",
+      "critical_issues": [
+        false,
+        false
+      ],
+      "rationales": [
+        "A and B are identical and leave the already precise procedure unchanged. Each preserves the staging prerequisite, protected command text, escalation condition, exit code, standard output, timestamp, and incident-ticket destination, while selecting strict and reporting no ambiguities. Both fully satisfy the task, so the result is a tie without a critical issue.",
+        "Both responses exactly reproduce the source procedure, select the required strict profile, preserve the protected command and all recording obligations, and correctly report no ambiguities."
+      ],
+      "verdict": "tie",
+      "votes": [
+        "tie",
+        "tie"
+      ]
+    },
+    {
+      "attempt": 3,
+      "case_id": "see-procedure-noop",
+      "critical_issues": [
+        false,
+        false
+      ],
+      "rationales": [
+        "The two responses are textually identical and satisfy every constraint: exact source preservation, strict profile selection, unchanged `diag --read-only` text, and `AMBIGUITIES: none`.",
+        "Both candidates return the precise source unchanged in the required three-field format and preserve the prerequisite, environment, command, timing condition, and required evidence."
+      ],
+      "verdict": "tie",
+      "votes": [
+        "tie",
+        "tie"
+      ]
+    },
+    {
+      "attempt": 1,
+      "case_id": "see-procedure-ordinary",
+      "critical_issues": [
+        true,
+        true
+      ],
+      "rationales": [
+        "The source requires the account to be authorized and then checked before the command runs. A replaces authorization with \u201cverifying its authorization\u201d and folds the separate check into an unsupported claim that the command inspects account status. B preserves all four source actions and explicitly reports the unresolved grant-versus-verify, referent, acceptance-criteria, and expected-result ambiguities. Technical fidelity outweighs B\u2019s lower readability; A\u2019s changed operation is critical.",
+        "The source says to authorize the account and check it before running the command. B instead says to verify authorization and treats the command as the status-inspection step, changing and combining required operations without support. A retains the four source actions and traces each consequential ambiguity, including whether \u201cauthorize\u201d means grant or verify. A therefore has higher technical fidelity; B\u2019s action change is critical."
+      ],
+      "verdict": "treatment",
+      "votes": [
+        "treatment",
+        "treatment"
+      ]
+    },
+    {
+      "attempt": 2,
+      "case_id": "see-procedure-ordinary",
+      "critical_issues": [
+        true,
+        true
+      ],
+      "rationales": [
+        "The source requires authentication and authorization before `authctl inspect --user alice`. A replaces those required actions with status verification, assumes the account is Alice, and adds an unsupported instruction to review output for \u201creported issues.\u201d B preserves the original actions and order while reporting the account, method, and acceptance-criteria ambiguities. B wins on fidelity; A\u2019s omitted obligations and invented output content are critical.",
+        "The source requires authentication and authorization before the inspection command. B changes both actions into status verification, identifies the account as Alice without conclusive source support, and invents \u201creported issues\u201d as command-output content. A preserves the source\u2019s actions and sequence and records the unresolved account, method, and \u201clooks good\u201d ambiguities. A is technically safer; B\u2019s changed obligations and invented content are critical."
+      ],
+      "verdict": "treatment",
+      "votes": [
+        "treatment",
+        "treatment"
+      ]
+    },
+    {
+      "attempt": 3,
+      "case_id": "see-procedure-ordinary",
+      "critical_issues": [
+        true,
+        true
+      ],
+      "rationales": [
+        "The source explicitly requires authenticate, authorize, check, and then run the command. A deletes the first three operations, reverses the effective sequence, and invents that the command reports authentication and authorization status. B retains every required action in source order and reports the unspecified methods and acceptance criteria. B clearly wins; A\u2019s omissions and invented command result are critical.",
+        "The source contains four ordered actions: authenticate, authorize, check, and run the command. B reduces them to running the command and reviewing output, while inventing that the output reports authentication and authorization status. A preserves the complete procedure and identifies its unspecified methods and acceptance criteria. A wins on technical fidelity; B\u2019s removed obligations and invented result are critical."
+      ],
+      "verdict": "treatment",
+      "votes": [
+        "treatment",
+        "treatment"
+      ]
+    },
+    {
+      "attempt": 1,
+      "case_id": "see-requirement-noop",
+      "critical_issues": [
+        false,
+        false
+      ],
+      "rationales": [
+        "A and B are textually identical: both select the strict profile, reproduce the source requirement exactly\u2014including BCP 14, the 1 MiB condition, HTTP 413, the MUST obligation, and 50 ms\u2014and correctly report no ambiguities.",
+        "Both responses exactly preserve the already precise source and use the required three-field format. Neither changes the gateway condition, size threshold, status code, obligation force, timing bound, or ambiguity result."
+      ],
+      "verdict": "tie",
+      "votes": [
+        "tie",
+        "tie"
+      ]
+    },
+    {
+      "attempt": 2,
+      "case_id": "see-requirement-noop",
+      "critical_issues": [
+        false,
+        false
+      ],
+      "rationales": [
+        "A and B contain the same compliant response. Each returns the strict profile, copies the source without edits, preserves every technical value and obligation, and reports `AMBIGUITIES: none` as required.",
+        "The two candidates are identical and satisfy the no-op requirement exactly. Both retain the 1 MiB trigger, HTTP 413 response, MUST force, 50 ms deadline, and the required absence of ambiguities."
+      ],
+      "verdict": "tie",
+      "votes": [
+        "tie",
+        "tie"
+      ]
+    },
+    {
+      "attempt": 3,
+      "case_id": "see-requirement-noop",
+      "critical_issues": [
+        false,
+        false
+      ],
+      "rationales": [
+        "There is no semantic or textual difference between A and B. Both use `PROFILE: strict`, reproduce the complete atomic requirement verbatim, and correctly give `AMBIGUITIES: none`.",
+        "A and B are equally correct because their responses are identical. They follow the exact output contract and preserve all source wording, conditions, values, and BCP 14 obligation force without unnecessary edits."
+      ],
+      "verdict": "tie",
+      "votes": [
+        "tie",
+        "tie"
+      ]
+    },
+    {
+      "attempt": 1,
+      "case_id": "see-requirement-ordinary",
+      "critical_issues": [
+        false,
+        false
+      ],
+      "rationales": [
+        "Both preserve the MUST and SHOULD force and identify the same missing measures and retry details. B is more readable and traceable because it gives the two mandatory properties separate requirement sentences without changing their force.",
+        "A preserves the original MUST and SHOULD semantics while separating the two mandatory properties into independently readable requirements. B is faithful, but its compound mandatory clause is less directly traceable."
+      ],
+      "verdict": "treatment",
+      "votes": [
+        "treatment",
+        "treatment"
+      ]
+    },
+    {
+      "attempt": 2,
+      "case_id": "see-requirement-ordinary",
+      "critical_issues": [
+        false,
+        false
+      ],
+      "rationales": [
+        "B preserves each modal obligation, separates mandatory properties for clearer traceability, and limits its ambiguity report to measurable criteria, retry trigger, and retry count. A adds less source-grounded timing and exception concerns.",
+        "A keeps the exact MUST and SHOULD force, presents each mandatory property as a clear requirement, and reports only directly actionable underspecification. B unnecessarily extends the ambiguity list to timing and exception conditions."
+      ],
+      "verdict": "treatment",
+      "votes": [
+        "treatment",
+        "treatment"
+      ]
+    },
+    {
+      "attempt": 3,
+      "case_id": "see-requirement-ordinary",
+      "critical_issues": [
+        false,
+        false
+      ],
+      "rationales": [
+        "B preserves the obligation force, makes the two MUST properties independently traceable, and identifies concrete missing thresholds and retry parameters. A adds broader timing and request-eligibility concerns not required by the source.",
+        "A is more readable and source-traceable because it separates the mandatory properties and confines ambiguities to missing measures, retry trigger, and retry count. B adds unnecessary timing and eligibility speculation."
+      ],
+      "verdict": "treatment",
+      "votes": [
+        "treatment",
+        "treatment"
+      ]
+    }
+  ],
+  "schema_version": 3
+}

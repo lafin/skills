@@ -1,0 +1,188 @@
+{
+  "pairs": {
+    "0a6b4f314e6cfed9": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "sib21-explanation-noop-topaz",
+      "order": "forward"
+    },
+    "17e30dbb7fcdc80e": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "sib21-explanation-ordinary-boreal",
+      "order": "forward"
+    },
+    "18b65daf71146f5f": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "see-procedure-ordinary",
+      "order": "forward"
+    },
+    "1a026e7f2795d0f9": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "see-authorization-scope-regression",
+      "order": "forward"
+    },
+    "1a537e028f0c6343": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "sib21-requirement-noop-maple",
+      "order": "forward"
+    },
+    "20be553b636f9b43": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "see-explanation-ordinary",
+      "order": "forward"
+    },
+    "3c595057825b2799": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "sib21-explanation-adversarial-helix",
+      "order": "forward"
+    },
+    "3e3c457a30056658": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "see-single-reference-not-ambiguity-regression",
+      "order": "forward"
+    },
+    "41d6add96d634575": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "see-unknown-recovery-before-destructive-regression",
+      "order": "forward"
+    },
+    "44769949f50b2c8c": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "see-descriptive-fact-regression",
+      "order": "forward"
+    },
+    "5d0897b873c8b4b5": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "see-procedure-noop",
+      "order": "forward"
+    },
+    "64d87aa8c37b57f0": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "see-requirement-ordinary",
+      "order": "forward"
+    },
+    "69f08e3c0277f846": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "see-local-antecedent-regression",
+      "order": "forward"
+    },
+    "810fb3145c633253": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "sib21-requirement-adversarial-quartz",
+      "order": "forward"
+    },
+    "9012b55099ba8588": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "sib21-procedure-adversarial-bramble",
+      "order": "forward"
+    },
+    "9282a333732f6779": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "sib21-incident-noop-violet",
+      "order": "forward"
+    },
+    "9f2089fbd6ef34ec": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "sib21-incident-ordinary-rowan",
+      "order": "forward"
+    },
+    "a212144fe3172d97": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "sib21-procedure-ordinary-aster",
+      "order": "forward"
+    },
+    "c6e3c0a5dd06fb76": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "sib21-requirement-ordinary-lumen",
+      "order": "forward"
+    },
+    "d83b3a138840ffb7": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "see-requirement-noop",
+      "order": "forward"
+    },
+    "e00cd1c1f30cbe19": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "see-error-ordinary",
+      "order": "forward"
+    },
+    "f3771af70e9054f7": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "see-exact-profile-proper-name-regression",
+      "order": "forward"
+    },
+    "f4d534f110e7d1cc": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "see-explanation-quote-punctuation",
+      "order": "forward"
+    },
+    "f56e5f9d80e45af4": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "sib21-incident-adversarial-saffron",
+      "order": "forward"
+    },
+    "f589814d88760238": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "see-evidence-limitation-not-ambiguity-regression",
+      "order": "forward"
+    },
+    "fbd498a4ed5a8015": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "sib21-procedure-noop-juniper",
+      "order": "forward"
+    }
+  },
+  "schema_version": 1,
+  "status": "restricted_blinding_key"
+}

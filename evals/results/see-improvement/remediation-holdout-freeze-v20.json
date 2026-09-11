@@ -1,0 +1,45 @@
+{
+  "frozen_at": "2026-09-11T18:20:50Z",
+  "candidate_freeze": {
+    "path": "evals/results/see-improvement/remediation-freeze-v20.json",
+    "sha256": "72ea8431d57d383126ee2152756e2e918450a9c7a95e95316b2e5a3a6ed2c5c9"
+  },
+  "holdout": {
+    "path": "evals/cases/see-behavior-independent-holdout-v19.jsonl",
+    "sha256": "992b6b256308a53790eb6b40d2ceab576bad65b6d6d18c485ad40bb5d334c905",
+    "records": 12,
+    "families": {
+      "procedure/runbook": 3,
+      "requirement/contract": 3,
+      "explanation/reference": 3,
+      "error/incident": 3
+    },
+    "variants": {
+      "ordinary": 4,
+      "adversarial": 4,
+      "noop": 4
+    },
+    "profiles": {
+      "strict": 6,
+      "engineering-default": 6
+    }
+  },
+  "response_blind_audit": {
+    "mechanical_validation": "pass",
+    "independent_author": "IndependentV19Author",
+    "independent_auditor": "V19HoldoutAuditor",
+    "audit_adjudicator": "V19AuditAdjudicator",
+    "candidate_or_prior_evidence_visible_to_author_or_auditor": false,
+    "explicit_checks": 85,
+    "generated_exact_preservation_checks": 77,
+    "final_adjudication": "FREEZE",
+    "release_blockers": [],
+    "final_recheck": "The holdout has 12 valid cases, balanced profiles, four no-op anchors, explicit obligation-force checks, exact lexical checks, ordering and cardinality checks, bounded redaction checks, and ambiguity/evidence separation checks.",
+    "semantic_only_disposition": "The pairwise judge must assess semantic obligation force, arbitrary English paraphrases, typed relations, causality, uncertainty, and ambiguity meaning."
+  },
+  "evaluator": {
+    "evals/run.py": "be310d7d73869c11412724d66d66105850b22cd3210e4c753f1cbc4aa443cca0",
+    "evals/grade.py": "21f818a084b4aecf52a6980f15558b2424bcedc640fb6b59647804d3a5fb0cc8"
+  },
+  "candidate_skill_sha256": "881dbdc8582069db6daffdaeb00b7bf3ddf399c04bed69507ded41e6a6e8da78"
+}

@@ -1,0 +1,118 @@
+{
+  "family": "procedure",
+  "rubric_path": "evals/see-rubric.json",
+  "records": [
+    {
+      "case_id": "see-procedure-ordinary",
+      "split": "development",
+      "artifact_family": "procedure and runbook",
+      "prompt": "Rewrite this engineering procedure with the engineering-default SEE profile. Source: To diagnose access problems, authenticate the account, authorize it, and check that it looks good. Run `authctl inspect --user alice`. Do not invent an expected result that the source does not provide. Respond with exactly three newline-separated fields: PROFILE: strict|engineering-default; REWRITE: <one line>; AMBIGUITIES: <text or none>.",
+      "case_manifest": {
+        "ambiguity_traps": [
+          "The pronoun it can refer to the account or authentication.",
+          "looks good has no observable meaning."
+        ],
+        "artifact_family": "procedure and runbook",
+        "conditions_and_exceptions": [],
+        "expected_obligation_force": [],
+        "numbers_units_versions_status_codes": [],
+        "permitted_rewrites": [
+          "Name the account as the object of both actions.",
+          "Report the missing success criterion."
+        ],
+        "prohibited_inventions": [
+          "A command result, exit code, or account state not present in the source."
+        ],
+        "protected_spans": [
+          "`authctl inspect --user alice`"
+        ],
+        "quoted_spans": [],
+        "required_structure": [
+          "Imperative action.",
+          "Observable result or explicit missing-result ambiguity."
+        ],
+        "selected_profile": "engineering-default",
+        "source_facts": [
+          "The procedure diagnoses access problems.",
+          "The procedure calls for authentication and authorization.",
+          "The source does not define the expected result."
+        ]
+      },
+      "baseline": {
+        "response": "PROFILE: engineering-default\nREWRITE: Diagnose Alice’s access problem by running `authctl inspect --user alice`, then review the output for authentication and authorization status.\nAMBIGUITIES: The source does not define the expected output or criteria for “looks good.”",
+        "deterministic_passed": true,
+        "critical_passed": true,
+        "failed_checks": []
+      },
+      "treatment": {
+        "response": "PROFILE: engineering-default\nREWRITE: To diagnose access problems: 1. Authenticate the account. 2. Authorize the account. 3. Check that the account looks good. 4. Run `authctl inspect --user alice`.\nAMBIGUITIES: The source does not specify how to authenticate or authorize the account, what “looks good” means, or whether the command performs these actions or is a separate diagnostic step.",
+        "deterministic_passed": true,
+        "critical_passed": true,
+        "failed_checks": []
+      }
+    },
+    {
+      "case_id": "see-release-procedure-ambiguity",
+      "split": "holdout",
+      "artifact_family": "procedure and runbook",
+      "prompt": "Rewrite this diagnostic procedure with the engineering-default SEE profile. Preserve the command, path, condition, and exit code. Report the missing healthy result in AMBIGUITIES; do not invent one. Source: Prerequisite: The operator has read access to the sandbox. If `sync probe --tenant maple` returns exit code 2, save the standard error in `/tmp/sync-probe.log`. Check whether the tenant is healthy. Respond with exactly three newline-separated fields: PROFILE: strict|engineering-default; REWRITE: <one line>; AMBIGUITIES: <text or none>.",
+      "case_manifest": {
+        "ambiguity_traps": [
+          "Healthy has no observable criterion."
+        ],
+        "artifact_family": "procedure and runbook",
+        "conditions_and_exceptions": [
+          "If `sync probe --tenant maple` returns exit code 2"
+        ],
+        "expected_obligation_force": [],
+        "numbers_units_versions_status_codes": [
+          "exit code 2"
+        ],
+        "permitted_rewrites": [
+          "Use imperative sentences.",
+          "Report the undefined healthy result."
+        ],
+        "prohibited_inventions": [
+          "A healthy exit code or output value."
+        ],
+        "protected_spans": [
+          "`sync probe --tenant maple`",
+          "`/tmp/sync-probe.log`"
+        ],
+        "quoted_spans": [],
+        "required_structure": [
+          "Prerequisite before the diagnostic action.",
+          "Conditional evidence-recording action."
+        ],
+        "selected_profile": "engineering-default",
+        "source_facts": [
+          "The operator needs read access to the sandbox.",
+          "Exit code 2 causes the operator to save standard error.",
+          "The source does not define the healthy result."
+        ]
+      },
+      "baseline": {
+        "response": "PROFILE: engineering-default\nREWRITE: Prerequisite: the operator has read access to the sandbox. Run `sync probe --tenant maple`; if it returns exit code 2, save its standard error to `/tmp/sync-probe.log`, then check whether the tenant is healthy.\nAMBIGUITIES: The expected command output or other result indicating that the tenant is healthy is not specified.",
+        "deterministic_passed": false,
+        "critical_passed": false,
+        "failed_checks": [
+          {
+            "name": "manifest_conditions_and_exceptions_1",
+            "detail": "Missing case-insensitively matched conditions_and_exceptions value: 'If `sync probe --tenant maple` returns exit code 2'"
+          }
+        ]
+      },
+      "treatment": {
+        "response": "PROFILE: engineering-default\nREWRITE: Prerequisite: The operator has read access to the sandbox. Run `sync probe --tenant maple`. If the command returns exit code 2, save its standard error in `/tmp/sync-probe.log`. Check whether the tenant is healthy.\nAMBIGUITIES: The source does not specify the observable result that indicates a healthy tenant.",
+        "deterministic_passed": false,
+        "critical_passed": false,
+        "failed_checks": [
+          {
+            "name": "manifest_conditions_and_exceptions_1",
+            "detail": "Missing case-insensitively matched conditions_and_exceptions value: 'If `sync probe --tenant maple` returns exit code 2'"
+          }
+        ]
+      }
+    }
+  ]
+}

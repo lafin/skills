@@ -1,0 +1,509 @@
+{
+  "pairs": {
+    "0192738aa5872806": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 3,
+      "case_id": "see_ind_v11_incident_adversarial_nx31",
+      "order": "swapped"
+    },
+    "019445c7e325bce7": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 3,
+      "case_id": "see_ind_v11_procedure_ordinary_calyx",
+      "order": "forward"
+    },
+    "01e7fad017cdb5f3": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 2,
+      "case_id": "see_ind_v11_procedure_ordinary_calyx",
+      "order": "swapped"
+    },
+    "036884c0f7e2729e": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 3,
+      "case_id": "see_ind_v11_incident_noop_pavo",
+      "order": "swapped"
+    },
+    "036a3ad5036973ee": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 2,
+      "case_id": "see_ind_v11_requirement_adversarial_arca",
+      "order": "forward"
+    },
+    "041f6ab3bfe65e7b": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "see_ind_v11_procedure_ordinary_calyx",
+      "order": "forward"
+    },
+    "04dcd05011aec639": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 1,
+      "case_id": "see_ind_v11_requirement_ordinary_orin",
+      "order": "swapped"
+    },
+    "06f78bf39a9868e1": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 3,
+      "case_id": "see_ind_v11_incident_noop_pavo",
+      "order": "forward"
+    },
+    "08944ad87c517133": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 2,
+      "case_id": "see_ind_v11_explanation_noop_nori",
+      "order": "swapped"
+    },
+    "0f2619053e890096": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 3,
+      "case_id": "see_ind_v11_requirement_adversarial_arca",
+      "order": "forward"
+    },
+    "153d87ad73a065e9": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 3,
+      "case_id": "see_ind_v11_requirement_noop_lumen",
+      "order": "forward"
+    },
+    "15664cb7d37ae7a2": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "see_ind_v11_explanation_ordinary_rill",
+      "order": "forward"
+    },
+    "2274f97cae4ca8d6": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 2,
+      "case_id": "see_ind_v11_procedure_adversarial_zephyr",
+      "order": "swapped"
+    },
+    "22b0f8bb0717147b": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 1,
+      "case_id": "see_ind_v11_requirement_adversarial_arca",
+      "order": "swapped"
+    },
+    "23dde4d2b0e6e0fd": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 2,
+      "case_id": "see_ind_v11_explanation_noop_nori",
+      "order": "forward"
+    },
+    "264ef64ab477d6af": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "see_ind_v11_requirement_noop_lumen",
+      "order": "forward"
+    },
+    "2715e0fe2d34d9e7": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 3,
+      "case_id": "see_ind_v11_requirement_noop_lumen",
+      "order": "swapped"
+    },
+    "275bc5fccbbabcc7": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 2,
+      "case_id": "see_ind_v11_procedure_adversarial_zephyr",
+      "order": "forward"
+    },
+    "2bb499b7d80a9397": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 1,
+      "case_id": "see_ind_v11_explanation_adversarial_sable",
+      "order": "swapped"
+    },
+    "2fab83727ace7e8a": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "see_ind_v11_incident_noop_pavo",
+      "order": "forward"
+    },
+    "40470a5f04e7ea12": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "see_ind_v11_incident_ordinary_tern",
+      "order": "forward"
+    },
+    "45dac9f7ba358e69": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 1,
+      "case_id": "see_ind_v11_incident_ordinary_tern",
+      "order": "swapped"
+    },
+    "4990780076dd66d9": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 3,
+      "case_id": "see_ind_v11_procedure_noop_vela",
+      "order": "swapped"
+    },
+    "516d025dedfaea79": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 2,
+      "case_id": "see_ind_v11_requirement_ordinary_orin",
+      "order": "swapped"
+    },
+    "517c0b07020b3bf1": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "see_ind_v11_procedure_adversarial_zephyr",
+      "order": "forward"
+    },
+    "56ea3b12aa24f15d": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 2,
+      "case_id": "see_ind_v11_incident_noop_pavo",
+      "order": "forward"
+    },
+    "5cfd6779c537e463": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 2,
+      "case_id": "see_ind_v11_requirement_adversarial_arca",
+      "order": "swapped"
+    },
+    "5ee6c845fd523cd0": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "see_ind_v11_incident_adversarial_nx31",
+      "order": "forward"
+    },
+    "63a878d0a04e7903": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 3,
+      "case_id": "see_ind_v11_incident_ordinary_tern",
+      "order": "swapped"
+    },
+    "646e4db3e075c374": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 1,
+      "case_id": "see_ind_v11_incident_noop_pavo",
+      "order": "swapped"
+    },
+    "6683bc2f57346043": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 1,
+      "case_id": "see_ind_v11_incident_adversarial_nx31",
+      "order": "swapped"
+    },
+    "6f5c43b7b0d41593": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 3,
+      "case_id": "see_ind_v11_explanation_ordinary_rill",
+      "order": "forward"
+    },
+    "72043cc49c2c3a2e": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 1,
+      "case_id": "see_ind_v11_explanation_ordinary_rill",
+      "order": "swapped"
+    },
+    "7311f7a6c22e1b31": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 2,
+      "case_id": "see_ind_v11_incident_noop_pavo",
+      "order": "swapped"
+    },
+    "7e2a8dfe38062e8a": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 3,
+      "case_id": "see_ind_v11_explanation_ordinary_rill",
+      "order": "swapped"
+    },
+    "820bd326619ecb2e": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 2,
+      "case_id": "see_ind_v11_incident_ordinary_tern",
+      "order": "swapped"
+    },
+    "82113cef7d011a75": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 3,
+      "case_id": "see_ind_v11_incident_adversarial_nx31",
+      "order": "forward"
+    },
+    "82cff5ac7e642558": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 2,
+      "case_id": "see_ind_v11_procedure_ordinary_calyx",
+      "order": "forward"
+    },
+    "83f75e1f7bdb0ecd": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 1,
+      "case_id": "see_ind_v11_procedure_adversarial_zephyr",
+      "order": "swapped"
+    },
+    "8425fb4c4207d20c": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 2,
+      "case_id": "see_ind_v11_requirement_ordinary_orin",
+      "order": "forward"
+    },
+    "88c06c2a19d4bc22": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 1,
+      "case_id": "see_ind_v11_procedure_noop_vela",
+      "order": "swapped"
+    },
+    "8cd9ea2732c7d1c7": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 3,
+      "case_id": "see_ind_v11_procedure_adversarial_zephyr",
+      "order": "forward"
+    },
+    "8f82535bfd89b184": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 2,
+      "case_id": "see_ind_v11_explanation_ordinary_rill",
+      "order": "forward"
+    },
+    "8fda5f733d98b1d2": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 3,
+      "case_id": "see_ind_v11_procedure_ordinary_calyx",
+      "order": "swapped"
+    },
+    "91a78ee6e55f4a98": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 1,
+      "case_id": "see_ind_v11_procedure_ordinary_calyx",
+      "order": "swapped"
+    },
+    "95f949eace3eaf34": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 2,
+      "case_id": "see_ind_v11_explanation_adversarial_sable",
+      "order": "forward"
+    },
+    "9627f135e8ac40b7": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 3,
+      "case_id": "see_ind_v11_requirement_ordinary_orin",
+      "order": "swapped"
+    },
+    "a1a874ac8694401f": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 2,
+      "case_id": "see_ind_v11_incident_adversarial_nx31",
+      "order": "swapped"
+    },
+    "a1e74ab236b157b8": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 2,
+      "case_id": "see_ind_v11_incident_adversarial_nx31",
+      "order": "forward"
+    },
+    "aa16b5a89336a629": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "see_ind_v11_explanation_adversarial_sable",
+      "order": "forward"
+    },
+    "abdc890a710e6ce0": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 3,
+      "case_id": "see_ind_v11_requirement_adversarial_arca",
+      "order": "swapped"
+    },
+    "aea9e861a002cfc7": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 2,
+      "case_id": "see_ind_v11_incident_ordinary_tern",
+      "order": "forward"
+    },
+    "b224f3a849cae8af": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "see_ind_v11_requirement_adversarial_arca",
+      "order": "forward"
+    },
+    "b2795bfe85452c67": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 3,
+      "case_id": "see_ind_v11_explanation_noop_nori",
+      "order": "forward"
+    },
+    "b7534cdeb8617cbd": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 2,
+      "case_id": "see_ind_v11_explanation_adversarial_sable",
+      "order": "swapped"
+    },
+    "b85e327399fc0858": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 3,
+      "case_id": "see_ind_v11_explanation_noop_nori",
+      "order": "swapped"
+    },
+    "b86f0e03c2459372": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 3,
+      "case_id": "see_ind_v11_procedure_noop_vela",
+      "order": "forward"
+    },
+    "bb5d3c33c27a938b": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 1,
+      "case_id": "see_ind_v11_explanation_noop_nori",
+      "order": "swapped"
+    },
+    "be4a98daa010db69": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 2,
+      "case_id": "see_ind_v11_explanation_ordinary_rill",
+      "order": "swapped"
+    },
+    "befd5388579adb1f": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 1,
+      "case_id": "see_ind_v11_requirement_noop_lumen",
+      "order": "swapped"
+    },
+    "c51136a18ff6d661": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "see_ind_v11_requirement_ordinary_orin",
+      "order": "forward"
+    },
+    "c674c1086ddf4d17": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 3,
+      "case_id": "see_ind_v11_procedure_adversarial_zephyr",
+      "order": "swapped"
+    },
+    "c905dfe55f2051ba": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 3,
+      "case_id": "see_ind_v11_incident_ordinary_tern",
+      "order": "forward"
+    },
+    "ca76db51197c6124": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 3,
+      "case_id": "see_ind_v11_requirement_ordinary_orin",
+      "order": "forward"
+    },
+    "cbcac93109b092b5": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 2,
+      "case_id": "see_ind_v11_requirement_noop_lumen",
+      "order": "forward"
+    },
+    "cc41c4d01df464a1": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 2,
+      "case_id": "see_ind_v11_procedure_noop_vela",
+      "order": "swapped"
+    },
+    "cde40b663b684df6": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 2,
+      "case_id": "see_ind_v11_procedure_noop_vela",
+      "order": "forward"
+    },
+    "d7612e61c0697a2d": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "see_ind_v11_procedure_noop_vela",
+      "order": "forward"
+    },
+    "dcbb54c0557212e3": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 2,
+      "case_id": "see_ind_v11_requirement_noop_lumen",
+      "order": "swapped"
+    },
+    "f83fc7546b9d0bc6": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 3,
+      "case_id": "see_ind_v11_explanation_adversarial_sable",
+      "order": "forward"
+    },
+    "fb83d943a2c73b1a": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 3,
+      "case_id": "see_ind_v11_explanation_adversarial_sable",
+      "order": "swapped"
+    },
+    "fc6263578cd27d73": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "see_ind_v11_explanation_noop_nori",
+      "order": "forward"
+    }
+  },
+  "schema_version": 4
+}

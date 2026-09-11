@@ -1,0 +1,28 @@
+{
+  "all_passed": true,
+  "artifacts": 9,
+  "condition": "treatment",
+  "critical_passed": 9,
+  "deterministic_grades": "grades.jsonl",
+  "efficacy_claim": null,
+  "input_binding": {
+    "artifacts": {
+      "artifacts/see-error-ordinary/1.json": "c98fdd06df150c2393e633edffc123badb300eea16fac8a4fcefc9abe48e4f59",
+      "artifacts/see-error-ordinary/2.json": "f19fb9970366cf9c8b44716779f4559a12489af885044e5ef1c63c99657ce599",
+      "artifacts/see-error-ordinary/3.json": "4960808d5c12305cf4c8cecf932c83988f0ec583fe60a2add818fc9a7379e2ad",
+      "artifacts/see-explanation-quote-punctuation/1.json": "6c0d79965149cef92dfd3bb77c9b64ffdbe3b9047cb0be4e29cc6a59c2547dd1",
+      "artifacts/see-explanation-quote-punctuation/2.json": "31a4a6f1a637e33392950769a06a32ed7017c7889e0e4e599b34379a55803067",
+      "artifacts/see-explanation-quote-punctuation/3.json": "0406fce32ec1e8b672e9f03c510b81ab49ae4d162aeccfddc4eb87da4eeb8f57",
+      "artifacts/see-unknown-recovery-before-destructive-regression/1.json": "fd587525f5ff580446acee692d7bc74837c5dee58fe1d9ce5b652d4327b9a5cd",
+      "artifacts/see-unknown-recovery-before-destructive-regression/2.json": "0abe8959eecac8b4768c0f7a7749a3f59d424be170e3e7e18836c0daabeaed17",
+      "artifacts/see-unknown-recovery-before-destructive-regression/3.json": "9d154ad7567097f56fde1235e119aa8786d52cb745313614d06a9685fa2f978f"
+    },
+    "case_snapshot_sha256": "7c8440b961f891e0481c39fbdd5382d1ee9d763209a91beff10982f686621c54",
+    "grader_sha256": "dd04a7a7d85d129245f1885bac5ff3845b3f3adb292b90394570f08b5827fe72",
+    "manifest_sha256": "2b6b7c7ab4ff54953214dd0b8ef579f87dbded46ce3b9727a8569942f9c99ec2"
+  },
+  "passed": 9,
+  "reason": "A single condition cannot support an efficacy claim; pair it with the other condition.",
+  "run_id": "remediation-v16-regression-smoke-treatment",
+  "schema_version": 4
+}

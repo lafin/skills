@@ -1,0 +1,28 @@
+{
+  "all_passed": true,
+  "artifacts": 9,
+  "condition": "treatment",
+  "critical_passed": 9,
+  "deterministic_grades": "grades.jsonl",
+  "efficacy_claim": null,
+  "input_binding": {
+    "artifacts": {
+      "artifacts/see-evidence-limitation-not-ambiguity-regression/1.json": "9c3e855d3e39f9138496192d5cef853fdbac2422f48a9ae5ddf196bedcf156d3",
+      "artifacts/see-evidence-limitation-not-ambiguity-regression/2.json": "682cf3994840bde8dc222ba91ed05f2a693ae20fe16646d9f6fb4cc14d2f4045",
+      "artifacts/see-evidence-limitation-not-ambiguity-regression/3.json": "af02bd6a42390b8c70f5046ffdccd5b3b91ceba143500930e40570852a748bf6",
+      "artifacts/see-single-reference-not-ambiguity-regression/1.json": "399a37bd14cece82c282fece2f304bac635fc1c4b3504888a621d018a1c57fe9",
+      "artifacts/see-single-reference-not-ambiguity-regression/2.json": "aced2bbc907580ad6ceea454a6111c924c690116d6bf207ec5c85c60d8388f85",
+      "artifacts/see-single-reference-not-ambiguity-regression/3.json": "955e3a516eafc7b905f6309f8614067f402086a0c04a7600dcc0629aab0b2fcf",
+      "artifacts/see-unknown-recovery-before-destructive-regression/1.json": "a880647fb5a88bc16243cad2c42a3e3d826beec446b177f2e694c1854d0acb35",
+      "artifacts/see-unknown-recovery-before-destructive-regression/2.json": "e1d3b39d337e322cba1a2b6c4f5ae63678ac54676ebd591d781a073f616326e7",
+      "artifacts/see-unknown-recovery-before-destructive-regression/3.json": "9a413a1fdc4711ebf22999d49335f0fad2283fc536d7147f8de0289cc769f2b4"
+    },
+    "case_snapshot_sha256": "1e7547028489a009264266384e8f6672ef0a6c408fbf8037ad28bdf7c0d8e716",
+    "grader_sha256": "5487fa4f7ea2115d97d7b0e527852ff747d059aa86449a68fe8d38e93b8b7079",
+    "manifest_sha256": "cbea8bf068b4c88551101e9b1da9fc0b140d336d5e3146e13989e96316ef5dd8"
+  },
+  "passed": 9,
+  "reason": "A single condition cannot support an efficacy claim; pair it with the other condition.",
+  "run_id": "remediation-v11-regression-smoke-treatment",
+  "schema_version": 4
+}

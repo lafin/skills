@@ -1,0 +1,80 @@
+{
+  "case_kind": "behavior",
+  "correctness_benefit": "Development treatment passed all deterministic checks; the sealed independent behavior treatment did not, so v3 remains no-go pending failure classification.",
+  "criteria": {
+    "cost_metrics_known": true,
+    "development_improved": true,
+    "holdout_preserved": false,
+    "increased_cost_has_correctness_benefit": true,
+    "no_critical_regressions": false,
+    "routing_holdout_all_passed": true
+  },
+  "decision": "fail",
+  "development": {
+    "baseline_metrics": {
+      "questions": 0,
+      "tokens": 11961,
+      "tool_events": 0
+    },
+    "baseline_passed": 16,
+    "critical_regressions": [],
+    "regressions": [],
+    "total": 21,
+    "treatment_metrics": {
+      "questions": 0,
+      "tokens": 109185,
+      "tool_events": 0
+    },
+    "treatment_passed": 21
+  },
+  "efficacy_claim": null,
+  "holdout": {
+    "baseline_metrics": {
+      "questions": 0,
+      "tokens": 22723,
+      "tool_events": 0
+    },
+    "baseline_passed": 13,
+    "critical_regressions": [
+      "see-v3-independent-procedure-noop-03:1",
+      "see-v3-independent-procedure-noop-03:3",
+      "see-v3-independent-explanation-ordinary-07:1"
+    ],
+    "regressions": [
+      "see-v3-independent-procedure-noop-03:1",
+      "see-v3-independent-procedure-noop-03:3",
+      "see-v3-independent-explanation-ordinary-07:1"
+    ],
+    "total": 36,
+    "treatment_metrics": {
+      "questions": 0,
+      "tokens": 192341,
+      "tool_events": 0
+    },
+    "treatment_passed": 12
+  },
+  "increased_metrics": [
+    "development:tokens",
+    "holdout:tokens"
+  ],
+  "paired_evidence": true,
+  "routing_holdout": {
+    "baseline_metrics": {
+      "questions": 0,
+      "tokens": 22395,
+      "tool_events": 0
+    },
+    "baseline_passed": 36,
+    "critical_regressions": [],
+    "regressions": [],
+    "total": 36,
+    "treatment_metrics": {
+      "questions": 0,
+      "tokens": 21999,
+      "tool_events": 0
+    },
+    "treatment_passed": 36
+  },
+  "schema_version": 4,
+  "unknown_metrics": []
+}

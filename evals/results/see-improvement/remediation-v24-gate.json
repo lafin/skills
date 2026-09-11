@@ -1,0 +1,72 @@
+{
+  "case_kind": "behavior",
+  "correctness_benefit": "Development treatment passed all 42 deterministic artifacts and the independently frozen holdout passed all 36 while preserving exact quotations, exact output tokens, named audience and product scope, descriptive facts and obligation boundaries, authorization, typed technical terms, source ambiguity, recovery placement, redaction boundaries, and no-op text.",
+  "criteria": {
+    "cost_metrics_known": true,
+    "development_improved": true,
+    "holdout_preserved": true,
+    "increased_cost_has_correctness_benefit": true,
+    "no_critical_regressions": true,
+    "routing_holdout_all_passed": true
+  },
+  "decision": "pass",
+  "development": {
+    "baseline_metrics": {
+      "questions": 0,
+      "tokens": 24092,
+      "tool_events": 0
+    },
+    "baseline_passed": 29,
+    "critical_regressions": [],
+    "regressions": [],
+    "total": 42,
+    "treatment_metrics": {
+      "questions": 0,
+      "tokens": 256429,
+      "tool_events": 0
+    },
+    "treatment_passed": 42
+  },
+  "efficacy_claim": "Treatment improved deterministic development results, preserved every passing holdout result, passed routing holdout, and introduced no undocumented critical or cost regression.",
+  "holdout": {
+    "baseline_metrics": {
+      "questions": 0,
+      "tokens": 22100,
+      "tool_events": 0
+    },
+    "baseline_passed": 24,
+    "critical_regressions": [],
+    "regressions": [],
+    "total": 36,
+    "treatment_metrics": {
+      "questions": 0,
+      "tokens": 222647,
+      "tool_events": 0
+    },
+    "treatment_passed": 36
+  },
+  "increased_metrics": [
+    "development:tokens",
+    "holdout:tokens"
+  ],
+  "paired_evidence": true,
+  "routing_holdout": {
+    "baseline_metrics": {
+      "questions": 0,
+      "tokens": 22395,
+      "tool_events": 0
+    },
+    "baseline_passed": 36,
+    "critical_regressions": [],
+    "regressions": [],
+    "total": 36,
+    "treatment_metrics": {
+      "questions": 0,
+      "tokens": 21999,
+      "tool_events": 0
+    },
+    "treatment_passed": 36
+  },
+  "schema_version": 4,
+  "unknown_metrics": []
+}

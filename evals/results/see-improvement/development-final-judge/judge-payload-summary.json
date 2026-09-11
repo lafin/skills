@@ -1,0 +1,10 @@
+{
+  "deterministic_grade_summaries": [
+    "evals/results/see-improvement/development-baseline/grade-summary.json",
+    "evals/results/see-improvement/development-final-treatment/grade-summary.json"
+  ],
+  "efficacy_claim": null,
+  "payloads": 36,
+  "schema_version": 3,
+  "swapped_pairs": 18
+}

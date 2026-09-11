@@ -12,7 +12,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-SCHEMA_VERSION = 3
+SCHEMA_VERSION = 4
 HASH = re.compile(r"[0-9a-f]{64}")
 POLICY_FLAGS = {"extensions": "disabled", "rules": "disabled", "sessions": "disabled"}
 SENSITIVE_CONFIG_KEY = re.compile(
@@ -28,6 +28,25 @@ VERIFIER_DIMENSIONS = {
     "verification",
     "reporting",
 }
+CASE_MANIFEST_LIST_FIELDS = {
+    "source_facts",
+    "protected_spans",
+    "quoted_spans",
+    "conditions_and_exceptions",
+    "numbers_units_versions_status_codes",
+    "expected_obligation_force",
+    "permitted_rewrites",
+    "required_structure",
+    "ambiguity_traps",
+    "prohibited_inventions",
+}
+CASE_MANIFEST_FIELDS = CASE_MANIFEST_LIST_FIELDS | {"artifact_family", "selected_profile"}
+EXACT_PRESERVATION_FIELDS = (
+    "protected_spans",
+    "quoted_spans",
+    "numbers_units_versions_status_codes",
+)
+
 
 
 def reject_duplicate_keys(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
@@ -224,9 +243,9 @@ def validate_case(case: dict[str, Any], location: str) -> None:
     }
     kind = case.get("kind")
     allowed = required | {"judge_criteria"} | (
-        {"response_fields"}
+        {"response_fields", "case_manifest"}
         if kind == "behavior"
-        else {"available_skills"}
+        else {"available_skills", "evaluated_skills"}
         if kind == "routing"
         else {"fixture"}
         if kind == "repository"
@@ -279,16 +298,60 @@ def validate_case(case: dict[str, Any], location: str) -> None:
             or len(fields) != len(set(fields))
         ):
             raise ValueError(f"{location}: invalid response_fields")
+        manifest = case.get("case_manifest")
+        if manifest is not None:
+            if not isinstance(manifest, dict) or set(manifest) != CASE_MANIFEST_FIELDS:
+                raise ValueError(f"{location}: invalid case_manifest schema")
+            if (
+                not isinstance(manifest["artifact_family"], str)
+                or not manifest["artifact_family"]
+                or manifest["selected_profile"] not in {"strict", "engineering-default"}
+            ):
+                raise ValueError(f"{location}: invalid case_manifest identity")
+            for name in CASE_MANIFEST_LIST_FIELDS:
+                items = manifest[name]
+                if not isinstance(items, list) or not all(
+                    isinstance(item, str) and item for item in items
+                ):
+                    raise ValueError(f"{location}: invalid case_manifest {name}")
+            if any(
+                not manifest[name]
+                for name in ("source_facts", "permitted_rewrites", "required_structure")
+            ):
+                raise ValueError(f"{location}: incomplete case_manifest")
+            prohibited_rewrite_spans = [
+                check["value"]
+                for check in case["checks"]
+                if check["op"] == "not_contains"
+                and check.get("field", "response") in {"response", "fields.REWRITE"}
+            ]
+            for name in EXACT_PRESERVATION_FIELDS:
+                for value in manifest[name]:
+                    conflict = next(
+                        (span for span in prohibited_rewrite_spans if value in span),
+                        None,
+                    )
+                    if conflict is not None:
+                        raise ValueError(
+                            f"{location}: exact {name} value {value!r} conflicts "
+                            f"with prohibited rewrite span {conflict!r}"
+                        )
     elif kind == "routing":
         skills = case.get("available_skills")
+        evaluated = case.get("evaluated_skills")
         if (
             not isinstance(skills, list)
             or not skills
             or not all(isinstance(skill, str) and skill for skill in skills)
             or len(skills) != len(set(skills))
             or case["target_skill"] not in skills
+            or not isinstance(evaluated, list)
+            or not evaluated
+            or not all(isinstance(skill, str) and skill for skill in evaluated)
+            or len(evaluated) != len(set(evaluated))
+            or not set(evaluated).issubset(skills)
         ):
-            raise ValueError(f"{location}: invalid available_skills")
+            raise ValueError(f"{location}: invalid routing skill scope")
     elif (
         not isinstance(case.get("fixture"), str)
         or not case["fixture"]
@@ -298,8 +361,13 @@ def validate_case(case: dict[str, Any], location: str) -> None:
 
 def validate_redacted_config(value: Any, key: str = "") -> None:
     if SENSITIVE_CONFIG_KEY.search(key):
-        redacted = value.get("value") if isinstance(value, dict) else value
-        if redacted != "<redacted>":
+        if isinstance(value, dict):
+            for item in value.values():
+                validate_redacted_config(item, key)
+        elif isinstance(value, list):
+            for item in value:
+                validate_redacted_config(item, key)
+        elif value != "<redacted>":
             raise ValueError(f"effective OMP config contains unredacted sensitive key {key!r}")
         return
     if isinstance(value, dict):
@@ -608,9 +676,10 @@ def expected_scope(case: dict[str, Any], manifest: dict[str, Any]) -> dict[str, 
             "invocation": f"/skill:{case['target_skill']}" if treatment else None,
         }
     return {
-        "mode": "repository-catalog",
-        "skills": sorted(manifest.get("skill_files", {})),
+        "mode": "confusable-pair",
+        "skills": case["available_skills"],
         "confusable_pair": case["available_skills"],
+        "evaluated_skills": case["evaluated_skills"],
     }
 
 def case_prompt(case: dict[str, Any], descriptions: dict[str, str]) -> str:
@@ -745,12 +814,24 @@ def validate_artifact(
         or any(command.count(flag) != 1 for flag in expected_runtime_flags | expected_config_flags)
     ):
         raise ValueError(f"{path}: command runtime configuration differs from manifest")
+    prompt_key = f"{case['kind']}_system_prompt"
+    expected_system_prompt = manifest["configuration"][prompt_key]
+    observed_system_flags = [
+        item for item in command if item.startswith("--system-prompt=")
+    ]
+    expected_system_flags = (
+        [f"--system-prompt={expected_system_prompt}"]
+        if expected_system_prompt
+        else []
+    )
+    if observed_system_flags != expected_system_flags:
+        raise ValueError(f"{path}: command system prompt differs from manifest")
     expected_skill_flag = (
         "--no-skills"
         if case["kind"] in {"behavior", "repository"} and manifest["condition"] == "baseline"
         else f"--skills={case['target_skill']}"
         if case["kind"] in {"behavior", "repository"}
-        else f"--skills={','.join(sorted(manifest.get('skill_files', {})))}"
+        else f"--skills={','.join(sorted(case['available_skills']))}"
     )
     if expected_skill_flag not in command:
         raise ValueError(f"{path}: command skill scope differs from manifest")
@@ -891,16 +972,69 @@ def field_value(value: dict[str, Any], field: str) -> str:
 
 
 def parse_response_fields(response: str, names: list[str]) -> dict[str, str] | None:
-    lines = [line for line in response.strip().splitlines() if line.strip()]
+    lines = response.splitlines()
     if len(lines) != len(names):
         return None
     values: dict[str, str] = {}
     for line, name in zip(lines, names):
-        prefix = f"{name}:"
-        if not line.startswith(prefix) or not line[len(prefix) :].strip():
+        prefix = f"{name}: "
+        if not line.startswith(prefix):
             return None
-        values[name] = line[len(prefix) :].strip()
+        value = line[len(prefix) :]
+        if not value or value != value.strip():
+            return None
+        values[name] = value
     return values
+def exact_span_present(text: str, value: str) -> bool:
+    def extends_token(position: int, step: int) -> bool:
+        if not 0 <= position < len(text):
+            return False
+        adjacent = text[position]
+        if adjacent.isalnum() or adjacent == "_" or adjacent in "-/%+":
+            return True
+        next_position = position + step
+        return (
+            adjacent in ".:"
+            and 0 <= next_position < len(text)
+            and (text[next_position].isalnum() or text[next_position] == "_")
+        )
+
+    start = 0
+    while (index := text.find(value, start)) >= 0:
+        end = index + len(value)
+        if not extends_token(index - 1, -1) and not extends_token(end, 1):
+            return True
+        start = index + 1
+    return False
+
+
+def manifest_preservation_checks(
+    case: dict[str, Any], rewrite: str
+) -> list[dict[str, Any]]:
+    manifest = case.get("case_manifest")
+    if not manifest:
+        return []
+    results: list[dict[str, Any]] = []
+    for field in EXACT_PRESERVATION_FIELDS:
+        for index, value in enumerate(manifest[field], 1):
+            preserved = exact_span_present(rewrite, value)
+            comparison = "exactly"
+            results.append(
+                {
+                    "name": f"manifest_{field}_{index}",
+                    "dimension": "preservation",
+                    "critical": True,
+                    "passed": preserved,
+                    "detail": (
+                        f"Preserved {field} value {comparison}: {value!r}"
+                        if preserved
+                        else f"Missing {comparison} matched {field} value: {value!r}"
+                    ),
+                }
+            )
+    return results
+
+
 
 
 def apply_check(check: dict[str, Any], artifact: dict[str, Any]) -> tuple[bool, str]:
@@ -912,7 +1046,7 @@ def apply_check(check: dict[str, Any], artifact: dict[str, Any]) -> tuple[bool, 
     elif op == "not_contains":
         passed = expected not in actual
     elif op == "equals":
-        passed = actual.strip().rstrip(";.") == expected.strip().rstrip(";.")
+        passed = actual == expected
     elif op == "regex":
         passed = re.search(expected, actual) is not None
     elif op == "not_regex":
@@ -981,6 +1115,11 @@ def grade_artifact(case: dict[str, Any], artifact: dict[str, Any]) -> dict[str, 
             }
         )
         checked_artifact["fields"] = fields or {}
+        results.extend(
+            manifest_preservation_checks(
+                case, (fields or {}).get("REWRITE", artifact.get("response", ""))
+            )
+        )
     for number, check in enumerate(case["checks"], 1):
         if case["kind"] == "routing" and check["name"] == "correct_route":
             passed = correct_route(artifact.get("response", ""), case["target_skill"])
@@ -1108,21 +1247,39 @@ def paired_runs(
     if base_cases != treat_cases:
         raise ValueError("baseline and treatment case snapshots differ")
     mutable_targets = {
-        case["target_skill"]
+        target
         for case in base_cases.values()
-        if case["kind"] in {"behavior", "repository"}
+        for target in (
+            [case["target_skill"]]
+            if case["kind"] in {"behavior", "repository"}
+            else case["evaluated_skills"]
+        )
     }
     base_skills = base_manifest["skill_files"]
     treatment_skills = treat_manifest["skill_files"]
     for name in base_skills.keys() | treatment_skills.keys():
         if name not in mutable_targets and base_skills.get(name) != treatment_skills.get(name):
             raise ValueError(f"baseline and treatment non-target skill differs: {name}")
+    routing_targets = {
+        skill
+        for case in base_cases.values()
+        if case["kind"] == "routing"
+        for skill in case["evaluated_skills"]
+    }
+    if routing_targets and not any(
+        base_skills.get(name) != treatment_skills.get(name)
+        for name in routing_targets
+    ):
+        raise ValueError("baseline and treatment evaluated routing skills are unchanged")
     if base_artifacts.keys() != treat_artifacts.keys():
         raise ValueError("baseline and treatment artifacts are not one-to-one paired")
     for key in base_artifacts:
         base = base_artifacts[key]
         treatment_value = treat_artifacts[key]
-        if base["prompt"] != treatment_value["prompt"]:
+        if (
+            base["prompt"] != treatment_value["prompt"]
+            and base_cases[key[0]]["kind"] != "routing"
+        ):
             raise ValueError(f"prompt differs for paired artifact {key}")
         if (base["provider"], base["model"]) != (
             treatment_value["provider"],
@@ -1382,17 +1539,18 @@ def paired_grade_counts(
 
 
 def merge_gate(args: argparse.Namespace) -> dict[str, Any]:
+    case_kind = getattr(args, "case_kind", "repository")
     development = paired_grade_counts(
         args.development_baseline,
         args.development_treatment,
         "development",
-        "repository",
+        case_kind,
     )
     holdout = paired_grade_counts(
         args.holdout_baseline,
         args.holdout_treatment,
         "holdout",
-        "repository",
+        case_kind,
     )
     routing_holdout = paired_grade_counts(
         args.routing_holdout_baseline,
@@ -1407,10 +1565,18 @@ def merge_gate(args: argparse.Namespace) -> dict[str, Any]:
     ]
     development_improved = (
         development["treatment_passed"] > development["baseline_passed"]
+        and (
+            case_kind != "behavior"
+            or development["treatment_passed"] == development["total"]
+        )
     )
     holdout_preserved = (
         not holdout["regressions"]
         and holdout["treatment_passed"] >= holdout["baseline_passed"]
+        and (
+            case_kind != "behavior"
+            or holdout["treatment_passed"] == holdout["total"]
+        )
     )
     routing_holdout_passed = (
         not routing_holdout["regressions"]
@@ -1444,6 +1610,7 @@ def merge_gate(args: argparse.Namespace) -> dict[str, Any]:
         "schema_version": SCHEMA_VERSION,
         "decision": "pass" if passed else "fail",
         "paired_evidence": True,
+        "case_kind": case_kind,
         "development": development,
         "holdout": holdout,
         "routing_holdout": routing_holdout,
@@ -1489,6 +1656,12 @@ def main() -> int:
     score_parser.add_argument("--output", type=Path, required=True)
     gate_parser = subparsers.add_parser(
         "gate", help="report the paired development and holdout merge gate"
+    )
+    gate_parser.add_argument(
+        "--case-kind",
+        choices=("repository", "behavior"),
+        default="repository",
+        help="Kind required for development and holdout pairs",
     )
     gate_parser.add_argument("--development-baseline", type=Path, required=True)
     gate_parser.add_argument("--development-treatment", type=Path, required=True)

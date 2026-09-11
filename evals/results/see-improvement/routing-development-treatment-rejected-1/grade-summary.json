@@ -1,0 +1,43 @@
+{
+  "all_passed": true,
+  "artifacts": 24,
+  "condition": "treatment",
+  "critical_passed": 24,
+  "deterministic_grades": "grades.jsonl",
+  "efficacy_claim": null,
+  "input_binding": {
+    "artifacts": {
+      "artifacts/see-routing-development-see--evaluation-negative/1.json": "1124e588257842534b8b6dbd3375b0afe24d8a07c95405acfe9aeba7428f0fc1",
+      "artifacts/see-routing-development-see--evaluation-negative/2.json": "0541a973faebfdbd16f780a3292f6065042fcb6a13a604857eeec72cf6d48e50",
+      "artifacts/see-routing-development-see--evaluation-negative/3.json": "fcaf4cc56a2f86079a15061a8d48ad1e95704cd04aba8d4d59d93aa8b7edc18b",
+      "artifacts/see-routing-development-see--evaluation-positive/1.json": "f67c9ca68b46089c3a6ee47e7a0059e81b03e6e0ea079d576ae9f203c23b67fc",
+      "artifacts/see-routing-development-see--evaluation-positive/2.json": "9439d56d152931ef65137fdc7c1b1b3eb8ddf1f42e05c472b05b366b9d4a073d",
+      "artifacts/see-routing-development-see--evaluation-positive/3.json": "744213dced4d389fbe28a45c33c5c7fb15777ed039a23bb1dcb6e41088cd9560",
+      "artifacts/see-routing-development-see--leancode-negative/1.json": "72406aa241b82724f412e88e0e6c8ae0c8b1578f7d26e8be2d092697d9fa7b9c",
+      "artifacts/see-routing-development-see--leancode-negative/2.json": "f112a54478679bb00845f2722722982728ab9ce0dffa63107cf843cb962c19d0",
+      "artifacts/see-routing-development-see--leancode-negative/3.json": "2121c660ed641f20cf52db94e581ded46e27275cc19a8acf3163579dc28cbb7a",
+      "artifacts/see-routing-development-see--leancode-positive/1.json": "6eb1a191d0a40f50832cc4ad9f202d000827ae81191e75930da2e75a2d918087",
+      "artifacts/see-routing-development-see--leancode-positive/2.json": "1c2e051b2b93d61a5fd16244f6ed74f054d7845320e83d28c1e24995ec3abf7a",
+      "artifacts/see-routing-development-see--leancode-positive/3.json": "02ad1a97a1f8c74a809aee07be752b8db3c3093719001a8e7242c8b4138ad6e4",
+      "artifacts/see-routing-development-see--lossless-negative/1.json": "3afeb81dc732b97fdbbb7ba37211f8eff257abccabc8ef03eab0145e98a4b14a",
+      "artifacts/see-routing-development-see--lossless-negative/2.json": "2d73280f8f2d287be62c505e26d749ae74ce4cf3bf9376020478675eb99c6d27",
+      "artifacts/see-routing-development-see--lossless-negative/3.json": "cf0f89674f7bd447652ae69d93acc13eda792c440ea87e66b60cdacc490ac63d",
+      "artifacts/see-routing-development-see--lossless-positive/1.json": "5b5b9178a7d63c06709cb13a056ee102e09094d59b68a28423bc1b8c7ea88c0a",
+      "artifacts/see-routing-development-see--lossless-positive/2.json": "07977ad39676a689c722b74c749a941513740f1789a38c46be423b9ed3371623",
+      "artifacts/see-routing-development-see--lossless-positive/3.json": "751d522e99e99ad54c3d3480a475d8d6a8e06e9281b36621698b3d2bd4b85019",
+      "artifacts/see-routing-development-see--tool-design-negative/1.json": "432c1253b57592872898e9dc3011213f90611cc99fe5bda33ec7e151018f728e",
+      "artifacts/see-routing-development-see--tool-design-negative/2.json": "944eb565247b8e34294038f33ff32b6285f588344837019bbabc3769595cff42",
+      "artifacts/see-routing-development-see--tool-design-negative/3.json": "3237ef49fbf1705018a179910c6f5db3ea8596fe2e85110e0ca34a1effc81404",
+      "artifacts/see-routing-development-see--tool-design-positive/1.json": "e5b11e792b5efdf2bba69427ca4915f3d984aff50eb3d2d36e6241a8704b6c47",
+      "artifacts/see-routing-development-see--tool-design-positive/2.json": "002618bf4aa789f90dc3d26a4320ece0d57819614a9086b5564d9ca9ba9ae9d9",
+      "artifacts/see-routing-development-see--tool-design-positive/3.json": "46394bf9362c7fb03dfeabc65a45691d2b12203c9ba034524530cb4af66ac297"
+    },
+    "case_snapshot_sha256": "f09b793f5ccbcb2cc761a090e8a6b941af46393cd3673834a4077491f07a8d27",
+    "grader_sha256": "5883e79e7ef2179ffd6ccbfd7a096105f4f0b0b3cb55327e5fe92b3211bdb5f7",
+    "manifest_sha256": "eaee520934ab4305213a6994074a4803a69b7f7a4a65309e61fbc26e26ae1cf2"
+  },
+  "passed": 24,
+  "reason": "A single condition cannot support an efficacy claim; pair it with the other condition.",
+  "run_id": "routing-development-treatment",
+  "schema_version": 3
+}

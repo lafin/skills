@@ -1,0 +1,47 @@
+{
+  "frozen_at": "2026-09-11T15:07:33Z",
+  "candidate_freeze": {
+    "path": "evals/results/see-improvement/remediation-freeze-v10.json",
+    "sha256": "7f6b54bb608ff4fe2efa0ecc9e72cd7ca8597d13cfbc8ebaa035d971ff2cfb6e"
+  },
+  "holdout": {
+    "path": "evals/cases/see-behavior-independent-holdout-v8.jsonl",
+    "sha256": "f42b100e759c17e24b0c3872bdafd5158cd8f1a7519fe764c168a526b992f33c",
+    "records": 12,
+    "families": {
+      "procedure/runbook": 3,
+      "requirement/contract": 3,
+      "explanation/reference": 3,
+      "error/incident": 3
+    },
+    "variants": {
+      "ordinary": 4,
+      "adversarial": 4,
+      "noop": 4
+    }
+  },
+  "response_blind_audit": {
+    "mechanical_validation": "pass",
+    "independent_author": "IndependentBehaviorHoldoutV8",
+    "independent_auditor": "HoldoutV8ScoutAudit",
+    "corrections_before_freeze": [
+      "Made the Boreal operator-obligation tokens order-neutral.",
+      "Made the Reviewer, Deployer, and retention predicates order-neutral.",
+      "Made the Harbor notification and deferral predicates order-neutral and removed an unprotected lexical verb requirement.",
+      "Accepted the manifest-permitted pending-status term outstanding.",
+      "Made the bundle failure, cause, and recovery predicates order-neutral.",
+      "Changed the shared response parser to reject blank physical lines in exact field contracts."
+    ],
+    "semantic_only_dispositions": [
+      "Relationship ownership, ordering, and causality remain judge criteria; token co-occurrence is not treated as semantic proof.",
+      "Contradictory safety, recovery, success, certainty, and authorization claims remain judge criteria; incomplete lexical blacklists would create false positives.",
+      "Field-value whitespace normalization remains accepted and is not a physical-line contract defect."
+    ],
+    "final_recheck": "No concrete deterministic predicate defect, profile or field mismatch, exact-span or redaction conflict, or unanchored no-op contract remained before capture."
+  },
+  "evaluator": {
+    "evals/run.py": "be310d7d73869c11412724d66d66105850b22cd3210e4c753f1cbc4aa443cca0",
+    "evals/grade.py": "5487fa4f7ea2115d97d7b0e527852ff747d059aa86449a68fe8d38e93b8b7079"
+  },
+  "candidate_skill_sha256": "d48e8f7f4f2dc2e542e190e7f0fdcc244fe76f9bba71d6f5d162c44400025bc2"
+}

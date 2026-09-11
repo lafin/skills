@@ -21,7 +21,7 @@ from typing import Any
 
 import yaml
 
-SCHEMA_VERSION = 3
+SCHEMA_VERSION = 4
 CHECK_OPS = {"contains", "not_contains", "equals", "regex", "not_regex"}
 SENSITIVE_CONFIG_KEY = re.compile(
     r"(?:auth(?:orization)?|bearer|cookie|token|secret|password|api.?key|access.?key|private.?key|credential)",
@@ -43,6 +43,11 @@ BEHAVIOR_SYSTEM_PROMPT = (
     "UNSUPPORTED_CLAIMS means an unsupported success claim. Use the single word none "
     "when the applicable item is absent; standard-library or existing code is none."
 )
+ROUTING_SYSTEM_PROMPT = (
+    "Classify the request using only the candidate skills in the user prompt. "
+    "Return exactly the response shape requested by the user. Do not invoke a skill, "
+    "return a URI, select an unlisted skill, or add an explanation."
+)
 COMMON_CASE_FIELDS = {
     "id",
     "kind",
@@ -54,11 +59,48 @@ COMMON_CASE_FIELDS = {
     "checks",
     "judge_criteria",
 }
+CASE_MANIFEST_LIST_FIELDS = {
+    "source_facts",
+    "protected_spans",
+    "quoted_spans",
+    "conditions_and_exceptions",
+    "numbers_units_versions_status_codes",
+    "expected_obligation_force",
+    "permitted_rewrites",
+    "required_structure",
+    "ambiguity_traps",
+    "prohibited_inventions",
+}
+CASE_MANIFEST_FIELDS = CASE_MANIFEST_LIST_FIELDS | {"artifact_family", "selected_profile"}
+EXACT_PRESERVATION_FIELDS = (
+    "protected_spans",
+    "quoted_spans",
+    "numbers_units_versions_status_codes",
+    "expected_obligation_force",
+)
+
 
 
 def nonempty_strings(value: Any, label: str) -> None:
     if not isinstance(value, list) or not value or not all(isinstance(item, str) and item for item in value):
         raise ValueError(f"{label} must be a non-empty array of non-empty strings")
+
+def validate_case_manifest(value: Any, location: str) -> None:
+    if not isinstance(value, dict) or set(value) != CASE_MANIFEST_FIELDS:
+        raise ValueError(f"{location}: case_manifest must contain the complete fixed schema")
+    if not isinstance(value["artifact_family"], str) or not value["artifact_family"]:
+        raise ValueError(f"{location}: artifact_family must be a non-empty string")
+    if value["selected_profile"] not in {"strict", "engineering-default"}:
+        raise ValueError(f"{location}: selected_profile must be strict or engineering-default")
+    for name in CASE_MANIFEST_LIST_FIELDS:
+        items = value[name]
+        if not isinstance(items, list) or not all(
+            isinstance(item, str) and item for item in items
+        ):
+            raise ValueError(f"{location}: {name} must be an array of non-empty strings")
+    for name in ("source_facts", "permitted_rewrites", "required_structure"):
+        if not value[name]:
+            raise ValueError(f"{location}: {name} must not be empty")
 
 
 def validate_case(case: Any, location: str) -> dict[str, Any]:
@@ -66,9 +108,9 @@ def validate_case(case: Any, location: str) -> dict[str, Any]:
         raise ValueError(f"{location}: case must be an object")
     kind = case.get("kind")
     allowed = COMMON_CASE_FIELDS | (
-        {"response_fields"}
+        {"response_fields", "case_manifest"}
         if kind == "behavior"
-        else {"available_skills"}
+        else {"available_skills", "evaluated_skills"}
         if kind == "routing"
         else {"fixture"}
         if kind == "repository"
@@ -124,12 +166,36 @@ def validate_case(case: Any, location: str) -> dict[str, Any]:
         nonempty_strings(case.get("response_fields"), f"{location}: response_fields")
         if len(set(case["response_fields"])) != len(case["response_fields"]):
             raise ValueError(f"{location}: response_fields must be unique")
+        if "case_manifest" in case:
+            validate_case_manifest(case["case_manifest"], location)
+            prohibited_rewrite_spans = [
+                check["value"]
+                for check in checks
+                if check["op"] == "not_contains"
+                and check.get("field", "response") in {"response", "fields.REWRITE"}
+            ]
+            for name in EXACT_PRESERVATION_FIELDS:
+                for value in case["case_manifest"][name]:
+                    conflict = next(
+                        (span for span in prohibited_rewrite_spans if value in span),
+                        None,
+                    )
+                    if conflict is not None:
+                        raise ValueError(
+                            f"{location}: exact {name} value {value!r} conflicts "
+                            f"with prohibited rewrite span {conflict!r}"
+                        )
     elif kind == "routing":
         nonempty_strings(case.get("available_skills"), f"{location}: available_skills")
+        nonempty_strings(case.get("evaluated_skills"), f"{location}: evaluated_skills")
         if len(set(case["available_skills"])) != len(case["available_skills"]):
             raise ValueError(f"{location}: available_skills must be unique")
+        if len(set(case["evaluated_skills"])) != len(case["evaluated_skills"]):
+            raise ValueError(f"{location}: evaluated_skills must be unique")
         if case["target_skill"] not in case["available_skills"]:
             raise ValueError(f"{location}: target_skill must be in available_skills")
+        if not set(case["evaluated_skills"]).issubset(case["available_skills"]):
+            raise ValueError(f"{location}: evaluated_skills must be available")
     elif (
         not isinstance(case.get("fixture"), str)
         or not case["fixture"]
@@ -459,7 +525,12 @@ def skill_scope(case: dict[str, Any], condition: str, catalog: list[str] | None 
             "skills": [] if condition == "baseline" else [case["target_skill"]],
             "invocation": None if condition == "baseline" else f"/skill:{case['target_skill']}",
         }
-    return {"mode": "repository-catalog", "skills": catalog or [], "confusable_pair": case["available_skills"]}
+    return {
+        "mode": "confusable-pair",
+        "skills": case["available_skills"],
+        "confusable_pair": case["available_skills"],
+        "evaluated_skills": case["evaluated_skills"],
+    }
 
 def case_prompt(case: dict[str, Any], descriptions: dict[str, str] | None = None) -> str:
     if case["kind"] != "routing":
@@ -489,8 +560,11 @@ def build_command(
         f"--max-time={args.max_time}",
     ]
     system_prompt = args.system_prompt
-    if system_prompt is None and case["kind"] == "behavior":
-        system_prompt = BEHAVIOR_SYSTEM_PROMPT
+    if system_prompt is None:
+        if case["kind"] == "behavior":
+            system_prompt = BEHAVIOR_SYSTEM_PROMPT
+        elif case["kind"] == "routing":
+            system_prompt = ROUTING_SYSTEM_PROMPT
     if system_prompt:
         command.append(f"--system-prompt={system_prompt}")
     if args.profile:
@@ -501,8 +575,7 @@ def build_command(
     if case["kind"] in {"behavior", "repository"}:
         command.append("--no-skills" if args.condition == "baseline" else f"--skills={case['target_skill']}")
     else:
-        skills = catalog if catalog is not None else repository_catalog(args.cwd)
-        command.append(f"--skills={','.join(skills)}")
+        command.append(f"--skills={','.join(sorted(case['available_skills']))}")
     return command
 
 
@@ -812,7 +885,7 @@ def main() -> int:
             "thinking": args.thinking,
             "system_prompt": args.system_prompt,
             "behavior_system_prompt": args.system_prompt or BEHAVIOR_SYSTEM_PROMPT,
-            "routing_system_prompt": args.system_prompt,
+            "routing_system_prompt": args.system_prompt or ROUTING_SYSTEM_PROMPT,
             "repository_system_prompt": args.system_prompt,
             "max_time": args.max_time,
             "verifier_timeout": args.verifier_timeout,

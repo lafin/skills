@@ -1,0 +1,11 @@
+{
+  "schema_version": 4,
+  "status": "blocked",
+  "results_used": false,
+  "model_requested": "anthropic/claude-sonnet-4-6",
+  "provider_observed": "anthropic",
+  "model_observed": "claude-sonnet-4-6",
+  "credential_state_unchanged": true,
+  "attempt_evidence": "evals/results/see-improvement/remediation-v3-development-judge/model-capture-blocked.json",
+  "reason": "The isolated profile has no Anthropic API key, and the default-profile OAuth credential is not permitted for the organization. No judge result was captured or scored. Model judging remains supporting evidence and cannot replace human calibration."
+}

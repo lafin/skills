@@ -1,0 +1,25 @@
+{
+  "all_passed": true,
+  "artifacts": 6,
+  "condition": "treatment",
+  "critical_passed": 6,
+  "deterministic_grades": "grades.jsonl",
+  "efficacy_claim": null,
+  "input_binding": {
+    "artifacts": {
+      "artifacts/see-error-ordinary/1.json": "8cc05072788c1c33367ebd0c41a97b76d40a2fba597849669f318a6670058ab5",
+      "artifacts/see-error-ordinary/2.json": "2cb937ae861ac88c20e1643fb1ccee3da5ffb1df25ade3840336c9cadc9b711c",
+      "artifacts/see-error-ordinary/3.json": "2e208c6fe1ed33f48467bdad4a879e064d3057e3cafaca76c22e4076c3771fdb",
+      "artifacts/see-explanation-quote-punctuation/1.json": "6973a0d0167b4ebbda76324ea8623607c67cc26dcaad621e54f01f151b656df3",
+      "artifacts/see-explanation-quote-punctuation/2.json": "5ebf8a12d74379805828febc37a6b371e62c1102d060068cfbc9e6e179678af3",
+      "artifacts/see-explanation-quote-punctuation/3.json": "30bccfd16962e57b4700d548beef73d31571d648fc8f10acf94ad1e4ee5deb78"
+    },
+    "case_snapshot_sha256": "9156b385b036fdef3770a086c3a832c5c4a38df0b0c9df63ef6354221b8a353a",
+    "grader_sha256": "dd04a7a7d85d129245f1885bac5ff3845b3f3adb292b90394570f08b5827fe72",
+    "manifest_sha256": "4a5d08fbacac24137aa0492db05a3f3c5347c0944e132e68e9313a00706773dd"
+  },
+  "passed": 6,
+  "reason": "A single condition cannot support an efficacy claim; pair it with the other condition.",
+  "run_id": "remediation-v17-regression-smoke-treatment",
+  "schema_version": 4
+}

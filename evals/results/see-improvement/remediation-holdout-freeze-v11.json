@@ -1,0 +1,40 @@
+{
+  "frozen_at": "2026-09-11T15:32:04Z",
+  "candidate_freeze": {
+    "path": "evals/results/see-improvement/remediation-freeze-v11.json",
+    "sha256": "596205df50677a62a357f668f2a8158daf725a8e9e065f02b5b999e0b770aa4a"
+  },
+  "holdout": {
+    "path": "evals/cases/see-behavior-independent-holdout-v11.jsonl",
+    "sha256": "da9a649a496a4163614eea3302a98ab3102bf31dec499ec95f65e32ffa96ff7f",
+    "records": 12,
+    "families": {
+      "procedure/runbook": 3,
+      "requirement/contract": 3,
+      "explanation/reference": 3,
+      "error/incident": 3
+    },
+    "variants": {
+      "ordinary": 4,
+      "adversarial": 4,
+      "noop": 4
+    }
+  },
+  "response_blind_audit": {
+    "mechanical_validation": "pass",
+    "independent_author": "IndependentBehaviorHoldoutV11",
+    "independent_auditor": "HoldoutV11ScoutAudit",
+    "candidate_or_prior_evidence_visible_to_author_or_auditor": false,
+    "corrections_before_freeze": [
+      "Changed the global field parser to reject blank physical lines and leading or trailing field-value whitespace.",
+      "Changed exact manifest-span matching to reject alphanumeric or underscore embedding, including numeric, identifier, and version supersets."
+    ],
+    "final_recheck": "All 12 schemas, exact profiles, field paths, exact spans, redaction constraints, and no-op anchors passed. No concrete deterministic blocker remained.",
+    "semantic_only_disposition": "Relationship mapping, causality, uncertainty, obligation force, ambiguity, and safety meaning remain in judge_criteria rather than incomplete lexical predicates."
+  },
+  "evaluator": {
+    "evals/run.py": "be310d7d73869c11412724d66d66105850b22cd3210e4c753f1cbc4aa443cca0",
+    "evals/grade.py": "f19fdfd06d88ba78ed911eb3059205e95025fd9258b5ddc8f6b447476ae424f8"
+  },
+  "candidate_skill_sha256": "9c84e922a9f808a3c0447128c491a0437257135b4a1f03ade6036ce7a245949a"
+}

@@ -1,0 +1,22 @@
+{
+  "all_passed": true,
+  "artifacts": 3,
+  "condition": "treatment",
+  "critical_passed": 3,
+  "deterministic_grades": "grades.jsonl",
+  "efficacy_claim": null,
+  "input_binding": {
+    "artifacts": {
+      "artifacts/see-explanation-quote-punctuation/1.json": "36bfe06ecac20269e1c6fc6dd045229bb666d9a56cba60a14e4ff1528ff21176",
+      "artifacts/see-explanation-quote-punctuation/2.json": "973521145b6207997edd6e6dfe0fea25c0ccf3cd14220d2643de1187035bc7c6",
+      "artifacts/see-explanation-quote-punctuation/3.json": "0246e998d5486fe9c43b1a69b68702ac521dbf30611fd76756be70ba15173a64"
+    },
+    "case_snapshot_sha256": "8000b330a54e70f69a9b039b6192c289fd3b17bc3f8b1779be8069d669707687",
+    "grader_sha256": "b194f75962c5cfdc798773c3ddb3394522fe72fefef9baaa02c17f9dcd50cb9e",
+    "manifest_sha256": "900aae799dadd03ab02083fcc12f2110788f1c712d077fc2967d7e496850f05f"
+  },
+  "passed": 3,
+  "reason": "A single condition cannot support an efficacy claim; pair it with the other condition.",
+  "run_id": "remediation-v8-quote-smoke-treatment",
+  "schema_version": 4
+}

@@ -1,0 +1,42 @@
+{
+  "frozen_at": "2026-09-11T16:48:44Z",
+  "candidate_freeze": {
+    "path": "evals/results/see-improvement/remediation-freeze-v16.json",
+    "sha256": "64a3aabb813094924a721c1fd21b2d90fde21238ce62698f54157dab6109c2d9"
+  },
+  "holdout": {
+    "path": "evals/cases/see-behavior-independent-holdout-v16.jsonl",
+    "sha256": "7db0c0f1b69c95652cb214b97ced08dc526bd2539926e8a27566717ace1c86fe",
+    "records": 12,
+    "families": {
+      "procedure/runbook": 3,
+      "requirement/contract": 3,
+      "explanation/reference": 3,
+      "error/incident": 3
+    },
+    "variants": {
+      "ordinary": 4,
+      "adversarial": 4,
+      "noop": 4
+    }
+  },
+  "response_blind_audit": {
+    "mechanical_validation": "pass",
+    "independent_author": "IndependentBehaviorHoldoutV16",
+    "independent_auditor": "HoldoutV16ScoutAudit",
+    "candidate_or_prior_evidence_visible_to_author_or_auditor": false,
+    "declared_checks": 44,
+    "generated_exact_preservation_checks": 84,
+    "corrections_before_freeze": [
+      "Matched Release operator capitalization to the source.",
+      "Added non-none and both-actor ambiguity checks to the procedure and requirement adversarial cases."
+    ],
+    "final_recheck": "All 12 schemas, profiles, field paths, source spans, no-op anchors, ambiguity anchors, and 34 exact-span boundary probes passed. No deterministic blocker remained.",
+    "semantic_only_disposition": "Actor relationships, obligation equivalence, ordering, causality, uncertainty, and measurement meaning remain in judge_criteria."
+  },
+  "evaluator": {
+    "evals/run.py": "be310d7d73869c11412724d66d66105850b22cd3210e4c753f1cbc4aa443cca0",
+    "evals/grade.py": "dd04a7a7d85d129245f1885bac5ff3845b3f3adb292b90394570f08b5827fe72"
+  },
+  "candidate_skill_sha256": "78cf0580674756ea8d8ae3c356df09f3e18c7a1f44c7853ed47bfd12e22dfa20"
+}

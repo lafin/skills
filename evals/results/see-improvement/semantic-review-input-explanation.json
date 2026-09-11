@@ -1,0 +1,131 @@
+{
+  "family": "explanation",
+  "rubric_path": "evals/see-rubric.json",
+  "records": [
+    {
+      "case_id": "see-explanation-ordinary",
+      "split": "development",
+      "artifact_family": "explanation and reference",
+      "prompt": "Rewrite this explanation with the engineering-default SEE profile. Source: Currently, the `timeout` parameter receives the `30s` argument. A fault produces an error that surfaces as a failure. Mean latency is 40 ms, while p99 latency is 120 ms at 500 requests per second. The worker caches jobs because this makes the service faster, and the service later calls them tasks. Preserve both latency statistics for their distinct purposes. Report both the undefined faster claim and the job/task terminology drift. Respond with exactly three newline-separated fields: PROFILE: strict|engineering-default; REWRITE: <one line>; AMBIGUITIES: <text or none>.",
+      "case_manifest": {
+        "ambiguity_traps": [
+          "Do not merge parameter with argument.",
+          "Do not discard mean latency because p99 is also present.",
+          "Do not silently choose job or task."
+        ],
+        "artifact_family": "explanation and reference",
+        "conditions_and_exceptions": [],
+        "expected_obligation_force": [],
+        "numbers_units_versions_status_codes": [
+          "40 ms",
+          "p99 latency",
+          "120 ms",
+          "500 requests per second"
+        ],
+        "permitted_rewrites": [
+          "Remove the floating word Currently if document scope supplies time.",
+          "Report job/task drift and the undefined faster claim."
+        ],
+        "prohibited_inventions": [
+          "A product version, benchmark environment, or claim that jobs and tasks are identical."
+        ],
+        "protected_spans": [
+          "`timeout`",
+          "`30s`"
+        ],
+        "quoted_spans": [],
+        "required_structure": [
+          "Mechanism separated from rationale.",
+          "Terminology ambiguity reported."
+        ],
+        "selected_profile": "engineering-default",
+        "source_facts": [
+          "A parameter receives an argument.",
+          "A fault can produce an error that surfaces as a failure.",
+          "Mean and p99 latency measurements serve distinct purposes.",
+          "The source alternates between jobs and tasks and does not define faster."
+        ]
+      },
+      "baseline": {
+        "response": "PROFILE: engineering-default\nREWRITE: The timeout is 30 s. Faults cause failures. At 500 requests per second, mean latency is 40 ms and p99 latency is 120 ms. The worker caches jobs, reportedly to make the service faster; the service later calls them tasks.\nAMBIGUITIES: “Faster” has no defined metric or baseline; “jobs” and “tasks” may refer to the same entities, but the terminology shift is unexplained.",
+        "deterministic_passed": false,
+        "critical_passed": false,
+        "failed_checks": [
+          {
+            "name": "manifest_protected_spans_1",
+            "detail": "Missing exactly matched protected_spans value: '`timeout`'"
+          },
+          {
+            "name": "manifest_protected_spans_2",
+            "detail": "Missing exactly matched protected_spans value: '`30s`'"
+          },
+          {
+            "name": "failure_terms",
+            "detail": "regex '(?i)fault.*error.*failure' in fields.REWRITE"
+          }
+        ]
+      },
+      "treatment": {
+        "response": "PROFILE: engineering-default\nREWRITE: The `timeout` parameter receives the `30s` argument. A fault produces an error, which surfaces as a failure. At 500 requests per second, mean latency is 40 ms, and p99 latency is 120 ms. The worker caches jobs because caching makes the service faster. The service later calls the jobs tasks.\nAMBIGUITIES: “faster” has no metric or comparison baseline; the source changes the term “jobs” to “tasks” without stating whether they have the same meaning.",
+        "deterministic_passed": true,
+        "critical_passed": true,
+        "failed_checks": []
+      }
+    },
+    {
+      "case_id": "see-release-explanation-timing",
+      "split": "holdout",
+      "artifact_family": "explanation and reference",
+      "prompt": "Rewrite this explanation with the engineering-default SEE profile. Preserve version 4.8, `legacyFlag`, the future timing, and asynchronous dispatch. Do not name the unknown dispatch actor. Report both the unknown removal version and the job/task terminology drift in AMBIGUITIES. Source: In version 4.8, the scheduler marks a job ready after validation. The job will be dispatched asynchronously. `legacyFlag` remains available, but its removal version is unknown. The dashboard calls the same item a task. Respond with exactly three newline-separated fields: PROFILE: strict|engineering-default; REWRITE: <one line>; AMBIGUITIES: <text or none>.",
+      "case_manifest": {
+        "ambiguity_traps": [
+          "Do not invent the dispatch actor.",
+          "Do not infer a removal version.",
+          "Do not silently choose job or task."
+        ],
+        "artifact_family": "explanation and reference",
+        "conditions_and_exceptions": [
+          "after validation"
+        ],
+        "expected_obligation_force": [],
+        "numbers_units_versions_status_codes": [
+          "version 4.8"
+        ],
+        "permitted_rewrites": [
+          "Separate the mechanism from terminology issues.",
+          "Keep the passive voice because the dispatch actor is unknown."
+        ],
+        "prohibited_inventions": [
+          "A dispatch actor or removal version."
+        ],
+        "protected_spans": [
+          "`legacyFlag`"
+        ],
+        "quoted_spans": [],
+        "required_structure": [
+          "Version-scoped mechanism explanation.",
+          "Unknown version and terminology drift reported."
+        ],
+        "selected_profile": "engineering-default",
+        "source_facts": [
+          "The scheduler marks a job ready after validation.",
+          "The job has future asynchronous dispatch.",
+          "The removal version for legacyFlag is unknown.",
+          "The dashboard calls the job a task."
+        ]
+      },
+      "baseline": {
+        "response": "PROFILE: engineering-default\nREWRITE: In version 4.8, the scheduler marks a job ready after validation; the job will be dispatched asynchronously. `legacyFlag` remains available, but its removal version is unknown. The dashboard refers to the same item as a task.\nAMBIGUITIES: The removal version for `legacyFlag` is unknown; terminology drifts between “job” in the scheduler and “task” in the dashboard.",
+        "deterministic_passed": true,
+        "critical_passed": true,
+        "failed_checks": []
+      },
+      "treatment": {
+        "response": "PROFILE: engineering-default\nREWRITE: In version 4.8, the scheduler marks a job ready after validation. The job will be dispatched asynchronously. `legacyFlag` remains available, but its removal version is unknown. The dashboard calls the same item a task.\nAMBIGUITIES: The removal version for `legacyFlag` is unknown; the scheduler uses “job,” but the dashboard uses “task” for the same item.",
+        "deterministic_passed": true,
+        "critical_passed": true,
+        "failed_checks": []
+      }
+    }
+  ]
+}

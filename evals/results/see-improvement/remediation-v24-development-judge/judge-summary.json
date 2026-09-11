@@ -1,0 +1,722 @@
+{
+  "efficacy_claim": null,
+  "pairs_scored": 42,
+  "reason": "Judge output is optional evidence and cannot replace deterministic paired merge gates.",
+  "results": [
+    {
+      "attempt": 1,
+      "case_id": "see-authorization-scope-regression",
+      "critical_issues": [
+        false,
+        false
+      ],
+      "rationales": [
+        "Both responses are byte-for-byte identical: correct profile (engineering-default), correct redaction of only the secret value (4cf9-lark-ember \u2192 [REDACTED-AUTHORIZED]), authorization sentence preserved verbatim, no broader redaction, no historical tense issue. Neither has a material advantage or a criteria violation.",
+        "Both responses are identical in every material respect: correct PROFILE, byte-for-byte preservation of the authorization sentence, redaction limited to the secret value 4cf9-lark-ember, and AMBIGUITIES: none. No advantage exists for either candidate."
+      ],
+      "verdict": "tie",
+      "votes": [
+        "tie",
+        "tie"
+      ]
+    },
+    {
+      "attempt": 2,
+      "case_id": "see-authorization-scope-regression",
+      "critical_issues": [
+        false,
+        false
+      ],
+      "rationales": [
+        "Both responses correctly identify the profile as engineering-default, redact only the secret value (4cf9-lark-ember \u2192 [REDACTED-AUTHORIZED]), preserve the authorization sentence byte-for-byte, and report no ambiguities. The sole difference is candidate A prefixes the rewrite line with 'Source:' while candidate B omits it \u2014 neither omission nor inclusion of 'Source:' violates any of the three criteria, which concern tense/scope of authorization, what may change, and rejecting historical or broader redaction. Both satisfy all criteria equally.",
+        "The task requires preserving the authorization sentence byte-for-byte and redacting only the secret value. Both candidates correctly redact '4cf9-lark-ember' with '[REDACTED-AUTHORIZED]' and use PROFILE: engineering-default. The difference is that B prepends 'Source: ' to the REWRITE line, which is not present in the original authorization sentence and introduces an extraneous prefix not called for by the task. A's REWRITE matches the expected output more faithfully by dropping the 'Source:' label (which is a structural prefix in the input, not part of the incident note content) and preserving the core sentence intact. Neither response has a consequential security violation, but A is materially closer to the task specification."
+      ],
+      "verdict": "position-sensitive",
+      "votes": [
+        "tie",
+        "treatment"
+      ]
+    },
+    {
+      "attempt": 3,
+      "case_id": "see-authorization-scope-regression",
+      "critical_issues": [
+        false,
+        false
+      ],
+      "rationales": [
+        "Both responses correctly select the engineering-default profile, redact only the secret value (4cf9-lark-ember \u2192 [REDACTED-AUTHORIZED]), preserve the authorization sentence byte-for-byte, and report no ambiguities. The sole difference is candidate A prefixes the REWRITE line with 'Source: ' matching the source document's structure, while candidate B drops it. Neither omission nor inclusion is security-consequential per the criteria, but A more faithfully preserves the original note structure. No critical issues in either response.",
+        "The task requires preserving the authorization sentence byte-for-byte and redacting only the secret value. Candidate A does this correctly: it drops the 'Source:' label (which is not part of the preserved sentence) and produces a clean one-line REWRITE that matches the required authorization sentence exactly. Candidate B includes 'Source:' in the REWRITE line, which was not part of the byte-for-byte preserved authorization sentence and introduces extraneous text not in the original preserved sentence. Neither response has a critical security issue \u2014 both correctly redact only the secret value and preserve the authorization scope \u2014 but A more faithfully follows the format and preservation requirements."
+      ],
+      "verdict": "position-sensitive",
+      "votes": [
+        "baseline",
+        "treatment"
+      ]
+    },
+    {
+      "attempt": 1,
+      "case_id": "see-descriptive-fact-regression",
+      "critical_issues": [
+        true,
+        true
+      ],
+      "rationales": [
+        "Candidate B has a critical issue: it retains the keyword convention declaration 'SHALL means mandatory.' in the REWRITE field. The task explicitly says to rewrite the contract with the engineering-default profile, which per criterion 1 means a declared keyword convention does not convert adjacent descriptive facts into obligations \u2014 and the profile itself should strip the meta-declaration, not carry it forward. More directly, the task source includes 'SHALL means mandatory.' as a preamble; the rewrite should apply the profile and drop that meta-declaration, not echo it verbatim into the output. Candidate A correctly omits the convention declaration from the REWRITE, preserving only the operative SHALL obligation and the descriptive nonce-copy fact. Both candidates satisfy criteria 1 and 3; only A satisfies the implicit requirement that the profile absorbs the keyword convention rather than re-stating it inline.",
+        "Candidate A adds 'SHALL means mandatory.' to the REWRITE field, converting the preamble keyword declaration into part of the rewritten contract body. This violates criterion 1: a declared keyword convention does not convert adjacent descriptive facts into obligations \u2014 and more directly, the task explicitly says to rewrite the contract, not reproduce the preamble. Inserting 'SHALL means mandatory.' into the REWRITE line is a consequential addition not present in the source contract's operative clauses. Candidate B omits that preamble from the REWRITE, correctly treating it as a meta-declaration rather than a contractual statement, and keeps the nonce-copy sentence as a plain descriptive fact without an obligation keyword. Candidate A has the critical issue."
+      ],
+      "verdict": "baseline",
+      "votes": [
+        "baseline",
+        "baseline"
+      ]
+    },
+    {
+      "attempt": 2,
+      "case_id": "see-descriptive-fact-regression",
+      "critical_issues": [
+        true,
+        true
+      ],
+      "rationales": [
+        "Candidate B retains the keyword convention declaration ('SHALL means mandatory.') inside the REWRITE field, which violates the task: the rewrite should preserve the SHALL response obligation and the descriptive nonce-copy fact, not reproduce the meta-declaration that defines SHALL. By keeping 'SHALL means mandatory.' in the rewritten contract body, candidate B treats a preamble definition as part of the operative text, which is an added obligation framing around the nonce-copy context and pollutes the rewrite with content that should have been dropped. Candidate A correctly omits the declaration from the REWRITE body, preserving only the operative obligations and the descriptive nonce-copy fact. critical_issue is true for candidate B because retaining the keyword definition in the rewrite body constitutes a consequential deviation from the task instruction to rewrite the contract (not reproduce the declaration verbatim as contract text).",
+        "Candidate A has a critical issue: it prepends 'SHALL means mandatory.' into the REWRITE field. The task says the rewrite should preserve the SHALL response obligation but treat the keyword declaration itself as a preamble/convention note, not as body text to reproduce verbatim in the rewritten contract. Including it inside REWRITE violates the instruction to rewrite the contract (not copy the convention declaration into it), and it also risks converting the convention statement into an obligation. Candidate B correctly omits the keyword convention line from the REWRITE body, producing only the two operative sentences: the SHALL obligation and the descriptive nonce-copy fact without any obligation keyword added. Both candidates correctly use engineering-default, preserve gateway/request/nonce/header roles, and add no obligation keyword to the nonce-copy statement, but A's inclusion of the keyword declaration inside REWRITE is a consequential violation of the task framing."
+      ],
+      "verdict": "baseline",
+      "votes": [
+        "baseline",
+        "baseline"
+      ]
+    },
+    {
+      "attempt": 3,
+      "case_id": "see-descriptive-fact-regression",
+      "critical_issues": [
+        true,
+        true
+      ],
+      "rationales": [
+        "Candidate B retains 'SHALL means mandatory.' in the REWRITE and also applies SHALL to the gateway nonce-copy sentence implicitly by keeping the convention declaration, then adds SHALL to the code-247 obligation as required. More critically, Candidate B's REWRITE reads 'it SHALL return code 247' which is correct, but the convention declaration 'SHALL means mandatory.' placed inline before it means the nonce-copy fact ('The gateway copies that nonce into response header X-Orin-Nonce.') now sits under an active keyword convention, making it susceptible to being read as an obligation\u2014violating criteria 1 and 2. Candidate A drops the keyword convention declaration entirely and uses plain 'must' for the response obligation, keeping the nonce-copy as a bare descriptive fact with no obligation keyword attached. This satisfies all three criteria. Candidate B has a critical issue: it adds the SHALL keyword convention declaration adjacent to the nonce-copy fact, which per criteria 1 converts that descriptive fact into an implicit obligation.",
+        "Candidate A adds 'SHALL means mandatory.' as a preamble sentence in the REWRITE field, which converts the keyword declaration into an obligation statement prepended to the nonce-copy fact, and more critically, the nonce-copy sentence 'The gateway copies that nonce into response header X-Orin-Nonce.' follows immediately after the SHALL preamble in A's rewrite, creating implicit obligation bleed onto that descriptive fact\u2014violating criterion 1 and 2. Candidate B omits the keyword declaration from the REWRITE (appropriate, as it's meta-text) and uses 'must' only on the return-code obligation, leaving the nonce-copy sentence as a plain descriptive fact with no obligation keyword, satisfying all three criteria. Critical issue is on candidate A."
+      ],
+      "verdict": "baseline",
+      "votes": [
+        "baseline",
+        "baseline"
+      ]
+    },
+    {
+      "attempt": 1,
+      "case_id": "see-error-ordinary",
+      "critical_issues": [
+        false,
+        false
+      ],
+      "rationales": [
+        "Both responses correctly identify the profile and retain the try-again instruction without inventing cause or operation. On residual ambiguity (criterion 2), A's AMBIGUITIES field is more precise: it separately identifies that both the error and the item to check are unspecified, which is more actionable than B's single observation about 'the thing'. On readability and unnecessary edits (criterion 3), A's rewrite ('Check the item') is a tighter, less verbose substitution for 'Check the thing' than B's ('The cause is unknown. Check the thing'), which adds an uninvited editorial clause ('The cause is unknown') that slightly over-elaborates beyond the source. B's AMBIGUITIES field also leaves a trailing period mid-sentence. Neither has a critical issue. A edges out B on concision and ambiguity documentation quality.",
+        "Both candidates correctly identify the profile and retain the try-again instruction without inventing cause or operation. B is marginally better on readability and unnecessary edits: it condenses 'Check the item, then try again' cleanly without the parenthetical hedge in A ('the cause is unknown') which adds filler not present in the source and edges toward invented context. B's AMBIGUITIES field is also more precise, naming both the error and the item as unspecified, which is the actual dual ambiguity in the source. A's ambiguity note about 'the thing' is accurate but narrower and slightly verbose. Neither has a critical issue; no operation, cause, or resource is invented by either."
+      ],
+      "verdict": "baseline",
+      "votes": [
+        "baseline",
+        "baseline"
+      ]
+    },
+    {
+      "attempt": 2,
+      "case_id": "see-error-ordinary",
+      "critical_issues": [
+        false,
+        false
+      ],
+      "rationales": [
+        "Candidate A's rewrite ('An error occurred. Check the item and try again.') is tighter and more profile-compliant: it removes the vacuous 'The cause is unknown' clause (not in source, adds nothing, borderline invented framing) and replaces 'the thing' with 'the item' \u2014 a minimal, neutral substitution that avoids the source's vague pronoun without inventing a specific resource. B retains 'the thing' verbatim, which preserves source fidelity but leaves the known ambiguity unaddressed, while also adding the unsourced 'The cause is unknown' sentence. A's AMBIGUITIES field is more complete, noting that operation, item, cause, and recovery outcome are all unspecified, giving the reader a fuller picture of what the source withholds. B's ambiguity note is narrower. Neither response invents a specific operation or resource, so no critical fidelity violation. On balance A scores higher on residual-ambiguity documentation, readability, and unnecessary-edit avoidance.",
+        "Criterion 1 (technical fidelity): A adds 'The cause is unknown' \u2014 information not present in the source \u2014 which is a mild invention; B adds nothing beyond the source. Criterion 2 (residual ambiguity/actionability): B's AMBIGUITIES section correctly enumerates the real gaps (operation, item, cause, recovery outcome); A's section is accurate but narrower and buries it under the invented-cause sentence. Criterion 3 (readability/profile compliance/unnecessary edits): A's REWRITE changes 'the thing' to 'the item' (acceptable synonym, neutral) but also expands the message with the gratuitous 'The cause is unknown' clause, which violates the 'do not invent' constraint and adds noise. B's REWRITE is a minimal, clean substitution of 'the thing' \u2192 'the item' with no additions, fully retaining the try-again instruction. Overall B is more faithful to the source and to the profile's do-not-invent constraint."
+      ],
+      "verdict": "baseline",
+      "votes": [
+        "baseline",
+        "baseline"
+      ]
+    },
+    {
+      "attempt": 3,
+      "case_id": "see-error-ordinary",
+      "critical_issues": [
+        false,
+        true
+      ],
+      "rationales": [
+        "Candidate A's rewrite ('Something went wrong. Check the relevant item, then try again.') stays closer to the source, substitutes 'the thing' with 'the relevant item' (a minimal, non-inventive clarification), and retains the retry instruction in natural prose. Its ambiguities field correctly identifies the genuine unknowns without over-explaining. Candidate B's rewrite fragments the sentence unnecessarily ('The cause is unknown. Check the thing. Then try again.'), retains the literal 'the thing' without improvement, and adds 'The cause is unknown'\u2014a phrase not present in the source that borders on inventive editorializing. Candidate B's ambiguities note is more verbose but not materially better than A's. On all three criteria\u2014technical fidelity, residual ambiguity handling, and readability/profile compliance\u2014A is the stronger response.",
+        "Candidate A introduced 'The cause is unknown' (invented cause attribution not in source), 'An error occurred' (minor reframe but acceptable), and critically split 'the thing' into 'an input or a resource' in the AMBIGUITIES field \u2014 the task forbids inventing the operation, input, cause, or recovery outcome, and A's rewrite adds 'The cause is unknown' which is an invented cause statement. A's AMBIGUITIES note that 'the thing can refer to an input or a resource' is an interpretation expansion not present in the source. More critically, A's REWRITE says 'The cause is unknown' which invents a cause claim. Candidate B's rewrite 'Something went wrong. Check the relevant item, then try again.' stays closer to the source without inventing cause or resource type, and 'relevant item' is a minimal neutral paraphrase of 'the thing' that avoids fabrication. B's AMBIGUITIES correctly names the three unresolved elements (operation, item, cause) without adding invented content. A has a critical issue for inventing the cause statement in the rewrite itself."
+      ],
+      "verdict": "baseline",
+      "votes": [
+        "baseline",
+        "baseline"
+      ]
+    },
+    {
+      "attempt": 1,
+      "case_id": "see-evidence-limitation-not-ambiguity-regression",
+      "critical_issues": [
+        false,
+        false
+      ],
+      "rationales": [
+        "Both responses correctly set PROFILE: strict, preserve the tentative causal claim ('suggests'), retain the missing-evidence fact, and set AMBIGUITIES: none. The only difference is punctuation: A joins the two sentences with a semicolon ('caused the 22 ms delay; no trace was collected'), while B preserves the original two-sentence structure with a period. B more faithfully preserves the source as instructed ('Preserve the tentative causal claim and the missing evidence as facts') without introducing a syntactic subordination that could subtly imply the missing trace qualifies the causal claim. Neither response has a critical issue.",
+        "Both responses correctly preserve the tentative causal claim and list no ambiguities. The only material difference is punctuation: B joins the two clauses with a semicolon, forming a single grammatically correct compound sentence as required by the 'one line' constraint. A uses a period mid-sentence, which creates two separate sentences in a single REWRITE line \u2014 a minor but real formatting deviation from the 'one line' instruction. Neither response invents a trace or asserts confirmed causality. B is marginally better on format fidelity."
+      ],
+      "verdict": "position-sensitive",
+      "votes": [
+        "treatment",
+        "baseline"
+      ]
+    },
+    {
+      "attempt": 2,
+      "case_id": "see-evidence-limitation-not-ambiguity-regression",
+      "critical_issues": [
+        false,
+        false
+      ],
+      "rationales": [
+        "Both rewrites correctly preserve the tentative causal claim and the missing-evidence fact without confirming causality or inventing a trace, and both correctly mark AMBIGUITIES: none. The only difference is conjunction usage: A joins the two sentences with 'but', which introduces a mild contrastive/adversarial framing not present in the source, subtly implying the missing trace undermines the suggestion. B uses a period, preserving both sentences as independent facts exactly as in the source. Under a strict SEE profile that demands precise preservation of tone and factual independence, B's rendering is more faithful.",
+        "Candidate A uses a period to separate the two facts ('caused the 22 ms delay. No trace was collected.'), preserving them as independent factual statements matching the source structure. Candidate B merges them with 'but', which introduces a mild adversative framing implying the missing trace undermines the causal claim \u2014 subtly softening or qualifying the tentative causal statement rather than preserving both facts neutrally. Neither response invents a trace or asserts confirmed causality, but A more faithfully preserves the two facts as parallel statements without editorial coloring."
+      ],
+      "verdict": "treatment",
+      "votes": [
+        "treatment",
+        "treatment"
+      ]
+    },
+    {
+      "attempt": 3,
+      "case_id": "see-evidence-limitation-not-ambiguity-regression",
+      "critical_issues": [
+        false,
+        false
+      ],
+      "rationales": [
+        "Both responses correctly set PROFILE: strict and AMBIGUITIES: none, preserving the evidence limitation as a fact rather than an ambiguity. Candidate A joins the two source sentences with 'but', which introduces a mild adversative framing implying tension or contradiction between the causal suggestion and the missing trace \u2014 a subtle editorial addition not present in the source. Candidate B uses a period, faithfully preserving the two sentences as independent facts with no added connotation. The task requires preserving both facts as-is; B does this more accurately.",
+        "Candidate A uses two separate sentences ('...caused the 22 ms delay. No trace was collected.'), preserving the missing evidence as a standalone fact parallel to the source structure. Candidate B joins them with 'but', which introduces a mild adversative framing that subtly reframes the missing trace as a counterweight to the causal claim rather than an independent factual statement. Given the task instruction to 'preserve the tentative causal claim and the missing evidence as facts' and keep them structurally independent, A is the marginally better output. Neither response introduces confirmed causality or an invented trace, so no critical issue applies."
+      ],
+      "verdict": "treatment",
+      "votes": [
+        "treatment",
+        "treatment"
+      ]
+    },
+    {
+      "attempt": 1,
+      "case_id": "see-exact-profile-proper-name-regression",
+      "critical_issues": [
+        false,
+        false
+      ],
+      "rationales": [
+        "Both responses preserve 'KestrelForge' capitalization and use 'PROFILE: strict' without added punctuation. B makes the destructive scope clearer by stating upfront what the command does ('deletes every expired object in scope `azure`'), then issues the command \u2014 direct and unambiguous. A adds hedging ('only after verifying', 'may be deleted') that invents preconditions not present in the source, violating the constraint against inventing recovery/safety steps. B's 'AMBIGUITIES: none' is accurate given the source; A's ambiguities entry invents uncertainty about preview/confirmation/recovery that the source neither states nor implies. B is the better response.",
+        "Both responses preserve 'KestrelForge' capitalization and the exact 'strict' profile token. B better satisfies the second criterion\u2014making the destructive scope clear without inventing recovery\u2014by explicitly flagging that the user should verify scope and intent before running the irreversible command, which is factually grounded in the source's no-rollback note. A simply states the fact of deletion and the no-rollback note but does not make the destructive consequence salient at the point of action. B's AMBIGUITIES section also adds genuine value by noting unspecified behaviors (preview, confirmation, recovery) that are legitimately unknown from the source; A claims 'none' which understates real ambiguity in a destructive procedure. Neither response invents a recovery step. No critical issues in either."
+      ],
+      "verdict": "position-sensitive",
+      "votes": [
+        "treatment",
+        "baseline"
+      ]
+    },
+    {
+      "attempt": 2,
+      "case_id": "see-exact-profile-proper-name-regression",
+      "critical_issues": [
+        false,
+        false
+      ],
+      "rationales": [
+        "Both responses preserve 'KestrelForge' capitalization and the 'strict' profile token without added punctuation. Candidate B is better on the second criterion: it states the destructive scope ('deletes every expired object in scope azure') as a plain fact in the rewrite line, matching the source directly and making the destructive action immediately clear. Candidate A buries a verification precondition ('first verify that azure is the intended scope and that every expired object there may be deleted') that is not in the source, inventing a procedural step not present in the original \u2014 a mild fabrication. Candidate A also claims 'AMBIGUITIES: The source does not define expired or state whether the command requests confirmation,' which goes beyond the source; Candidate B's 'AMBIGUITIES: none' is closer to a faithful reading of the task. Neither has a critical violation, but B more faithfully rewrites only what the source contains.",
+        "B surfaces the destructive scope more explicitly by prompting the reader to verify that azure is the intended scope before running the command, which directly satisfies 'make the destructive scope clear.' B also notes genuine ambiguities (undefined 'expired,' no confirmation prompt) rather than claiming 'none,' which is more accurate given the source. A declares AMBIGUITIES: none despite the same unresolved questions, and its rewrite buries the scope concern. Neither response violates product-name capitalization or profile token requirements."
+      ],
+      "verdict": "position-sensitive",
+      "votes": [
+        "treatment",
+        "baseline"
+      ]
+    },
+    {
+      "attempt": 3,
+      "case_id": "see-exact-profile-proper-name-regression",
+      "critical_issues": [
+        false,
+        false
+      ],
+      "rationales": [
+        "Both responses satisfy the format contract and preserve 'KestrelForge' capitalization and the exact 'strict' token. The key differentiator is criteria 2: making the destructive scope clear. Candidate A explicitly flags the destructive nature ('this command deletes every expired object in that scope') and adds a confirmation gate ('verify that scope azure is intended and obtain explicit confirmation'), making the risk more salient to the reader. Candidate B states the same facts but then ends with an instruction to proceed ('run kestrel-clean --scope azure'), which undercuts the goal of making the destructive scope clear\u2014it buries the warning before an affirmative action directive. A's framing keeps the warning front and center without inventing a recovery step. Neither response has a critical violation.",
+        "Both responses preserve 'KestrelForge' capitalization and the exact 'strict' profile token without added punctuation, and both correctly convey the destructive scope without inventing recovery. Candidate A's rewrite is more faithful to the task: it rewrites the source content concisely and factually, making the destructive scope clear (deletes every expired object, no rollback) in one tight line. Candidate B adds a 'verify' and 'obtain explicit confirmation' instruction that is not present in the source and constitutes invented procedural content beyond what the source provides\u2014this conflicts with the criterion not to invent recovery or additional steps. A is therefore the better response."
+      ],
+      "verdict": "position-sensitive",
+      "votes": [
+        "baseline",
+        "treatment"
+      ]
+    },
+    {
+      "attempt": 1,
+      "case_id": "see-explanation-ordinary",
+      "critical_issues": [
+        false,
+        false
+      ],
+      "rationales": [
+        "Criterion 1 (technical fidelity): Both preserve both latency statistics and the term distinction. B keeps the original sentence structure closer to the source, which aids traceability. A compresses 'A fault produces an error that surfaces as a failure' into 'A fault causes an error, resulting in failure'\u2014losing the explicit two-step causal chain ('produces'\u2192'surfaces as') present in the source. Minor fidelity loss for A. Criterion 2 (ambiguity reduction and readability): B's AMBIGUITIES section is more precise and actionable\u2014it explains *why* each ambiguity matters ('produces different verification criteria', 'changes what the worker caches and what the service later calls'). A's ambiguities are vaguer ('may refer to', 'drifts without clarification') and less operationally useful. Criterion 3 (profile compliance, unnecessary edits, source traceability): B's REWRITE stays closer to source phrasing and ordering, making traceability straightforward. A reorders the latency statistics sentence (moving '500 requests per second' earlier) and introduces 'claimed to improve service performance'\u2014an editorial inference not present in the source\u2014which violates source traceability. That inference ('claimed') is an unnecessary edit that introduces a skeptical framing absent from the original. B wins on all three criteria without a critical issue.",
+        "Both responses preserve both latency statistics and flag both ambiguities correctly. B edges out A on technical fidelity and readability: B's rewrite keeps the source sentence structure closer to the original (less reordered), uses tighter phrasing ('is set to' vs the wordier 'receives the \u2026 argument'), and handles the failure chain more faithfully ('causes an error, resulting in failure' vs A's restructured 'A fault produces an error. The error surfaces as a failure' which splits one clause into two sentences, adding noise). B's ambiguity text is also slightly crisper and more precise ('no baseline or performance metric is specified' vs A's more verbose parallel constructions). A's multi-sentence rewrite departs more from the one-line constraint implied by 'REWRITE: <one line>', which is a minor but real compliance gap. Neither response has a consequential violation."
+      ],
+      "verdict": "position-sensitive",
+      "votes": [
+        "treatment",
+        "baseline"
+      ]
+    },
+    {
+      "attempt": 2,
+      "case_id": "see-explanation-ordinary",
+      "critical_issues": [
+        false,
+        false
+      ],
+      "rationales": [
+        "Both responses are technically faithful and flag the correct ambiguities. A edges out B on two criteria. First, profile compliance and unnecessary edits: B's rewrite retains 'because this makes the service faster' as a paraphrase ('because this makes the service faster'), preserving the causal claim the task implicitly asks to neutralize by flagging it as undefined; A drops the causal rationale entirely ('caches jobs to improve service performance'), which is a cleaner engineering-default rewrite that avoids restating an undefined claim as fact. Second, readability and ambiguity reduction: A's ambiguity section is marginally cleaner ('may refer to the same entity, but the terminology changes without explanation' vs B's 'does not establish whether both terms identify the same entities'\u2014similar quality). The key differentiator is that B's REWRITE still asserts 'this makes the service faster' inline before the AMBIGUITIES section flags 'faster' as undefined\u2014an internal contradiction that slightly undermines fidelity and profile compliance. A avoids this by substituting a neutral phrase. Neither response has a consequential criterion violation.",
+        "Both responses are close, but B is marginally better on all three criteria. On technical fidelity: A writes 'The `timeout` parameter currently receives the `30s` argument' (retains 'currently', adds noise) and 'A fault produces an error, which surfaces as a failure' (adds 'which' clause slightly awkwardly); B writes 'The caller passes `30s` as the `timeout` argument' (cleaner active voice, drops superfluous 'currently') and 'A fault causes an error, resulting in a failure' (tighter). Both preserve both latency statistics and the job/task distinction. On ambiguity reduction: B's ambiguity note is more precise \u2014 'no baseline or measured improvement is provided' vs A's vaguer 'does not identify a metric or baseline'; B's job/task note explicitly states 'the terminology changes without explanation' which is more actionable. On profile compliance: B's rewrite is tighter active-voice prose with no unnecessary hedging; A's rewrite is acceptable but slightly wordier. Neither response has a consequential violation."
+      ],
+      "verdict": "baseline",
+      "votes": [
+        "baseline",
+        "baseline"
+      ]
+    },
+    {
+      "attempt": 3,
+      "case_id": "see-explanation-ordinary",
+      "critical_issues": [
+        false,
+        false
+      ],
+      "rationales": [
+        "Criterion 1 (technical fidelity): Both preserve both latency statistics and the job/task distinction. A preserves the original causal framing ('a fault causes an error, and the operation fails') more faithfully and keeps 'p99' associated with the 500 rps context correctly. B restructures 'mean latency is 40 ms. The p99 latency is 120 ms at 500 requests per second' in a way that grammatically dissociates the 500 rps qualifier from mean latency, slightly reducing fidelity. Criterion 2 (ambiguity reduction): A's AMBIGUITIES section is more complete\u2014it flags that 'relevant metric, baseline, and measured improvement are not specified' and explicitly notes the unexplained terminology change; B's is vaguer ('can make it unclear'). Criterion 3 (profile compliance): A's REWRITE is tighter, avoids padding ('Currently' opener removed cleanly, no hedge phrases), and stays closer to engineering-default terseness. B retains 'Currently' and adds 'surfaces as a failure' paraphrase that adds no information. Neither has a critical issue.",
+        "Both responses preserve the latency statistics and flag the two ambiguities. B is better on all three criteria: (1) Technical fidelity \u2014 B keeps the causal chain intact ('A fault causes an error, and the operation fails') and preserves the 500 rps context anchored to the latency pair with 'while p99'; A's rewrite is equally accurate but slightly looser ('surfaces as a failure' is redundant with 'produces an error'). (2) Ambiguity reduction \u2014 B explicitly flags that the metric, baseline, and measured improvement are unspecified, and notes the terminology change is 'unexplained', giving the reader actionable detail; A's ambiguity note is briefer and less precise. (3) Profile compliance and source traceability \u2014 B flags the unsupported claim inline in the REWRITE ('the source claims this makes the service faster but provides no metric or comparison'), which is the correct engineering-default behavior of surfacing the claim's evidentiary status without deleting it; A silently drops the attribution and just states 'The worker caches jobs because this caching makes the service faster', which passes the unsupported claim through as if confirmed. This is a meaningful profile-compliance gap favoring B."
+      ],
+      "verdict": "baseline",
+      "votes": [
+        "baseline",
+        "baseline"
+      ]
+    },
+    {
+      "attempt": 1,
+      "case_id": "see-explanation-quote-punctuation",
+      "critical_issues": [
+        true,
+        true
+      ],
+      "rationales": [
+        "Candidate A invents an ambiguity ('KM-6 does not establish whether or under what conditions W4 batches envelopes for 12 seconds') that is not present in the source. The source states W4 *may* batch envelopes for 12 s \u2014 the 'may' qualifier already encodes the conditionality; no additional ambiguity about batching conditions is present in the source material. Criterion 3 explicitly says 'without inventing ambiguity'. This is a consequential violation affecting candidate A. Candidate B correctly reports 'none' for AMBIGUITIES, preserves all required elements (G7-to-Q2 relation, W4 batching role, 'may' qualifier, 12 s, KM-6 provenance, exact quotation, missing baseline as evidence limitation, attributed claim not promoted to system fact), and satisfies all four criteria.",
+        "Candidate B has a critical issue: its AMBIGUITIES line invents an ambiguity ('does not establish whether or under what conditions W4 batches envelopes for 12 seconds') that is not present in the source. The source states plainly that W4 may batch for 12 s; the uncertainty is already captured by 'may'. Criterion 3 explicitly requires exposing the missing baseline as an evidence limitation 'without inventing ambiguity.' B fabricates a new ambiguity about conditionality that the source does not raise, violating criterion 3. Candidate A correctly responds with 'none' for AMBIGUITIES, accurately reflecting that there are no genuine ambiguities beyond the already-noted missing baseline. Both candidates satisfy criteria 1, 2, and 4. A's REWRITE is slightly terser but fully compliant. B's REWRITE is also compliant on the rewrite line, but the invented AMBIGUITIES entry is a consequential criterion violation."
+      ],
+      "verdict": "treatment",
+      "votes": [
+        "treatment",
+        "treatment"
+      ]
+    },
+    {
+      "attempt": 2,
+      "case_id": "see-explanation-quote-punctuation",
+      "critical_issues": [
+        false,
+        false
+      ],
+      "rationales": [
+        "Both responses preserve the G7-to-Q2 relation, the MAY qualifier, 12 s duration, KM-6 provenance, and the missing-baseline limitation without inventing a causal explanation. A is better on criterion 4 (do not promote attributed claim into system fact): A explicitly notes 'this is a memo claim, not guaranteed system behavior,' making the system-vs-memo distinction clearer and more deliberate. A's AMBIGUITIES section also surfaces a second genuine ambiguity (the batching condition itself) that is present in the source and worth flagging, which B omits. B's AMBIGUITIES line is narrower\u2014it only restates the baseline gap already covered in REWRITE, adding no net information. A's treatment of 'massively improved' in REWRITE ('the claim cannot be evaluated because it provides no baseline') and B's treatment are equivalent, but A's explicit separation of memo claim from system behavior in REWRITE gives it a material edge on criterion 4. No critical issues in either response.",
+        "A satisfies all four criteria cleanly. B has two deficiencies: (1) its AMBIGUITIES line raises 'whether or under what conditions W4 batches envelopes' as an open question, which invents ambiguity not present in the source\u2014the source states 'may batch' as a qualifier, not an unresolved condition, violating criterion 3; (2) the exact quotation in B's REWRITE includes a trailing comma inside the closing quotation mark ('massively improved,') making the quotation inexact, violating criterion 2. A preserves the exact quotation without interior punctuation changes and limits its AMBIGUITIES to the missing baseline, which is the only genuine evidence gap. B's explicit parenthetical 'this is a memo claim, not guaranteed system behavior' is a reasonable clarification but does not offset the two violations above."
+      ],
+      "verdict": "position-sensitive",
+      "votes": [
+        "baseline",
+        "treatment"
+      ]
+    },
+    {
+      "attempt": 3,
+      "case_id": "see-explanation-quote-punctuation",
+      "critical_issues": [
+        false,
+        false
+      ],
+      "rationales": [
+        "Both responses satisfy the core criteria: G7-to-Q2 relation preserved, W4 batching with 'may' and 12 s retained, KM-6 provenance noted, exact quotation kept, missing baseline exposed without invention, and memo claim not promoted to system fact. B is better on two counts. First, B's AMBIGUITIES line stays tightly scoped to the actual gap (the unknown baseline makes the throughput claim unevaluable), matching the task precisely. A's AMBIGUITIES line adds a second invented ambiguity\u2014whether or under what conditions W4 batches\u2014that is not present in the source; the source already includes 'may batch for 12 s', so asserting that KM-6 'does not establish whether or under what conditions W4 batches' manufactures uncertainty not in the original, violating criterion 3. Second, A's REWRITE embeds that same invented ambiguity ('this is a memo claim, not confirmed system behavior' is acceptable, but 'may batch envelopes for 12 seconds; this is a memo claim' is slightly redundant with what follows). B is cleaner and does not invent additional ambiguity.",
+        "B better satisfies criterion 4 by explicitly flagging the W4 batching statement as a memo claim rather than confirmed system behavior, keeping the distinction between system fact and attributed claim clear throughout. B's AMBIGUITIES line is also more precise: it separately names the conditionality of W4 batching and the missing throughput baseline, covering both evidence gaps. A collapses AMBIGUITIES to only the baseline and does not mark the batching claim as memo-sourced in the rewrite, leaving criterion 4 partially unmet. Neither response has a critical issue; B is materially better on criteria 3 and 4."
+      ],
+      "verdict": "position-sensitive",
+      "votes": [
+        "treatment",
+        "baseline"
+      ]
+    },
+    {
+      "attempt": 1,
+      "case_id": "see-local-antecedent-regression",
+      "critical_issues": [
+        false,
+        false
+      ],
+      "rationales": [
+        "The task explicitly states the source already reads 'the pressure' and that there is one compatible antecedent (manifold pressure) with no consequential ambiguity. Candidate B preserves the source phrasing 'the pressure', matching the task instruction not to invent another pressure. Candidate A expands it to 'the manifold pressure', which is a gratuitous change the task does not request and that criteria 2 implicitly discourages by not rewarding unnecessary alterations. Both satisfy the other criteria equally, but B is the more faithful rewrite under the engineering-default profile where the antecedent is unambiguous.",
+        "Both responses are correct and nearly identical. B explicitly repeats 'manifold pressure' in the condition clause, which more precisely preserves the antecedent and aligns with the engineering-default profile's preference for clarity. A uses the pronoun 'the pressure' which, while unambiguous given one compatible antecedent, is slightly less explicit. The difference is marginal but B is marginally better on criteria 1 and 3 by making the antecedent fully explicit in the condition. No critical issues in either response."
+      ],
+      "verdict": "position-sensitive",
+      "votes": [
+        "treatment",
+        "baseline"
+      ]
+    },
+    {
+      "attempt": 2,
+      "case_id": "see-local-antecedent-regression",
+      "critical_issues": [
+        false,
+        false
+      ],
+      "rationales": [
+        "Both responses are identical in content, profile selection, rewrite text, and ambiguity declaration. No material difference exists between A and B.",
+        "Both responses are identical in every field: profile, rewrite, and ambiguities declaration. No basis to prefer one over the other."
+      ],
+      "verdict": "tie",
+      "votes": [
+        "tie",
+        "tie"
+      ]
+    },
+    {
+      "attempt": 3,
+      "case_id": "see-local-antecedent-regression",
+      "critical_issues": [
+        false,
+        false
+      ],
+      "rationales": [
+        "The task explicitly states the source has one compatible antecedent for 'the pressure' and instructs not to invent another pressure. Candidate A expands 'the pressure' to 'the manifold pressure', which contradicts the task instruction ('do not invent another pressure') and over-specifies beyond the source's anaphoric reference. Candidate B preserves the original anaphoric 'the pressure', correctly trusting the single compatible antecedent as the task directs. All three criteria are met by B: one antecedent is present and not multiplied, no hypothetical ambiguity is invented, and the condition is preserved attached to the close action.",
+        "Both responses are correct and criteria-compliant. Candidate B expands 'the pressure' to 'the manifold pressure', which is a minor stylistic improvement for clarity and consistency with the prior sentence. Candidate A preserves the pronoun 'the pressure', which is unambiguous given the single antecedent per the task. Neither has a consequential violation. B's expansion is marginally preferable for technical documentation clarity, giving it a slight edge."
+      ],
+      "verdict": "position-sensitive",
+      "votes": [
+        "treatment",
+        "baseline"
+      ]
+    },
+    {
+      "attempt": 1,
+      "case_id": "see-procedure-noop",
+      "critical_issues": [
+        false,
+        false
+      ],
+      "rationales": [
+        "Both responses are identical in every field: PROFILE strict, REWRITE reproduces the source verbatim without unsupported edits, and AMBIGUITIES none. Technical fidelity is perfect (4/4) for both, unnecessary-edit rate is zero for both, and strict-profile compliance with readability is equally high (4/4). No consequential violations in either candidate.",
+        "Both responses are identical in every respect: correct PROFILE label, verbatim source preservation with no unsupported edits, and AMBIGUITIES: none. Technical fidelity, unnecessary-edit rate, strict-profile compliance, and readability are indistinguishable."
+      ],
+      "verdict": "tie",
+      "votes": [
+        "tie",
+        "tie"
+      ]
+    },
+    {
+      "attempt": 2,
+      "case_id": "see-procedure-noop",
+      "critical_issues": [
+        false,
+        false
+      ],
+      "rationales": [
+        "Both responses are identical in every field: PROFILE strict, REWRITE reproduces the source verbatim without unsupported edits, and AMBIGUITIES none. Technical fidelity is perfect, unnecessary-edit rate is zero, strict-profile compliance and readability are equivalent. No basis to prefer either candidate.",
+        "Both responses are byte-for-byte identical: PROFILE: strict, REWRITE reproduces the source verbatim without unsupported edits, and AMBIGUITIES: none. All three criteria score equally across candidates."
+      ],
+      "verdict": "tie",
+      "votes": [
+        "tie",
+        "tie"
+      ]
+    },
+    {
+      "attempt": 3,
+      "case_id": "see-procedure-noop",
+      "critical_issues": [
+        false,
+        false
+      ],
+      "rationales": [
+        "Both responses are identical in content, structure, and correctness. Each correctly identifies the profile as strict, returns the source text verbatim without unsupported edits, and reports AMBIGUITIES: none. Technical fidelity is perfect for both (4/4), unnecessary-edit rate is zero for both (4/4), and strict-profile compliance with readability is identical (4/4). No critical issues in either candidate.",
+        "Both responses are identical in every field: PROFILE strict, REWRITE preserving the source text verbatim, and AMBIGUITIES none. Technical fidelity is perfect in both (no unsupported edits), strict-profile compliance and readability are equal. No material advantage exists for either candidate."
+      ],
+      "verdict": "tie",
+      "votes": [
+        "tie",
+        "tie"
+      ]
+    },
+    {
+      "attempt": 1,
+      "case_id": "see-procedure-ordinary",
+      "critical_issues": [
+        false,
+        false
+      ],
+      "rationales": [
+        "Candidate A produces a tighter, more actionable single-line rewrite that integrates the command naturally into the prose, consistent with an engineering-default profile favoring concise imperative style. It correctly reports the 'looks good' ambiguity. Candidate B expands into a numbered list, which adds formatting overhead not called for by a one-line rewrite contract, and its AMBIGUITIES section adds the 'authorize = grant vs verify' ambiguity\u2014a genuine catch\u2014but the list format violates the single-line REWRITE requirement and over-editorializes structure relative to the source. Neither response invents a result. A scores higher on readability, profile compliance, and adherence to the one-line format constraint; B's numbered list is an unnecessary structural deviation. No critical issues in either.",
+        "Technical fidelity: both preserve the source steps without inventing results (4/4 each). Residual ambiguity: B correctly flags only the genuine undefined criterion ('looks good'); A additionally flags 'authorize the account' as ambiguous between granting vs. verifying access, which is a real ambiguity in the source\u2014slight edge to A here, but A's flagging of it is marginally over-reading given the engineering-default profile. Actionability/readability: B collapses the three steps into a compact prose sentence with the command appended, matching engineering-default style (terse, no ceremony). A expands into a numbered list with a redundant summary step ('check that the account looks good' as a discrete list item) that adds no precision and pads the rewrite unnecessarily. Profile compliance: engineering-default favors concise prose; B's single-sentence rewrite fits; A's numbered list is more verbose than warranted. Unnecessary edits: A introduces 'the account looks good' as an explicit list step rather than treating it as source phrasing to flag\u2014minor but unnecessary. Source traceability: both traceable. Overall B is cleaner, more compliant with the profile, and avoids padding without losing fidelity."
+      ],
+      "verdict": "baseline",
+      "votes": [
+        "baseline",
+        "baseline"
+      ]
+    },
+    {
+      "attempt": 2,
+      "case_id": "see-procedure-ordinary",
+      "critical_issues": [
+        false,
+        false
+      ],
+      "rationales": [
+        "Candidate A produces a single coherent prose sentence that integrates all four source steps, preserves the command verbatim, adds no invented result, and surfaces the genuinely consequential ambiguities (access target, auth/authz procedures, and what constitutes a satisfactory status). Candidate B breaks the procedure into a numbered list, which violates the REWRITE one-line contract, and its stated ambiguity ('looks good' meaning enabled vs. having required permissions) is narrower and less actionable than A's. A scores higher on actionability, readability, residual ambiguity coverage, and profile compliance; B's multi-line REWRITE is a format violation against the explicit contract.",
+        "B scores higher on technical fidelity: it preserves the source order (authenticate \u2192 authorize \u2192 inspect output) without inventing a numbered step 3 label ('Check that the account looks good') that implies a discrete verification stage not in the source, and avoids the vague filler phrase 'looks good' entirely. A's numbered list restructures the source into four steps where the source has three, adding minor fabrication of step structure. B's AMBIGUITIES section is more complete and actionable, identifying the access target, the procedures themselves, and the status criteria as unspecified\u2014all genuinely consequential gaps. A's ambiguity note is narrower (only the 'looks good' phrase) and misses larger gaps. Both comply with the engineering-default profile and the three-field format. Neither invents an expected result, so no critical issue applies. B is materially better on residual ambiguity coverage and technical fidelity."
+      ],
+      "verdict": "baseline",
+      "votes": [
+        "baseline",
+        "baseline"
+      ]
+    },
+    {
+      "attempt": 3,
+      "case_id": "see-procedure-ordinary",
+      "critical_issues": [
+        false,
+        false
+      ],
+      "rationales": [
+        "Candidate A produces a single-line REWRITE that integrates all source steps into one coherent sentence, preserves the authctl command inline, explicitly flags the no-invented-result constraint ('without assuming a specific expected result'), and names two distinct ambiguities (affected resource, authorization scope, and the vague acceptance criterion). Candidate B's REWRITE is a bulleted-style sentence fragment list rather than a single line, reducing readability and profile compliance; it also omits the resource/scope ambiguity, leaving residual consequential ambiguity higher. Neither candidate invents an expected result, so no critical issue applies. A wins on actionability, readability, ambiguity coverage, and profile compliance.",
+        "Candidate A's rewrite fragments the procedure into choppy disconnected sentences ('Authenticate the account. Authorize the account. Check that the account looks good.') that reduce readability and actionability compared to the source. Candidate B preserves the logical flow as a single coherent instruction, integrates the authctl command naturally, and explicitly notes the absence of expected results without inventing one. Both correctly identify the ambiguities around 'looks good', but B's ambiguity section is more complete, naming both the unspecified resource/scope and the missing acceptance criteria. Neither candidate invents an expected result. B scores materially better on readability, actionability, and source traceability."
+      ],
+      "verdict": "baseline",
+      "votes": [
+        "baseline",
+        "baseline"
+      ]
+    },
+    {
+      "attempt": 1,
+      "case_id": "see-requirement-noop",
+      "critical_issues": [
+        false,
+        false
+      ],
+      "rationales": [
+        "Both responses are byte-for-byte identical: PROFILE: strict, the same single-line REWRITE preserving every condition and value from the source, and AMBIGUITIES: none. No condition, value, or obligation was changed. Technical fidelity, unnecessary-edit rate, strict-profile compliance, and readability are equal across both candidates.",
+        "Candidates A and B produced identical responses across all three fields (PROFILE, REWRITE, AMBIGUITIES). Both preserved the source text verbatim with no edits, correctly identified the profile as strict, and reported no ambiguities. No condition, value, or obligation was changed. Technical fidelity is perfect for both; neither has any advantage."
+      ],
+      "verdict": "tie",
+      "votes": [
+        "tie",
+        "tie"
+      ]
+    },
+    {
+      "attempt": 2,
+      "case_id": "see-requirement-noop",
+      "critical_issues": [
+        false,
+        false
+      ],
+      "rationales": [
+        "Both responses are identical in every field: PROFILE strict, REWRITE reproduces the source verbatim without any changes, and AMBIGUITIES none. Technical fidelity is perfect for both; no condition, value, or obligation was altered; strict-profile compliance and readability are equal. No material advantage exists for either candidate.",
+        "Both responses are identical in every field: PROFILE, REWRITE, and AMBIGUITIES. Neither changed any condition, value, or obligation from the source; both reproduce the requirement verbatim and correctly report no ambiguities. No material advantage exists for either candidate."
+      ],
+      "verdict": "tie",
+      "votes": [
+        "tie",
+        "tie"
+      ]
+    },
+    {
+      "attempt": 3,
+      "case_id": "see-requirement-noop",
+      "critical_issues": [
+        false,
+        false
+      ],
+      "rationales": [
+        "Both responses are identical in every field: PROFILE, REWRITE, and AMBIGUITIES. The rewrite preserves the source text verbatim without any changes to conditions, values, or obligations. Both satisfy all three criteria equally \u2014 technical fidelity is perfect, unnecessary-edit rate is zero, strict-profile compliance is met, and readability is unchanged. No material difference exists between A and B.",
+        "Both responses are identical in every field: PROFILE strict, REWRITE verbatim copy of the source, AMBIGUITIES none. No changed condition, value, or obligation; no unnecessary edits; full strict-profile compliance. Neither has any advantage over the other."
+      ],
+      "verdict": "tie",
+      "votes": [
+        "tie",
+        "tie"
+      ]
+    },
+    {
+      "attempt": 1,
+      "case_id": "see-requirement-ordinary",
+      "critical_issues": [
+        false,
+        false
+      ],
+      "rationales": [
+        "Both responses are functionally identical on technical fidelity (correct PROFILE, faithful REWRITE preserving MUST/SHOULD force, no invented thresholds) and readability/format compliance. The differentiator is ambiguity reduction quality. B's AMBIGUITIES section is tighter and more useful: it explicitly names the consequence ('implementations can use different thresholds and produce different compliance verdicts'), which is an objective verifiability concern directly relevant to the engineering-default profile. A's AMBIGUITIES section adds noise by listing retry triggers, limits, timing, and applicable requests as unspecified \u2014 these are plausible concerns but the source text gives no basis for flagging them beyond what B already covers; A is partially inventing scope gaps the task says not to invent. Neither response has a critical issue.",
+        "Both responses are functionally identical on criteria 1 (correct PROFILE, unchanged RFC 2119 force levels, clean split of the conjoined MUST). On criteria 2, B is materially better: it identifies four distinct ambiguities (retry triggers, limits, timing, applicable requests) versus A's single observation that thresholds are unmeasurable, giving a more actionable gap analysis. On criteria 3 both are equally clean and traceable. No critical issues in either response."
+      ],
+      "verdict": "position-sensitive",
+      "votes": [
+        "treatment",
+        "baseline"
+      ]
+    },
+    {
+      "attempt": 2,
+      "case_id": "see-requirement-ordinary",
+      "critical_issues": [
+        false,
+        false
+      ],
+      "rationales": [
+        "Criterion 1 (technical fidelity): Both correctly preserve MUST/MUST/SHOULD force. Tie on criterion 1. Criterion 2 (ambiguity reduction): B's AMBIGUITIES section is materially more specific \u2014 it calls out the missing response-time threshold, missing measurable criterion for 'reliable', and the unspecified trigger conditions and scope of retries. A's AMBIGUITIES is vaguer ('retry scope, conditions, and behavior are unspecified' vs B's enumerated gaps). B wins criterion 2. Criterion 3 (readability, profile compliance, unnecessary edits): A merges three obligations into one compound sentence ('MUST be fast, MUST be reliable, and SHOULD retry'), which obscures the separate force of each keyword. B splits them into three discrete sentences, which is cleaner for an RFC 2119 rewrite and makes each obligation individually traceable to the source. Neither candidate invents thresholds or conditions. B wins criterion 3. No critical issues in either response.",
+        "Criterion 1 (technical fidelity): Both preserve MUST/SHOULD forces correctly. Criterion 2 (ambiguity reduction): Both identify the same ambiguities; B is slightly more compact and covers retry scope/conditions/behavior explicitly in fewer words without omitting anything A caught. Criterion 3 (readability/profile compliance/unnecessary edits): B's REWRITE keeps the original sentence structure as a single clause matching the source ('MUST be fast, MUST be reliable, and SHOULD retry requests'), which is the minimal faithful rewrite. A splits into three separate sentences, an unnecessary structural change that departs from the source without adding clarity and constitutes an unneeded edit. B's AMBIGUITIES field is more concise and equally complete. No critical issues in either response."
+      ],
+      "verdict": "position-sensitive",
+      "votes": [
+        "treatment",
+        "baseline"
+      ]
+    },
+    {
+      "attempt": 3,
+      "case_id": "see-requirement-ordinary",
+      "critical_issues": [
+        false,
+        false
+      ],
+      "rationales": [
+        "Both responses are functionally identical: same PROFILE, same REWRITE (splitting the conjunction into three RFC 2119 statements without inventing thresholds), and substantively equivalent AMBIGUITIES text. Candidate A notes both 'fast'/'reliable' lack measurable criteria and that retry triggers/limits/exception conditions are unspecified \u2014 the latter is extra but not wrong since the task says not to invent them, not that omitting them from ambiguities is forbidden. Candidate B is more concise but covers only the measurement gap. Neither addition/omission constitutes a material advantage on any of the three criteria. No critical issues: no MUST/SHOULD force changes, no invented thresholds, profile compliance identical.",
+        "Both candidates produce identical PROFILE and REWRITE fields, so criteria 1 and 3 are tied. On criterion 2 (ambiguity reduction and objective verifiability), B's AMBIGUITIES field is materially more complete: it flags not only the vagueness of 'fast' and 'reliable' but also the unspecified retry triggers, limits, and exception conditions\u2014all genuine gaps a verifier would need resolved. A's ambiguities note stops at the two adjectives and omits the retry underspecification entirely. B therefore scores higher on criterion 2 with no tradeoff elsewhere."
+      ],
+      "verdict": "position-sensitive",
+      "votes": [
+        "tie",
+        "baseline"
+      ]
+    },
+    {
+      "attempt": 1,
+      "case_id": "see-single-reference-not-ambiguity-regression",
+      "critical_issues": [
+        false,
+        false
+      ],
+      "rationales": [
+        "Both responses correctly identify the profile and report no ambiguities. Candidate A merges the three source sentences into a single fluent sentence while preserving all facts (one gauge, 31 kPa reading, operator records it) without altering meaning. Candidate B merely reproduces the source sentences unchanged, which is not a rewrite. Neither response violates the criteria: the gauge reading is stated as a fact in both, and neither invents a second referent. A is materially better because it actually performs the rewriting task.",
+        "Both responses correctly identify engineering-default, preserve 31 kPa as a fact (not an obligation), and report no ambiguities. The only difference is stylistic: A splits into three sentences while B merges into one via a relative clause and semicolon. Neither variant has a material quality advantage under the supplied criteria."
+      ],
+      "verdict": "position-sensitive",
+      "votes": [
+        "baseline",
+        "tie"
+      ]
+    },
+    {
+      "attempt": 2,
+      "case_id": "see-single-reference-not-ambiguity-regression",
+      "critical_issues": [
+        false,
+        false
+      ],
+      "rationales": [
+        "Both responses correctly identify the profile, preserve 31 kPa as a fact, and report no ambiguities. Candidate A produces a tighter single-sentence rewrite that eliminates the choppy three-sentence structure of the source while preserving all facts. Candidate B reproduces the source nearly verbatim with no meaningful transformation. Under an engineering-default SEE profile the goal is clarity and concision; A's consolidation into one fluent sentence better serves that goal, giving it a modest but real advantage.",
+        "Both responses correctly apply the engineering-default profile, preserve 31 kPa as a fact, and treat the single-referent pronoun as unambiguous. Candidate A is marginally better: it uses short declarative sentences that match the source structure exactly, avoiding the semicolon-chained construction in B which slightly obscures the three discrete facts. Neither response has a consequential criteria violation."
+      ],
+      "verdict": "position-sensitive",
+      "votes": [
+        "baseline",
+        "treatment"
+      ]
+    },
+    {
+      "attempt": 3,
+      "case_id": "see-single-reference-not-ambiguity-regression",
+      "critical_issues": [
+        false,
+        false
+      ],
+      "rationales": [
+        "Both responses correctly identify the profile as engineering-default, preserve the gauge reading as a fact (not an obligation), and report no ambiguities. Candidate A merges the three source sentences into one fluent sentence using a semicolon-joined construction, demonstrating better prose economy without loss of meaning. Candidate B preserves the source sentence structure almost verbatim, which adds no value over the original. Neither response has a consequential violation: both correctly treat 'the gauge' as a resolved referent (no invented ambiguity) and keep '31 kPa' as a factual observation. A's consolidation is a marginal stylistic improvement; B's sentence-by-sentence rendering is acceptable but offers no advantage.",
+        "Both responses correctly identify the profile as engineering-default, preserve 31 kPa as a fact (not an obligation), treat 'the gauge' as a non-ambiguous definite reference with one local referent, and report no ambiguities. Candidate A uses three separate sentences; candidate B fuses them with semicolons. Neither structure is mandated by the criteria, and neither introduces error or ambiguity. No material quality difference exists."
+      ],
+      "verdict": "position-sensitive",
+      "votes": [
+        "baseline",
+        "tie"
+      ]
+    },
+    {
+      "attempt": 1,
+      "case_id": "see-unknown-recovery-before-destructive-regression",
+      "critical_issues": [
+        false,
+        false
+      ],
+      "rationales": [
+        "Both responses satisfy the structural contract and place the recovery sentence before the command. B's AMBIGUITIES field is materially better: it explicitly frames the gap as a binary unknown (can be available or unavailable) and names the concrete consequence (changes rollback options), directly satisfying criterion 1 ('unknown, not proven impossible') and criterion 2 ('reader sees the gap'). A's AMBIGUITIES field ('Recovery availability after deletion is unspecified') is a near-restatement of the REWRITE sentence and adds no informational value about the implications of the gap.",
+        "Both responses are functionally identical on every criterion: the PROFILE is strict, the REWRITE preserves the exact command and places the source sentence before it, and the AMBIGUITIES field reports the recovery gap without asserting impossibility. Candidate A's AMBIGUITIES text is slightly more verbose, elaborating the two possible states, while B's is more concise \u2014 neither approach violates any criterion. No material advantage exists for either candidate."
+      ],
+      "verdict": "position-sensitive",
+      "votes": [
+        "treatment",
+        "tie"
+      ]
+    },
+    {
+      "attempt": 2,
+      "case_id": "see-unknown-recovery-before-destructive-regression",
+      "critical_issues": [
+        false,
+        false
+      ],
+      "rationales": [
+        "Both responses satisfy the hard constraints: PROFILE strict, sentence order (warning before command), exact command preserved, three-field format. The differentiator is ambiguity quality. Criterion 1 requires the recovery status be framed as unknown, not impossible. Candidate A writes 'Whether deleted records can be recovered is unspecified' \u2014 grammatically correct but passive and less explicit about the binary states. Candidate B writes 'Recovery can be available or unavailable. This determines whether you can restore deleted records.' \u2014 explicitly names both possible states, making clear the status is open (unknown) rather than ruled out, and adds a consequence sentence that helps the reader understand the stakes. Criterion 2 is met equally by both. B's ambiguity section more directly satisfies criterion 1 by naming the two open possibilities rather than merely noting the gap exists.",
+        "Both responses satisfy the structural contract and place the recovery-status sentence before the command. Candidate A's ambiguity text ('Recovery can be available or unavailable. This determines whether you can restore deleted records.') overstates what is known: it frames the two states as equal possibilities and then explains the obvious implication, adding noise without precision. Candidate B's text ('Whether deleted records can be recovered is unspecified.') is a single, direct statement of the gap \u2014 exactly what the criteria require. Neither response has a critical issue; both keep the recovery status unknown rather than proven impossible, and both surface the gap before the destructive action. B is materially tighter."
+      ],
+      "verdict": "position-sensitive",
+      "votes": [
+        "treatment",
+        "baseline"
+      ]
+    },
+    {
+      "attempt": 3,
+      "case_id": "see-unknown-recovery-before-destructive-regression",
+      "critical_issues": [
+        false,
+        false
+      ],
+      "rationales": [
+        "Both responses satisfy all criteria: the recovery-status sentence precedes the destructive command, the command is preserved exactly, the ambiguity is reported, and neither asserts recovery is impossible. The only difference is sentence order within REWRITE (A leads with the warning sentence then command; B does the same) and minor wording variation in AMBIGUITIES. Neither difference is material to the criteria.",
+        "Both responses satisfy all criteria: the recovery status is framed as unknown/unspecified (not proven impossible), the gap sentence appears before the destructive command, the exact command is preserved, and the recovery gap is reported as an ambiguity. The only difference is minor prose variation in the AMBIGUITIES field ('Recovery availability is not specified, so it is unknown whether deleted records can be recovered.' vs 'Whether deleted records can be recovered is unspecified.') \u2014 neither phrasing has a material advantage over the other on the supplied criteria."
+      ],
+      "verdict": "tie",
+      "votes": [
+        "tie",
+        "tie"
+      ]
+    }
+  ],
+  "schema_version": 4
+}

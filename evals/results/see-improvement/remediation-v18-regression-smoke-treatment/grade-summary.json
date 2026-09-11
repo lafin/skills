@@ -1,0 +1,28 @@
+{
+  "all_passed": true,
+  "artifacts": 9,
+  "condition": "treatment",
+  "critical_passed": 9,
+  "deterministic_grades": "grades.jsonl",
+  "efficacy_claim": null,
+  "input_binding": {
+    "artifacts": {
+      "artifacts/see-authorization-scope-regression/1.json": "654f95badc153301ecdfbd8f1de43ffc9fe52ced3b1445f368d305afedbd3714",
+      "artifacts/see-authorization-scope-regression/2.json": "2b8fc28ba361089dbaa2770b51dcab4590ad30af798c912fc864a6c7f55c5aab",
+      "artifacts/see-authorization-scope-regression/3.json": "727c54d88d24f447c6ac76e1a7d69564a1c446e264b9cce728a6d13a1dd69786",
+      "artifacts/see-descriptive-fact-regression/1.json": "30af6c20286224071f4578afc56008df0fb2ad8ec780d00f39c22f02337ae02e",
+      "artifacts/see-descriptive-fact-regression/2.json": "9244f77c8ef2679da07c8eb0115bed2699b9e5a325def37aede96d97bc5a122b",
+      "artifacts/see-descriptive-fact-regression/3.json": "ad9c11e5402df21c748f1e92b7be11ed3ff51afe14933fba505222bb62c93d53",
+      "artifacts/see-error-ordinary/1.json": "040511025a047cab505fd1016aa943396deb0344b9beac17c9324041bc56a20b",
+      "artifacts/see-error-ordinary/2.json": "2b7461faaccee37d6f9b709c3e89796c270e94ebb1ca0d1d5976e60dbf254474",
+      "artifacts/see-error-ordinary/3.json": "73f6f9c8e95d38552d97d511f20c16ab93e6a261bacc76e0ea00b3d2800114b0"
+    },
+    "case_snapshot_sha256": "e3ad02f331bbbd634956a4e39e6dcf7b9ad65c522ed4ba189d064155ada048ce",
+    "grader_sha256": "dd04a7a7d85d129245f1885bac5ff3845b3f3adb292b90394570f08b5827fe72",
+    "manifest_sha256": "5d89a3f58e5d73d19595172eef03f7eeaea9f795357ed3861cb89dee1f1f9a1a"
+  },
+  "passed": 9,
+  "reason": "A single condition cannot support an efficacy claim; pair it with the other condition.",
+  "run_id": "remediation-v18-regression-smoke-treatment",
+  "schema_version": 4
+}

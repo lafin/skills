@@ -1,0 +1,257 @@
+{
+  "pairs": {
+    "0972e8e7b0e9d9cf": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 3,
+      "case_id": "see-error-noop",
+      "order": "swapped"
+    },
+    "1c52bd625fffb9b6": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 2,
+      "case_id": "see-explanation-noop",
+      "order": "swapped"
+    },
+    "276c7ce0d4744f20": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 1,
+      "case_id": "see-procedure-adversarial",
+      "order": "swapped"
+    },
+    "2b0b0ddd8408077b": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 3,
+      "case_id": "see-requirement-adversarial",
+      "order": "forward"
+    },
+    "41f836977e686b45": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 1,
+      "case_id": "see-explanation-noop",
+      "order": "swapped"
+    },
+    "4290629c667f5381": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 2,
+      "case_id": "see-requirement-adversarial",
+      "order": "forward"
+    },
+    "4919e0156813ca55": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 3,
+      "case_id": "see-requirement-adversarial",
+      "order": "swapped"
+    },
+    "535064991466c1db": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 3,
+      "case_id": "see-explanation-noop",
+      "order": "swapped"
+    },
+    "54b35930f4ca15a9": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 1,
+      "case_id": "see-error-noop",
+      "order": "swapped"
+    },
+    "5a21420a0bb26db4": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 3,
+      "case_id": "see-explanation-adversarial",
+      "order": "swapped"
+    },
+    "5c3b0a6b831a4efe": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 2,
+      "case_id": "see-error-adversarial",
+      "order": "swapped"
+    },
+    "635700c0ce0a2a59": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 2,
+      "case_id": "see-procedure-adversarial",
+      "order": "swapped"
+    },
+    "641cc12780ca1a6b": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 3,
+      "case_id": "see-error-adversarial",
+      "order": "swapped"
+    },
+    "6ae0736845d910cd": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 2,
+      "case_id": "see-procedure-adversarial",
+      "order": "forward"
+    },
+    "6ed9dc718d24c5c5": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 2,
+      "case_id": "see-error-noop",
+      "order": "forward"
+    },
+    "7230f491ce2500ce": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 3,
+      "case_id": "see-error-noop",
+      "order": "forward"
+    },
+    "74afdc51473c34a9": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 1,
+      "case_id": "see-explanation-adversarial",
+      "order": "swapped"
+    },
+    "8371e289834eac05": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 1,
+      "case_id": "see-error-adversarial",
+      "order": "swapped"
+    },
+    "87bdef4d2ecc57f4": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 3,
+      "case_id": "see-explanation-noop",
+      "order": "forward"
+    },
+    "8c2873dd2fb8d602": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 3,
+      "case_id": "see-procedure-adversarial",
+      "order": "forward"
+    },
+    "92260a845dbc2bf8": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 2,
+      "case_id": "see-error-adversarial",
+      "order": "forward"
+    },
+    "9553348119434ab3": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "see-procedure-adversarial",
+      "order": "forward"
+    },
+    "9b075c14ea8b7e60": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 2,
+      "case_id": "see-explanation-noop",
+      "order": "forward"
+    },
+    "9e0371228adf50f0": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 3,
+      "case_id": "see-error-adversarial",
+      "order": "forward"
+    },
+    "a8db11fe5bb7dade": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 3,
+      "case_id": "see-procedure-adversarial",
+      "order": "swapped"
+    },
+    "b525f97a54020800": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "see-error-noop",
+      "order": "forward"
+    },
+    "c48600312e4d4679": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 2,
+      "case_id": "see-explanation-adversarial",
+      "order": "swapped"
+    },
+    "cca502860c9f2959": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 2,
+      "case_id": "see-error-noop",
+      "order": "swapped"
+    },
+    "cebed9853cfc1dda": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 2,
+      "case_id": "see-explanation-adversarial",
+      "order": "forward"
+    },
+    "d472fbf13728798b": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "see-explanation-noop",
+      "order": "forward"
+    },
+    "d56132a653852913": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 2,
+      "case_id": "see-requirement-adversarial",
+      "order": "swapped"
+    },
+    "dea1fa3e24b3f6ea": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 3,
+      "case_id": "see-explanation-adversarial",
+      "order": "forward"
+    },
+    "e005fe9a6dcb2ccd": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "see-explanation-adversarial",
+      "order": "forward"
+    },
+    "eab33766c6ab6495": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "see-error-adversarial",
+      "order": "forward"
+    },
+    "f459e079a0eb6b71": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "see-requirement-adversarial",
+      "order": "forward"
+    },
+    "f7e2619d9203db4b": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 1,
+      "case_id": "see-requirement-adversarial",
+      "order": "swapped"
+    }
+  },
+  "schema_version": 3
+}

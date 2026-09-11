@@ -1,0 +1,55 @@
+{
+  "frozen_at": "2026-09-11T18:20:50Z",
+  "supersedes": "remediation-freeze-v18.json",
+  "prior_freeze_sha256": "c8c276a3f61108d2941bb195eaea9aaa8d9d28ac47f67bdcaddcb1b0b53174eb",
+  "reason": "The V18 final holdout exposed over-reporting of absent recovery and omitted imperative actors as ambiguities, plus one rewrite that moved protected technical alternatives only to the ambiguity field. The first correction over-suppressed genuine vague terms in development. V20 distinguishes absent details from source vague terms and requires exact spans in rewritten content. A nine-artifact development smoke passed before freeze.",
+  "rejected_evidence": {
+    "v18_holdout": {
+      "baseline": "remediation-v18-independent-behavior-baseline",
+      "treatment": "remediation-v18-independent-behavior-treatment",
+      "baseline_passed": 30,
+      "treatment_passed": 30,
+      "critical_treatment_passed": 35,
+      "artifacts": 36,
+      "candidate_defect_artifacts": 6,
+      "note": "The V18 candidate and holdout are rejected and are not release evidence."
+    },
+    "v19_development": {
+      "baseline": "remediation-v19-development-behavior-baseline",
+      "treatment": "remediation-v19-development-behavior-treatment",
+      "baseline_passed": 27,
+      "treatment_passed": 35,
+      "artifacts": 42,
+      "candidate_defect_artifacts": 7,
+      "note": "The V19 candidate over-suppressed source vague terms and is rejected."
+    }
+  },
+  "development_smoke": {
+    "run": "remediation-v20-development-regression-smoke-treatment",
+    "passed": 9,
+    "artifacts": 9,
+    "note": "Supporting pre-freeze smoke only; final development treatment binds the frozen candidate."
+  },
+  "response_blind_holdout_process": {
+    "independent_author": "IndependentV19Author",
+    "independent_auditor": "V19HoldoutAuditor",
+    "audit_adjudicator": "V19AuditAdjudicator",
+    "candidate_or_prior_evidence_visible_to_author_or_auditor": false,
+    "final_adjudication": "FREEZE",
+    "release_blockers": [],
+    "semantic_only_disposition": "Obligation force, arbitrary English paraphrases, typed relations, causality, uncertainty, and ambiguity meaning remain in judge_criteria. Deterministic checks enforce exact lexical, field, ordering, cardinality, redaction, and common mutation boundaries."
+  },
+  "sha256": {
+    "evals/run.py": "be310d7d73869c11412724d66d66105850b22cd3210e4c753f1cbc4aa443cca0",
+    "evals/grade.py": "21f818a084b4aecf52a6980f15558b2424bcedc640fb6b59647804d3a5fb0cc8",
+    "tests/test_evaluation_harness.py": "3a0ca63c287dcffedef730e1a5483332ef766d102f0dd040396075d93850e6b7",
+    "simplified-engineering-english/SKILL.md": "881dbdc8582069db6daffdaeb00b7bf3ddf399c04bed69507ded41e6a6e8da78",
+    "simplified-engineering-english/references/rules.md": "bebe88700dded668c6610ec26c4c0cebdf3b56f47c3364455ec80466ca00ea7d",
+    "simplified-engineering-english/references/dictionary.md": "93ca70b1fc419005ab110c4f6e52270a3b2dabe44fb46ec086c37af245aecdc0",
+    "evals/see-rubric.json": "e11626411fa94b26dfaafdd8d207bf3038ec8692f748d167527d03fe5f708e0e",
+    "evals/cases/see-behavior-development.jsonl": "d27bc4f5a2a6bd41fcb46beb8c94b36395cf1beb4f08951806ba32f1a935f766",
+    "evals/cases/see-behavior-independent-holdout-v19.jsonl": "992b6b256308a53790eb6b40d2ceab576bad65b6d6d18c485ad40bb5d334c905",
+    "evals/cases/see-routing-development.jsonl": "7aec2346a04c2363f73230e7308332bc663d148390925ea8cf3ffc0f0820ada7",
+    "evals/cases/see-routing-independent-holdout.jsonl": "19b95bfc5f067ea8e71bd8f1106aef96a837993a271621589fc23da063906437f"
+  }
+}

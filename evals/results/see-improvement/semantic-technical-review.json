@@ -1,0 +1,431 @@
+{
+  "families": [
+    {
+      "family": "procedure",
+      "reviews": [
+        {
+          "baseline": {
+            "critical_issue": true,
+            "evidence": [
+              "Source span: \u201cauthenticate the account, authorize it, and check that it looks good. Run `authctl inspect --user alice`.\u201d This requires authentication and authorization actions but does not state that the command performs them or that its output contains authentication and authorization status.",
+              "Response span: \u201cDiagnose Alice\u2019s access problem by running `authctl inspect --user alice`, then review the output for authentication and authorization status.\u201d This replaces the required authentication and authorization actions with an unsupported command-and-output workflow and invents the output categories \u201cauthentication and authorization status.\u201d",
+              "Source/response ambiguity spans: the source says \u201cauthorize it\u201d and \u201ccheck that it looks good,\u201d but the response silently makes \u201cthe output\u201d the checked object. Its AMBIGUITIES field reports only \u201cexpected output or criteria for \u2018looks good\u2019\u201d and does not report the unresolved antecedent or the unsupported assumption about the command.",
+              "Deterministic-check assessment: the record passed its deterministic and critical checks, so there is no deterministic-check false positive. The pass failed to detect the semantic response defects above.",
+              "Verdict: the invented command behavior and changed required actions are critical technical-fidelity and profile violations; the otherwise clear sentence does not offset them."
+            ],
+            "scores": {
+              "actionability_or_verifiability": 1,
+              "readability_and_scanability": 3,
+              "residual_consequential_ambiguity": 0,
+              "selected_profile_compliance": 0,
+              "source_traceability": 1,
+              "technical_fidelity": 0,
+              "unnecessary_edit_rate": 0
+            },
+            "technical_authority_concern": "The claim that `authctl inspect --user alice` yields authentication and authorization status is absent from the source and requires confirmation from the command owner."
+          },
+          "case_id": "see-procedure-ordinary",
+          "comparative_verdict": "treatment",
+          "confidence": 0.99,
+          "split": "development",
+          "treatment": {
+            "critical_issue": false,
+            "evidence": [
+              "Source span: \u201cauthenticate the account, authorize it, and check that it looks good. Run `authctl inspect --user alice`.\u201d The source leaves the methods, the meaning of \u201clooks good,\u201d and the command\u2019s relationship to the preceding actions unspecified.",
+              "Response span: \u201c1. Authenticate the account. 2. Authorize the account. 3. Check that the account looks good. 4. Run `authctl inspect --user alice`.\u201d This preserves the action order and protected command while resolving \u201cit\u201d to the permitted object, \u201cthe account.\u201d",
+              "Response ambiguity span: \u201cThe source does not specify how to authenticate or authorize the account, what \u2018looks good\u2019 means, or whether the command performs these actions or is a separate diagnostic step.\u201d This reports each unsupported resolution instead of inventing technical behavior.",
+              "Deterministic-check assessment: the record passed all deterministic checks; there is no deterministic-check false positive or separate response defect.",
+              "Verdict: all consequential source properties are preserved and precisely traceable. Actionability is 3 rather than 4 because the source supplies neither the authentication/authorization methods nor an observable success criterion, although the response correctly discloses those gaps."
+            ],
+            "scores": {
+              "actionability_or_verifiability": 3,
+              "readability_and_scanability": 4,
+              "residual_consequential_ambiguity": 4,
+              "selected_profile_compliance": 4,
+              "source_traceability": 4,
+              "technical_fidelity": 4,
+              "unnecessary_edit_rate": 4
+            },
+            "technical_authority_concern": null
+          }
+        },
+        {
+          "baseline": {
+            "critical_issue": true,
+            "evidence": [
+              "Source span: \u201cIf `sync probe --tenant maple` returns exit code 2, save the standard error in `/tmp/sync-probe.log`. Check whether the tenant is healthy.\u201d Only the evidence-saving action is conditional; the health check is a separate unconditional instruction.",
+              "Response span: \u201cif it returns exit code 2, save its standard error to `/tmp/sync-probe.log`, then check whether the tenant is healthy.\u201d The coordinated actions after the if-clause place, or at minimum materially risk placing, the health check inside the exit-code-2 condition.",
+              "Deterministic-check false positive: the failed check reports the exact text \u201cIf `sync probe --tenant maple` returns exit code 2\u201d as missing, but \u201cRun `sync probe --tenant maple`; if it returns exit code 2\u201d preserves that condition through an unambiguous local pronoun. The check rejects paraphrase rather than detecting a missing condition.",
+              "Separate response defect: independently of that false positive, appending \u201cthen check whether the tenant is healthy\u201d to the conditional instruction changes or materially obscures the condition governing the health check. The deterministic failure detail does not identify this defect.",
+              "Response ambiguity span: \u201cThe expected command output or other result indicating that the tenant is healthy is not specified.\u201d This correctly reports the missing healthy result, but it does not cure the changed conditional scope.",
+              "Verdict: the conditional-scope mutation is critical because an operator can omit the required health check whenever the command returns an exit code other than 2."
+            ],
+            "scores": {
+              "actionability_or_verifiability": 2,
+              "readability_and_scanability": 1,
+              "residual_consequential_ambiguity": 0,
+              "selected_profile_compliance": 0,
+              "source_traceability": 2,
+              "technical_fidelity": 0,
+              "unnecessary_edit_rate": 2
+            },
+            "technical_authority_concern": null
+          },
+          "case_id": "see-release-procedure-ambiguity",
+          "comparative_verdict": "treatment",
+          "confidence": 0.97,
+          "split": "holdout",
+          "treatment": {
+            "critical_issue": false,
+            "evidence": [
+              "Source span: \u201cPrerequisite: The operator has read access to the sandbox. If `sync probe --tenant maple` returns exit code 2, save the standard error in `/tmp/sync-probe.log`. Check whether the tenant is healthy.\u201d This establishes the prerequisite, the exit-code condition and evidence action, and a separate health check.",
+              "Response span: \u201cPrerequisite: The operator has read access to the sandbox. Run `sync probe --tenant maple`. If the command returns exit code 2, save its standard error in `/tmp/sync-probe.log`. Check whether the tenant is healthy.\u201d The separated sentences preserve every logical relationship, protected span, path, and value without extending the condition to the health check.",
+              "Response ambiguity span: \u201cThe source does not specify the observable result that indicates a healthy tenant.\u201d This precisely reports the one unsupported success criterion.",
+              "Deterministic-check false positive: the failed check requires the literal contiguous span \u201cIf `sync probe --tenant maple` returns exit code 2,\u201d while the response first names the command and then uses the clear noun phrase \u201cthe command\u201d in the condition. No source condition is missing, and this checker failure is not a response defect.",
+              "Verdict: the rewrite is fully faithful, unambiguous, minimal, and scannable. Actionability is 3 rather than 4 only because the source omits the healthy result; the response correctly discloses that limitation."
+            ],
+            "scores": {
+              "actionability_or_verifiability": 3,
+              "readability_and_scanability": 4,
+              "residual_consequential_ambiguity": 4,
+              "selected_profile_compliance": 4,
+              "source_traceability": 4,
+              "technical_fidelity": 4,
+              "unnecessary_edit_rate": 4
+            },
+            "technical_authority_concern": null
+          }
+        }
+      ]
+    },
+    {
+      "family": "requirement",
+      "reviews": [
+        {
+          "baseline": {
+            "critical_issue": true,
+            "evidence": [
+              "Source span: \u201cThe API MUST be fast and reliable, and SHOULD retry requests.\u201d Response span: \u201cThe API MUST provide fast responses and reliable operation, and SHOULD retry requests.\u201d The response preserves MUST for both required qualities and SHOULD for retries, but \u201cfast responses\u201d slightly narrows the source\u2019s undefined \u201cfast\u201d performance term.",
+              "Source requirement: \u201cSplit the compound normative statement.\u201d Response span: \u201cThe API MUST provide fast responses and reliable operation, and SHOULD retry requests.\u201d This is a response defect: three obligations remain in one statement, reducing scanability and violating the required one-obligation-per-statement structure.",
+              "Deterministic-check assessment: `split_obligations` failed because the response has no sentence boundary between MUST and SHOULD. This is a true positive for the structural response defect, not a deterministic-check false positive.",
+              "Source spans: \u201cfast and reliable\u201d and \u201cSHOULD retry requests.\u201d Response span: \u201c\u201cfast\u201d and \u201creliable\u201d lack measurable thresholds; retry count, timing, and applicable requests are unspecified.\u201d The ambiguity field correctly exposes the missing verification criteria and retry-policy details without inventing values.",
+              "Critical-floor assessment: selected-profile compliance is 2, below the rubric floor of 3, because the required obligation split was not performed. The critical status comes from that profile floor, not from a changed RFC 2119 obligation force."
+            ],
+            "scores": {
+              "actionability_or_verifiability": 3,
+              "readability_and_scanability": 2,
+              "residual_consequential_ambiguity": 3,
+              "selected_profile_compliance": 2,
+              "source_traceability": 3,
+              "technical_fidelity": 3,
+              "unnecessary_edit_rate": 3
+            },
+            "technical_authority_concern": "A technical authority must define measurable performance and reliability criteria and the retry policy. It should also confirm that narrowing \u201cfast\u201d to \u201cfast responses\u201d is authorized."
+          },
+          "case_id": "see-requirement-ordinary",
+          "comparative_verdict": "treatment",
+          "confidence": 0.96,
+          "split": "development",
+          "treatment": {
+            "critical_issue": false,
+            "evidence": [
+              "Source span: \u201cThe API MUST be fast and reliable, and SHOULD retry requests.\u201d Response spans: \u201cThe API MUST be fast. The API MUST be reliable. The API SHOULD retry requests.\u201d Every obligation and its force are preserved, and each obligation is placed in a separate statement.",
+              "Source gaps: \u201cfast,\u201d \u201creliable,\u201d and an undefined retry policy. Response span: \u201c\u201cfast\u201d has no measurable threshold; \u201creliable\u201d has no measurable threshold; the retry trigger, retry count, and exception conditions are not specified.\u201d The response identifies the unsupported criteria instead of inventing thresholds, counts, or exceptions.",
+              "Response spans: \u201cPROFILE: engineering-default\u201d and exactly one PROFILE, REWRITE, and AMBIGUITIES line. The response follows the selected profile and required output shape while making only the requested split and ambiguity report.",
+              "Actionability evidence: the response cannot supply objective performance or retry acceptance criteria because the source omits them, but it clearly reports those missing inputs; this supports score 3 rather than inventing data for score 4.",
+              "Deterministic-check assessment: all checks passed, and inspection shows no deterministic-check false positive and no separate response defect."
+            ],
+            "scores": {
+              "actionability_or_verifiability": 3,
+              "readability_and_scanability": 4,
+              "residual_consequential_ambiguity": 4,
+              "selected_profile_compliance": 4,
+              "source_traceability": 4,
+              "technical_fidelity": 4,
+              "unnecessary_edit_rate": 4
+            },
+            "technical_authority_concern": "Before publication, a technical authority must define measurable performance and reliability criteria plus the retry trigger, count, timing, and allowed exceptions."
+          }
+        },
+        {
+          "baseline": {
+            "critical_issue": true,
+            "evidence": [
+              "Source span: \u201cThe service SHOULD delete completed exports after 30 days unless a legal hold is active.\u201d Response span: \u201cThe service SHOULD delete completed exports 30 days after completion unless a legal hold is active.\u201d The source does not identify the event that starts the 30-day interval; the response silently selects export completion as that event. This adds a consequential retention condition that requires technical or policy authority.",
+              "Source span: \u201cThe service MUST NOT write a token to logs.\u201d Response span: \u201cThe service MUST NOT write tokens to logs.\u201d The singular-to-generic-plural change does not alter the prohibition: both formulations prohibit token logging.",
+              "Source span: \u201cResponse time MUST be acceptable.\u201d Response span: \u201cThe service MUST have an acceptable response time.\u201d The MUST force is preserved. Response span: \u201cno response-time threshold, percentile, workload, measurement point, or evaluation period is defined.\u201d This correctly explains why the obligation is not objectively verifiable without inventing a threshold.",
+              "Structure evidence: response spans \u201c1.\u201d, \u201c2.\u201d, and \u201c3.\u201d separate all three obligations, and \u201cunless a legal hold is active\u201d remains attached to export deletion. The response is immediately scannable despite its retention-anchor defect.",
+              "Deterministic-check assessment: `deterministic_passed: true` is not a false positive failure; rather, the deterministic checks missed the semantic invention \u201cafter completion.\u201d This is a response defect and a deterministic false negative, so the pass does not override the rubric\u2019s critical semantic finding.",
+              "Critical assessment: inventing the event that starts a deletion interval changes a consequential condition. It therefore triggers technical-fidelity and ambiguity scores of 0 and violates the selected profile\u2019s semantic safeguard."
+            ],
+            "scores": {
+              "actionability_or_verifiability": 2,
+              "readability_and_scanability": 4,
+              "residual_consequential_ambiguity": 0,
+              "selected_profile_compliance": 0,
+              "source_traceability": 2,
+              "technical_fidelity": 0,
+              "unnecessary_edit_rate": 2
+            },
+            "technical_authority_concern": "A retention-policy authority must specify which event starts the 30-day interval. The baseline\u2019s choice of export completion is not authorized by the source."
+          },
+          "case_id": "see-release-requirement-force",
+          "comparative_verdict": "treatment",
+          "confidence": 0.9,
+          "split": "holdout",
+          "treatment": {
+            "critical_issue": false,
+            "evidence": [
+              "Source spans: \u201cMUST NOT write a token to logs,\u201d \u201cSHOULD delete completed exports after 30 days unless a legal hold is active,\u201d and \u201cResponse time MUST be acceptable.\u201d Response spans preserve each phrase and force: \u201cMUST NOT write a token to logs,\u201d \u201cSHOULD delete completed exports after 30 days unless a legal hold is active,\u201d and \u201cresponse time MUST be acceptable.\u201d No fact, number, exception, or obligation force changes.",
+              "Response structure contains three separate sentences in the one-line REWRITE field. The legal-hold exception remains in the deletion sentence, and the output contains exactly the required PROFILE, REWRITE, and AMBIGUITIES lines.",
+              "Source span: \u201cResponse time MUST be acceptable.\u201d Response span: \u201cThe response-time obligation is not measurable because \u201cacceptable\u201d does not define a threshold or an objective pass-or-fail criterion.\u201d The response precisely reports the required verification gap without inventing latency values.",
+              "Source span: \u201cafter 30 days\u201d does not state which event begins the interval. The treatment preserves that ambiguity instead of silently resolving it, so fidelity remains complete; however, the AMBIGUITIES field does not report this material operational gap. This limits residual-ambiguity, actionability, profile-compliance, and traceability scores.",
+              "Deterministic-check assessment: all checks passed. There is no deterministic-check false positive; the remaining interval-start issue is an unreported source ambiguity, not an invented treatment fact or a failed deterministic condition.",
+              "Critical-floor assessment: technical fidelity 4, residual ambiguity 3, readability 4, and profile compliance 3 meet all rubric floors, so the omission is material but not critical."
+            ],
+            "scores": {
+              "actionability_or_verifiability": 2,
+              "readability_and_scanability": 4,
+              "residual_consequential_ambiguity": 3,
+              "selected_profile_compliance": 3,
+              "source_traceability": 3,
+              "technical_fidelity": 4,
+              "unnecessary_edit_rate": 4
+            },
+            "technical_authority_concern": "A retention-policy authority must define the event that starts the 30-day interval, and a service owner must define an objective response-time criterion."
+          }
+        }
+      ]
+    },
+    {
+      "family": "explanation",
+      "reviews": [
+        {
+          "baseline": {
+            "critical_issue": true,
+            "evidence": [
+              "Deterministic-check classification \u2014 Source spans: \"`timeout`\", \"`30s`\", and \"A fault produces an error that surfaces as a failure.\" Response spans: \"The timeout is 30 s.\" and \"Faults cause failures.\" Verdict: `manifest_protected_spans_1`, `manifest_protected_spans_2`, and `failure_terms` identify genuine response defects; none is a deterministic-check false positive.",
+              "Technical fidelity \u2014 Source spans: \"the `timeout` parameter receives the `30s` argument\" and \"A fault produces an error that surfaces as a failure.\" Response spans: \"The timeout is 30 s.\" and \"Faults cause failures.\" Verdict: 0/4 because the response changes the protected argument literal, erases the parameter/argument distinction, and removes the error stage from the causal chain.",
+              "Residual consequential ambiguity \u2014 Source spans: \"the `timeout` parameter receives the `30s` argument\" and \"the service later calls them tasks.\" Response spans: \"The timeout is 30 s.\" and \"\u201cjobs\u201d and \u201ctasks\u201d may refer to the same entities, but the terminology shift is unexplained.\" Verdict: 2/4 because the terminology drift and undefined \u201cfaster\u201d claim are reported, but the rewrite makes the parameter/argument relationship materially unclear.",
+              "Actionability or verifiability \u2014 Source spans: \"A fault produces an error that surfaces as a failure\" and \"Mean latency is 40 ms, while p99 latency is 120 ms at 500 requests per second.\" Response spans: \"Faults cause failures\" and \"At 500 requests per second, mean latency is 40 ms and p99 latency is 120 ms.\" Verdict: 2/4 because the performance evidence remains objectively checkable, but the failure model and exact configuration token have material gaps.",
+              "Readability and scanability \u2014 Source span: \"A fault produces an error that surfaces as a failure.\" Response spans: \"Faults cause failures.\" and \"At 500 requests per second, mean latency is 40 ms and p99 latency is 120 ms.\" Verdict: 3/4 because the response is concise and well ordered, but it cannot receive 4 while an important logical relationship is absent.",
+              "Selected-profile compliance \u2014 Prompt span: \"engineering-default SEE profile.\" Response spans: \"PROFILE: engineering-default\", \"The timeout is 30 s.\", and \"Faults cause failures.\" Verdict: 0/4 because the declared profile is correct, but the rewrite violates the profile's error-level preservation safeguards for protected technical tokens and causal meaning.",
+              "Unnecessary edit rate \u2014 Source spans: \"`timeout` parameter receives the `30s` argument\" and \"A fault produces an error that surfaces as a failure.\" Response spans: \"The timeout is 30 s.\" and \"Faults cause failures.\" Verdict: 0/4 because unnecessary edits create critical defects instead of limiting changes to ambiguity-bearing prose.",
+              "Source traceability \u2014 Source spans: \"because this makes the service faster\" and \"the service later calls them tasks.\" Response spans: \"reportedly to make the service faster\" and \"\u201cFaster\u201d has no defined metric or baseline; \u201cjobs\u201d and \u201ctasks\u201d may refer to the same entities.\" Verdict: 2/4 because the reported ambiguities are traceable, but the added uncertainty marker \u201creportedly\u201d and the material token and causal changes lack source support."
+            ],
+            "scores": {
+              "actionability_or_verifiability": 2,
+              "readability_and_scanability": 3,
+              "residual_consequential_ambiguity": 2,
+              "selected_profile_compliance": 0,
+              "source_traceability": 2,
+              "technical_fidelity": 0,
+              "unnecessary_edit_rate": 0
+            },
+            "technical_authority_concern": "Product authority must define the performance metric and baseline for \u201cfaster\u201d and confirm the relationship between \u201cjobs\u201d and \u201ctasks\u201d; the response correctly flags those source-level concerns, independently of its own critical fidelity defects."
+          },
+          "case_id": "see-explanation-ordinary",
+          "comparative_verdict": "treatment",
+          "confidence": 0.99,
+          "split": "development",
+          "treatment": {
+            "critical_issue": false,
+            "evidence": [
+              "Deterministic-check classification \u2014 Source spans: \"`timeout`\", \"`30s`\", and \"A fault produces an error that surfaces as a failure.\" Response spans: \"The `timeout` parameter receives the `30s` argument.\" and \"A fault produces an error, which surfaces as a failure.\" Verdict: all deterministic checks pass, there is no response defect covered by those checks, and there is no deterministic-check false positive.",
+              "Technical fidelity \u2014 Source spans: \"Mean latency is 40 ms, while p99 latency is 120 ms at 500 requests per second\" and \"the `timeout` parameter receives the `30s` argument.\" Response spans: \"At 500 requests per second, mean latency is 40 ms, and p99 latency is 120 ms\" and \"The `timeout` parameter receives the `30s` argument.\" Verdict: 4/4 because every protected token, statistic, unit, load condition, role, and causal stage is preserved.",
+              "Residual consequential ambiguity \u2014 Source spans: \"because this makes the service faster\" and \"the service later calls them tasks.\" Response span: \"\u201cfaster\u201d has no metric or comparison baseline; the source changes the term \u201cjobs\u201d to \u201ctasks\u201d without stating whether they have the same meaning.\" Verdict: 4/4 because both unsupported resolutions are explicitly reported and neither is silently selected.",
+              "Actionability or verifiability \u2014 Source span: \"Mean latency is 40 ms, while p99 latency is 120 ms at 500 requests per second.\" Response spans: \"At 500 requests per second, mean latency is 40 ms, and p99 latency is 120 ms\" and \"\u201cfaster\u201d has no metric or comparison baseline.\" Verdict: 4/4 because the available benchmark evidence is complete and the missing evidence for the performance claim is stated without invention.",
+              "Readability and scanability \u2014 Source spans: \"A fault produces an error that surfaces as a failure\" and \"the worker caches jobs because this makes the service faster, and the service later calls them tasks.\" Response spans: \"A fault produces an error, which surfaces as a failure.\" and \"The worker caches jobs because caching makes the service faster. The service later calls the jobs tasks.\" Verdict: 4/4 because the response uses direct sentences, stable referents, and dependency order while retaining each logical relationship.",
+              "Selected-profile compliance \u2014 Prompt span: \"engineering-default SEE profile.\" Response spans: \"PROFILE: engineering-default\", \"The worker caches jobs because caching makes the service faster\", and \"\u201cfaster\u201d has no metric or comparison baseline.\" Verdict: 4/4 because the selected profile is declared, mechanism and rationale remain distinguishable, and unresolved performance and terminology claims are reported.",
+              "Unnecessary edit rate \u2014 Source spans: \"Currently, the `timeout` parameter receives the `30s` argument\" and \"the service later calls them tasks.\" Response spans: \"The `timeout` parameter receives the `30s` argument\" and \"The service later calls the jobs tasks.\" Verdict: 4/4 because the permitted floating word is removed and ambiguous pronouns and structure are clarified without changing compliant technical content.",
+              "Source traceability \u2014 Source spans: \"faster\" and \"the service later calls them tasks.\" Response span: \"\u201cfaster\u201d has no metric or comparison baseline; the source changes the term \u201cjobs\u201d to \u201ctasks\u201d without stating whether they have the same meaning.\" Verdict: 4/4 because every ambiguity finding and every material rewrite maps precisely to an identifiable source span."
+            ],
+            "scores": {
+              "actionability_or_verifiability": 4,
+              "readability_and_scanability": 4,
+              "residual_consequential_ambiguity": 4,
+              "selected_profile_compliance": 4,
+              "source_traceability": 4,
+              "technical_fidelity": 4,
+              "unnecessary_edit_rate": 4
+            },
+            "technical_authority_concern": "Product authority must define the performance metric and baseline for \u201cfaster\u201d and confirm whether \u201cjobs\u201d and \u201ctasks\u201d have the same technical meaning before publication; the response does not invent either answer."
+          }
+        },
+        {
+          "baseline": {
+            "critical_issue": false,
+            "evidence": [
+              "Deterministic-check classification \u2014 Source spans: \"version 4.8\", \"`legacyFlag`\", \"will be dispatched asynchronously\", and \"after validation.\" Response spans: \"In version 4.8\", \"`legacyFlag`\", \"will be dispatched asynchronously\", and \"after validation.\" Verdict: all deterministic checks pass, no covered response defect exists, and there is no deterministic-check false positive.",
+              "Technical fidelity \u2014 Source span: \"In version 4.8, the scheduler marks a job ready after validation. The job will be dispatched asynchronously. `legacyFlag` remains available, but its removal version is unknown.\" Response span: \"In version 4.8, the scheduler marks a job ready after validation; the job will be dispatched asynchronously. `legacyFlag` remains available, but its removal version is unknown.\" Verdict: 4/4 because version scope, validation condition, future timing, asynchronous dispatch, protected identifier, availability, and uncertainty are all preserved without an invented actor.",
+              "Residual consequential ambiguity \u2014 Source spans: \"its removal version is unknown\" and \"The dashboard calls the same item a task.\" Response span: \"The removal version for `legacyFlag` is unknown; terminology drifts between \u201cjob\u201d in the scheduler and \u201ctask\u201d in the dashboard.\" Verdict: 4/4 because both required source ambiguities are explicit and the response does not guess a version or normalize the terms.",
+              "Actionability or verifiability \u2014 Source spans: \"marks a job ready after validation\" and \"its removal version is unknown.\" Response spans: \"marks a job ready after validation\" and \"The removal version for `legacyFlag` is unknown.\" Verdict: 4/4 because the observable readiness condition is preserved and the unavailable version evidence is clearly identified rather than invented.",
+              "Readability and scanability \u2014 Source spans: \"The scheduler marks a job ready after validation. The job will be dispatched asynchronously.\" Response span: \"the scheduler marks a job ready after validation; the job will be dispatched asynchronously.\" Verdict: 3/4 because the order and relationships remain clear, but joining two distinct lifecycle statements with a semicolon is less immediately scannable than the source's direct sentence boundary.",
+              "Selected-profile compliance \u2014 Prompt span: \"engineering-default SEE profile.\" Response spans: \"PROFILE: engineering-default\", \"the job will be dispatched asynchronously\", and \"terminology drifts between \u201cjob\u201d in the scheduler and \u201ctask\u201d in the dashboard.\" Verdict: 4/4 because the response uses the selected profile, properly retains passive voice for the unknown dispatch actor, and reports each required ambiguity.",
+              "Unnecessary edit rate \u2014 Source spans: \"after validation. The job will be dispatched asynchronously\" and \"The dashboard calls the same item a task.\" Response spans: \"after validation; the job will be dispatched asynchronously\" and \"The dashboard refers to the same item as a task.\" Verdict: 3/4 because the edits are harmless but unnecessary; the source wording already preserved the required meaning.",
+              "Source traceability \u2014 Source spans: \"`legacyFlag` remains available, but its removal version is unknown\" and \"The dashboard calls the same item a task.\" Response span: \"The removal version for `legacyFlag` is unknown; terminology drifts between \u201cjob\u201d in the scheduler and \u201ctask\u201d in the dashboard.\" Verdict: 4/4 because both findings and all technical statements map directly to the source."
+            ],
+            "scores": {
+              "actionability_or_verifiability": 4,
+              "readability_and_scanability": 3,
+              "residual_consequential_ambiguity": 4,
+              "selected_profile_compliance": 4,
+              "source_traceability": 4,
+              "technical_fidelity": 4,
+              "unnecessary_edit_rate": 3
+            },
+            "technical_authority_concern": "Product authority must supply any future removal version for `legacyFlag` and confirm the intended scheduler/dashboard terminology; the response correctly preserves both as unresolved source-level concerns."
+          },
+          "case_id": "see-release-explanation-timing",
+          "comparative_verdict": "treatment",
+          "confidence": 0.9,
+          "split": "holdout",
+          "treatment": {
+            "critical_issue": false,
+            "evidence": [
+              "Deterministic-check classification \u2014 Source spans: \"version 4.8\", \"`legacyFlag`\", \"will be dispatched asynchronously\", and \"after validation.\" Response spans: \"In version 4.8\", \"`legacyFlag`\", \"will be dispatched asynchronously\", and \"after validation.\" Verdict: all deterministic checks pass, no covered response defect exists, and there is no deterministic-check false positive.",
+              "Technical fidelity \u2014 Source span: \"In version 4.8, the scheduler marks a job ready after validation. The job will be dispatched asynchronously. `legacyFlag` remains available, but its removal version is unknown.\" Response span: \"In version 4.8, the scheduler marks a job ready after validation. The job will be dispatched asynchronously. `legacyFlag` remains available, but its removal version is unknown.\" Verdict: 4/4 because the response preserves every consequential property verbatim and does not invent a dispatch actor or removal version.",
+              "Residual consequential ambiguity \u2014 Source spans: \"its removal version is unknown\" and \"The dashboard calls the same item a task.\" Response span: \"The removal version for `legacyFlag` is unknown; the scheduler uses \u201cjob,\u201d but the dashboard uses \u201ctask\u201d for the same item.\" Verdict: 4/4 because the unknown version and terminology drift are both explicit and neither receives an unsupported resolution.",
+              "Actionability or verifiability \u2014 Source spans: \"marks a job ready after validation\" and \"its removal version is unknown.\" Response spans: \"marks a job ready after validation\" and \"The removal version for `legacyFlag` is unknown.\" Verdict: 4/4 because the observable readiness condition is intact and the missing removal-version evidence is reported without invention.",
+              "Readability and scanability \u2014 Source spans: \"The scheduler marks a job ready after validation. The job will be dispatched asynchronously.\" Response spans: \"The scheduler marks a job ready after validation. The job will be dispatched asynchronously.\" Verdict: 4/4 because direct sentence boundaries expose the validation-to-readiness behavior and the later asynchronous dispatch immediately.",
+              "Selected-profile compliance \u2014 Prompt span: \"engineering-default SEE profile.\" Response spans: \"PROFILE: engineering-default\", \"The job will be dispatched asynchronously\", and \"the scheduler uses \u201cjob,\u201d but the dashboard uses \u201ctask\u201d for the same item.\" Verdict: 4/4 because the selected profile is declared, passive voice is correctly retained for the unknown actor, and all explanation-card ambiguities are reported.",
+              "Unnecessary edit rate \u2014 Source span: \"In version 4.8, the scheduler marks a job ready after validation. The job will be dispatched asynchronously. `legacyFlag` remains available, but its removal version is unknown. The dashboard calls the same item a task.\" Response span: \"In version 4.8, the scheduler marks a job ready after validation. The job will be dispatched asynchronously. `legacyFlag` remains available, but its removal version is unknown. The dashboard calls the same item a task.\" Verdict: 4/4 because the rewrite leaves already compliant source text unchanged and adds only the required ambiguity report.",
+              "Source traceability \u2014 Source spans: \"its removal version is unknown\" and \"The dashboard calls the same item a task.\" Response span: \"The removal version for `legacyFlag` is unknown; the scheduler uses \u201cjob,\u201d but the dashboard uses \u201ctask\u201d for the same item.\" Verdict: 4/4 because each ambiguity and every preserved non-change has exact source support."
+            ],
+            "scores": {
+              "actionability_or_verifiability": 4,
+              "readability_and_scanability": 4,
+              "residual_consequential_ambiguity": 4,
+              "selected_profile_compliance": 4,
+              "source_traceability": 4,
+              "technical_fidelity": 4,
+              "unnecessary_edit_rate": 4
+            },
+            "technical_authority_concern": "Product authority must supply any future removal version for `legacyFlag` and confirm the intended scheduler/dashboard terminology; the response correctly preserves both as unresolved source-level concerns."
+          }
+        }
+      ]
+    },
+    {
+      "family": "error",
+      "reviews": [
+        {
+          "baseline": {
+            "critical_issue": true,
+            "evidence": [
+              "Source span: \u201cSomething went wrong. Check the thing and try again.\u201d The manifest states that the failed operation, affected resource, and cause are unspecified, and it requires the missing details to be identified as ambiguities.",
+              "Response spans: \u201cSomething went wrong. Check the relevant item and try again.\u201d preserves the unspecified failure and the retry instruction without inventing a cause or outcome. The change from \u201cthe thing\u201d to \u201cthe relevant item\u201d is harmless but does not improve precision.",
+              "Response defect: \u201cAMBIGUITIES: \u2018the thing\u2019 does not identify what the user should check.\u201d reports only the unclear item. It does not report the unspecified failed operation, unknown cause, or unspecified check, so several consequential limitations remain hidden and the retry instruction is not actionable.",
+              "Deterministic-check assessment: the failed `reports_missing_details` check is not a false positive. Its failure corresponds to the response defect: the AMBIGUITIES field contains \u201cthing\u201d but does not identify the missing operation/input/resource together with the other missing diagnostic detail.",
+              "Rubric verdict: the material omissions put technical fidelity below 3, residual consequential ambiguity below 3, and selected-profile compliance below 3; the rubric critical floors therefore apply."
+            ],
+            "scores": {
+              "actionability_or_verifiability": 1,
+              "readability_and_scanability": 4,
+              "residual_consequential_ambiguity": 1,
+              "selected_profile_compliance": 1,
+              "source_traceability": 3,
+              "technical_fidelity": 2,
+              "unnecessary_edit_rate": 3
+            },
+            "technical_authority_concern": null
+          },
+          "case_id": "see-error-ordinary",
+          "comparative_verdict": "treatment",
+          "confidence": 0.97,
+          "split": "development",
+          "treatment": {
+            "critical_issue": true,
+            "evidence": [
+              "Source span: \u201cSomething went wrong. Check the thing and try again.\u201d The source supplies no operation, affected resource, cause, or precise check, and it requires retention of the retry instruction.",
+              "Response spans: \u201cAn error occurred. Check the thing. Then try again.\u201d preserve the failure, the unspecified item, and the retry instruction without promising that retry succeeds. The short ordered sentences are immediately scannable.",
+              "Response span: \u201cThe failed operation, the thing to check, and the required check are not specified.\u201d clearly exposes the principal actionability limits instead of inventing missing data.",
+              "Response defect: the AMBIGUITIES field does not report that the cause is unknown, although the manifest explicitly says \u201cThe source provides no cause\u201d and permits reporting the \u201cmissing operation, input, cause, and actionable recovery.\u201d This leaves one material ambiguity and one artifact-card control unmet.",
+              "Deterministic-check assessment: `deterministic_passed: true` is a coverage gap, not a false positive. The checker accepts the response despite the omitted cause ambiguity.",
+              "Rubric verdict: residual consequential ambiguity and selected-profile compliance remain below their critical floors because the required cause ambiguity is absent."
+            ],
+            "scores": {
+              "actionability_or_verifiability": 3,
+              "readability_and_scanability": 4,
+              "residual_consequential_ambiguity": 2,
+              "selected_profile_compliance": 2,
+              "source_traceability": 3,
+              "technical_fidelity": 2,
+              "unnecessary_edit_rate": 3
+            },
+            "technical_authority_concern": null
+          }
+        },
+        {
+          "baseline": {
+            "critical_issue": false,
+            "evidence": [
+              "Source spans: \u201cUpload failed for `/Users/lee/report.csv`,\u201d \u201cparser accepted and/or normalized the header,\u201d \u201cThe cause might be an invalid header,\u201d and `/srv/private/uploads/781/debug.log`. The prompt requires preservation of the local path, quotation, and causal uncertainty, but requires the complete sensitive server path to become `[internal path redacted]`.",
+              "Response span: \u201cUpload failed for `/Users/lee/report.csv`. The service log shows \\\"parser accepted and/or normalized the header\\\". The cause might be an invalid header. Diagnostic details are stored at `[internal path redacted]`.\u201d preserves every publishable fact and exact protected span, preserves uncertainty, and performs only the authorized redaction.",
+              "Response span: \u201cThe cause is uncertain; the header might be invalid, but the log does not establish that it caused the failure.\u201d precisely reports the unsupported causal resolution and does not invent recovery.",
+              "Deterministic-check false positive: `manifest_numbers_units_versions_status_codes_1` reports missing `781`, but `781` occurs only inside the sensitive path that the prompt requires the response to replace in full with `[internal path redacted]`. Retaining `781` would partially disclose the protected path; this failure is not a response defect.",
+              "Rubric verdict: the response satisfies all semantic controls and critical floors. The deterministic failure conflicts with the authorized-redaction requirement and does not establish a critical mutation."
+            ],
+            "scores": {
+              "actionability_or_verifiability": 4,
+              "readability_and_scanability": 4,
+              "residual_consequential_ambiguity": 4,
+              "selected_profile_compliance": 4,
+              "source_traceability": 4,
+              "technical_fidelity": 4,
+              "unnecessary_edit_rate": 4
+            },
+            "technical_authority_concern": null
+          },
+          "case_id": "see-release-error-redaction",
+          "comparative_verdict": "baseline",
+          "confidence": 0.93,
+          "split": "holdout",
+          "treatment": {
+            "critical_issue": false,
+            "evidence": [
+              "Source spans: \u201cUpload failed for `/Users/lee/report.csv`,\u201d \u201cparser accepted and/or normalized the header,\u201d \u201cThe cause might be an invalid header,\u201d and `/srv/private/uploads/781/debug.log`. The prompt authorizes only the complete server-path redaction and requires the possible cause to remain uncertain.",
+              "Response spans: \u201cUpload failed for `/Users/lee/report.csv`,\u201d \u201cparser accepted and/or normalized the header,\u201d and `[internal path redacted]` preserve the protected local path and quotation while safely replacing the sensitive server path.",
+              "Response spans: \u201cAn invalid header might be the cause\u201d and \u201cIt is uncertain whether an invalid header caused the upload failure\u201d preserve the same modal uncertainty as the source and do not claim that the log proves causation.",
+              "Deterministic-check false positive: `manifest_conditions_and_exceptions_1` requires the exact word order \u201cmight be an invalid header,\u201d but \u201cAn invalid header might be the cause\u201d preserves the same condition and causal uncertainty. This lexical mismatch is not a response defect.",
+              "Deterministic-check false positive: `manifest_numbers_units_versions_status_codes_1` requires `781`, although that value exists only within `/srv/private/uploads/781/debug.log`, which must be replaced completely by `[internal path redacted]`. Omitting it is the required safe behavior, not a fidelity defect.",
+              "Response defect assessment: no consequential response defect is present. The only non-maximal dimension is unnecessary edit rate because reordering \u201cThe cause might be an invalid header\u201d to \u201cAn invalid header might be the cause\u201d is harmless churn rather than a needed correction.",
+              "Rubric verdict: all critical floors are met; both deterministic failures are false positives caused by checks that conflict with semantic equivalence or authorized redaction."
+            ],
+            "scores": {
+              "actionability_or_verifiability": 4,
+              "readability_and_scanability": 4,
+              "residual_consequential_ambiguity": 4,
+              "selected_profile_compliance": 4,
+              "source_traceability": 4,
+              "technical_fidelity": 4,
+              "unnecessary_edit_rate": 3
+            },
+            "technical_authority_concern": null
+          }
+        }
+      ]
+    }
+  ],
+  "human_calibration": {
+    "blocking": true,
+    "reason": "No qualified human technical authority reviewed the source-specific findings.",
+    "status": "not performed"
+  },
+  "reviewer_type": "independent model review",
+  "rubric": "evals/see-rubric.json",
+  "schema_version": 1,
+  "summary": {
+    "baseline_critical_issues": 6,
+    "cases_reviewed": 8,
+    "comparative_verdicts": {
+      "baseline": 1,
+      "tie": 0,
+      "treatment": 7
+    },
+    "development_cases": 4,
+    "families": 4,
+    "holdout_cases": 4,
+    "treatment_critical_issues": 1
+  }
+}

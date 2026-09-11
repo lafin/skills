@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "status": "complete",
+  "authentication_source": "work profile credential store",
+  "profile": "work",
+  "provider_observed": "anthropic",
+  "model_requested": "anthropic/claude-sonnet-4-6",
+  "model_observed": "claude-sonnet-4-6",
+  "thinking": "off",
+  "tools": [],
+  "payloads": 72,
+  "results": 72,
+  "failures": [],
+  "capture_attempt_counts": {
+    "1": 71,
+    "2": 1
+  },
+  "capture_cost": 1.3718046,
+  "cumulative_runtime_seconds": 413.482354781474,
+  "results_sha256": "ffcdb7feb9288155339c45cd6dde4f2ebe49e6ddc2a1842efe7a3d6ce793d810",
+  "raw_capture_directory": "model-captures",
+  "prior_blocked_capture": "model-capture-prior-blocked.json",
+  "used_as_supporting_evidence": true,
+  "used_by_automated_gate": false
+}

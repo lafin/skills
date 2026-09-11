@@ -1,0 +1,52 @@
+{
+  "schema_version": 2,
+  "decision": "no-go",
+  "efficacy_claim": null,
+  "automated_evaluated_configuration_gate": {
+    "decision": "pass",
+    "path": "evals/results/see-improvement/remediation-v24-gate.json",
+    "claim": "Treatment improved deterministic development results, preserved every passing holdout result, passed routing holdout, and introduced no undocumented critical or cost regression.",
+    "scope": "openai-codex/gpt-5.6-sol with OMP omp/18.1.17, profile skill-eval-isolated, thinking off, three attempts per case, and no tools"
+  },
+  "independent_model_judge": {
+    "status": "complete_uncalibrated",
+    "provider": "anthropic",
+    "model": "claude-sonnet-4-6",
+    "authentication_source": "work profile credential store",
+    "thinking": "off",
+    "payloads": 156,
+    "swapped_pairs": 78,
+    "position_sensitive_pairs": 30,
+    "critical_flagged_pairs": 6,
+    "analysis": "evals/results/see-improvement/remediation-v24-model-judge-analysis.json",
+    "effect": "supporting evidence only; human calibration and adjudication remain required"
+  },
+  "release_blockers": [
+    {
+      "id": "human_calibration_and_adjudication",
+      "status": "blocked",
+      "evidence": "evals/results/see-improvement/remediation-v24-human-calibration-packet.json",
+      "reason": "No qualified human reviewer has scored and locked the 26 calibration pairs or adjudicated the model judge's 30 position-sensitive and 6 critical-flagged pairs."
+    },
+    {
+      "id": "technical_attestation",
+      "status": "blocked",
+      "evidence": "evals/results/see-improvement/remediation-v24-technical-attestation.json",
+      "reason": "No named qualified technical authority has attested correctness, safety, security, completeness, operational validity, and product terminology."
+    },
+    {
+      "id": "durable_external_storage",
+      "status": "blocked",
+      "evidence": null,
+      "reason": "Raw artifacts exist only in local Git-ignored directories; no durable external artifact store is configured."
+    }
+  ],
+  "supported_automated_claim": "For the evaluated configuration only, deterministic behavior improved from 29/42 to 42/42 on development and from 24/36 to 36/36 on the independently frozen holdout; routing remained 30/30 on development and 36/36 on holdout.",
+  "unsupported_release_claims": [
+    "release readiness",
+    "SEE conformance",
+    "generalization to other models, profiles, prompts, or repositories",
+    "qualified human or technical approval",
+    "published efficacy"
+  ]
+}

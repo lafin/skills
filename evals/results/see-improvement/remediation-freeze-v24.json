@@ -1,0 +1,33 @@
+{
+  "frozen_at": "2026-09-11T18:54:50Z",
+  "supersedes": "remediation-freeze-v23.json",
+  "prior_freeze_sha256": "79156ac020cd39d05bebe9b33877b00538092e76a5de5d9dc21e1295969dfcc2",
+  "reason": "The final V23 development capture produced a faithful term-drift explanation that the development regex rejected because it used 'synonyms' and 'different' instead of 'term', 'same', or 'whether'. V24 broadens only that development oracle. The candidate and the independently frozen V21 holdout are unchanged.",
+  "metadata_correction": "Corrected the routing holdout SHA-256 from a 65-character transcription carried by V10-V23 to the computed 64-character digest. Candidate, cases, evaluator, and run outputs are unchanged.",
+  "rejected_v23_development": {
+    "baseline": "remediation-v19-development-behavior-baseline",
+    "treatment": "remediation-v23-development-behavior-treatment",
+    "treatment_passed": 41,
+    "artifacts": 42,
+    "oracle_false_positive_artifacts": 1
+  },
+  "response_blind_holdout_process": {
+    "independent_author": "IndependentV21Author",
+    "independent_auditor": "V21OracleAuditor",
+    "candidate_or_prior_evidence_visible_to_author_or_auditor": false,
+    "final_audit": "GO"
+  },
+  "sha256": {
+    "evals/run.py": "be310d7d73869c11412724d66d66105850b22cd3210e4c753f1cbc4aa443cca0",
+    "evals/grade.py": "21f818a084b4aecf52a6980f15558b2424bcedc640fb6b59647804d3a5fb0cc8",
+    "tests/test_evaluation_harness.py": "3a0ca63c287dcffedef730e1a5483332ef766d102f0dd040396075d93850e6b7",
+    "simplified-engineering-english/SKILL.md": "256976f959ac379e0080835f7b6f5201908b722dbab4384d0e32cc12e31e20a8",
+    "simplified-engineering-english/references/rules.md": "bebe88700dded668c6610ec26c4c0cebdf3b56f47c3364455ec80466ca00ea7d",
+    "simplified-engineering-english/references/dictionary.md": "93ca70b1fc419005ab110c4f6e52270a3b2dabe44fb46ec086c37af245aecdc0",
+    "evals/see-rubric.json": "e11626411fa94b26dfaafdd8d207bf3038ec8692f748d167527d03fe5f708e0e",
+    "evals/cases/see-behavior-development.jsonl": "58a77441872e44aa8fc98f4cbe7b786543cd068d88c1a579b7605782c1d8adab",
+    "evals/cases/see-behavior-independent-holdout-v21.jsonl": "c69cf79fc08fe1e97cad6fa35f5759ea8df53362b0e2eb83ea3cc6f001907842",
+    "evals/cases/see-routing-development.jsonl": "7aec2346a04c2363f73230e7308332bc663d148390925ea8cf3ffc0f0820ada7",
+    "evals/cases/see-routing-independent-holdout.jsonl": "19b95bfc5f067ea8e71bd8f1106aef96a837993a271621589fc23da063906437"
+  }
+}

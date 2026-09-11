@@ -1,0 +1,42 @@
+{
+  "frozen_at": "2026-09-11T16:25:54Z",
+  "candidate_freeze": {
+    "path": "evals/results/see-improvement/remediation-freeze-v15.json",
+    "sha256": "648203546c35caf503508414f49be277aa4c6bb76c44d83487c7e462e7375833"
+  },
+  "holdout": {
+    "path": "evals/cases/see-behavior-independent-holdout-v14.jsonl",
+    "sha256": "37d42b38ef7f9f1cd780ea3d677500b5aa03f32af6d718c9f91cdecd42527389",
+    "records": 12,
+    "families": {
+      "procedure/runbook": 3,
+      "requirement/contract": 3,
+      "explanation/reference": 3,
+      "error/incident": 3
+    },
+    "variants": {
+      "ordinary": 4,
+      "adversarial": 4,
+      "noop": 4
+    }
+  },
+  "response_blind_audit": {
+    "mechanical_validation": "pass",
+    "independent_author": "IndependentBehaviorHoldoutV14",
+    "independent_auditor": "HoldoutV14ScoutAudit",
+    "candidate_or_prior_evidence_visible_to_author_or_auditor": false,
+    "corrections_before_freeze": [
+      "Resolved the supported caching subject while retaining the two genuinely ambiguous object and owner pronouns.",
+      "Removed an unsupported to-versus-by measurement ambiguity.",
+      "Delegated semantic obligation-force equivalence to judge criteria.",
+      "Hardened exact-span boundaries against technical token extensions."
+    ],
+    "final_recheck": "All 12 schemas, exact profiles, field paths, source spans, no-op anchors, and exhaustive boundary probes passed. No deterministic blocker remained.",
+    "semantic_only_disposition": "Relationship mapping, causality, uncertainty, obligation force, ambiguity, and safety meaning remain in judge_criteria rather than incomplete lexical predicates."
+  },
+  "evaluator": {
+    "evals/run.py": "be310d7d73869c11412724d66d66105850b22cd3210e4c753f1cbc4aa443cca0",
+    "evals/grade.py": "dd04a7a7d85d129245f1885bac5ff3845b3f3adb292b90394570f08b5827fe72"
+  },
+  "candidate_skill_sha256": "ffc23001ce96c3bb05eab684b00f440e622aea608442c936e24c0c6bee6efb50"
+}

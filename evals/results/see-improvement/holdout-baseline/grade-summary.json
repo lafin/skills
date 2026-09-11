@@ -1,0 +1,37 @@
+{
+  "all_passed": false,
+  "artifacts": 18,
+  "condition": "baseline",
+  "critical_passed": 8,
+  "deterministic_grades": "grades.jsonl",
+  "efficacy_claim": null,
+  "input_binding": {
+    "artifacts": {
+      "artifacts/see-error-adversarial/1.json": "9e273e6e021298fd91815c68a3d2edf9d37db666615e1b5e0f422aa836914d3a",
+      "artifacts/see-error-adversarial/2.json": "522f1d4746a52cf7f4031da5f853ab78bdf89c3306696804ebc77d5a634746bf",
+      "artifacts/see-error-adversarial/3.json": "4ae9d1c0fe96a2d790ab9ff0f6bea11be63c006b7440328388cb2c7dfefa407d",
+      "artifacts/see-error-noop/1.json": "9dcc0531a91028ab013fb42d23d641cf6802983f45be5b0599af595d07880e32",
+      "artifacts/see-error-noop/2.json": "38a16acc1ed9b158fab48878846835974db46ce8ad6b1497665feb0034e1c827",
+      "artifacts/see-error-noop/3.json": "bf482ec2ee6348a3ae01a0f80a81d2cfbb8fd6db481c059bcd185a9d86ac1b9a",
+      "artifacts/see-explanation-adversarial/1.json": "2f2a2b9c0a6c03ab15cf1b3a15cd44778a1be61b875b1bd2894b3995ad64147c",
+      "artifacts/see-explanation-adversarial/2.json": "e06b43cfdf69278bb85dfd6a4c4cae6e32b317756bf26f0440f1b40f93a18b39",
+      "artifacts/see-explanation-adversarial/3.json": "dd9477261175199bdedc0ebd5dfa9728ffcea3a91ab112c622b39e1ec8fb6a23",
+      "artifacts/see-explanation-noop/1.json": "caf1fe9eb78e7ec257ee4333d842241573e8e187a7bfbd62013d6c255a92bee0",
+      "artifacts/see-explanation-noop/2.json": "d02fe8a09ee80f6f9f4ab113c75b73f1745ea0ebfb12136fac81b88bb373272b",
+      "artifacts/see-explanation-noop/3.json": "614d59d562b9fa39ee3174cfc45be80627971e0b37070b7ab282fa113ba5a7cb",
+      "artifacts/see-procedure-adversarial/1.json": "be53c7db1a305559fed916893a3455dc504c471e47da98c3e197461de8d283ef",
+      "artifacts/see-procedure-adversarial/2.json": "6d7c654ea159acd627734c3bcbbec57b677640debd1a56ab1aa692c4bd1585ec",
+      "artifacts/see-procedure-adversarial/3.json": "6b1ca77a3b605ad15539490d8d3cb1cbfa418b9a4c429e5a58512e6697b6c33a",
+      "artifacts/see-requirement-adversarial/1.json": "c8128bb6ec77fdf7043b7d14af6b204ec9bde914795c4defb0d4fffbe9d91e2c",
+      "artifacts/see-requirement-adversarial/2.json": "2bc8cbd3519714152b339d19f1c244ca0a4c42eb1b8a32b602ebcd3752cf1364",
+      "artifacts/see-requirement-adversarial/3.json": "1d0b0560a3e3bf3d1cd8e197becd88e668bee906afd42a963b02164ac1f97065"
+    },
+    "case_snapshot_sha256": "060cc929b4489e43b55bb51bdb5254bfc455de97dba6628420a733b009165715",
+    "grader_sha256": "5883e79e7ef2179ffd6ccbfd7a096105f4f0b0b3cb55327e5fe92b3211bdb5f7",
+    "manifest_sha256": "3773b8de6ab32c5ee7a724840eed4f8c378539770e131dfa4eeb77b1e44c7881"
+  },
+  "passed": 8,
+  "reason": "A single condition cannot support an efficacy claim; pair it with the other condition.",
+  "run_id": "holdout-baseline",
+  "schema_version": 3
+}

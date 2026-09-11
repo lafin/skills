@@ -1,0 +1,19 @@
+{
+  "schema_version": 4,
+  "status": "blocked",
+  "results_used": false,
+  "model_requested": "anthropic/claude-sonnet-4-6",
+  "provider_observed": "anthropic",
+  "model_observed": "claude-sonnet-4-6",
+  "attempts": [
+    {
+      "profile": "skill-eval-isolated",
+      "outcome": "No API key found for anthropic"
+    },
+    {
+      "profile": "default",
+      "outcome": "HTTP 403 permission_error: OAuth authentication is not allowed for the organization"
+    }
+  ],
+  "reason": "No usable Anthropic credential is available. No judge result was captured or scored. Cross-family model judging remains supporting evidence only and cannot replace human calibration."
+}

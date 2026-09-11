@@ -1,0 +1,15 @@
+{
+  "frozen_at": "2026-09-11T12:01:35Z",
+  "purpose": "Candidate, evaluator, rubric, tests, and development cases frozen before independent holdout generation.",
+  "sha256": {
+    "evals/run.py": "be310d7d73869c11412724d66d66105850b22cd3210e4c753f1cbc4aa443cca0",
+    "evals/grade.py": "7266d3fa594dbc640bec9fdad0612e7ec15a662cb265987bae84e3d4044c13ec",
+    "tests/test_evaluation_harness.py": "f6f0b6ea1ba5a84de8a55ec085b8cbb2c29dcc84f20fe87b1875aef72af86cf4",
+    "simplified-engineering-english/SKILL.md": "903d461865b99553aa09899332d0c39aad62aad792f0f8f00a0f5081bdab2d44",
+    "simplified-engineering-english/references/rules.md": "11cf7bfe8221382885830bf0a892b48aa81a0d8b6977e7373a68f171bbc31c88",
+    "simplified-engineering-english/references/dictionary.md": "93ca70b1fc419005ab110c4f6e52270a3b2dabe44fb46ec086c37af245aecdc0",
+    "evals/see-rubric.json": "e11626411fa94b26dfaafdd8d207bf3038ec8692f748d167527d03fe5f708e0e",
+    "evals/cases/see-behavior-development.jsonl": "ff8e0f84ff70d0d90a6466c33bd63031561c5c14ef93b93b910ed5aed74eeee2",
+    "evals/cases/see-routing-development.jsonl": "7aec2346a04c2363f73230e7308332bc663d148390925ea8cf3ffc0f0820ada7"
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "frozen_at": "2026-09-11T15:54:53Z",
+  "supersedes": "remediation-freeze-v12.json",
+  "prior_freeze_sha256": "0176fd5f74263e53993273ce4c6875dd21ddcb0e8a033a4252c4eba61f2deb6e",
+  "reason": "The V12 development capture showed that a lexical ambiguity predicate still rejected two faithful descriptions. V13 keeps only the deterministic anchor that the response identifies the source term 'thing'; the judge criteria retain the semantic requirement. The candidate, grader, and sealed V11 holdout are unchanged.",
+  "rejected_v12_development": {
+    "baseline": "remediation-v12-development-behavior-baseline",
+    "treatment": "remediation-v12-development-behavior-treatment",
+    "baseline_passed": 28,
+    "treatment_passed": 40,
+    "artifacts": 42,
+    "classification": {
+      "oracle_false_positive_artifacts": 2,
+      "oracle_defects": 1,
+      "candidate_defects": 0
+    },
+    "oracle_defect": "The predicate recognized selected ambiguity phrases instead of testing the stable source anchor and delegating semantic adequacy to judge criteria."
+  },
+  "sealed_holdout": {
+    "freeze": "remediation-holdout-freeze-v11.json",
+    "note": "The candidate, run harness, grader, rubric, and holdout cases are unchanged. Only a development deterministic predicate changed after the sealed holdout capture."
+  },
+  "sha256": {
+    "evals/run.py": "be310d7d73869c11412724d66d66105850b22cd3210e4c753f1cbc4aa443cca0",
+    "evals/grade.py": "f19fdfd06d88ba78ed911eb3059205e95025fd9258b5ddc8f6b447476ae424f8",
+    "tests/test_evaluation_harness.py": "72922a04b8bf66fc55e31e223874fb7e79d0ae6dcc093d38ab2d443e385ec5e0",
+    "simplified-engineering-english/SKILL.md": "9c84e922a9f808a3c0447128c491a0437257135b4a1f03ade6036ce7a245949a",
+    "simplified-engineering-english/references/rules.md": "bebe88700dded668c6610ec26c4c0cebdf3b56f47c3364455ec80466ca00ea7d",
+    "simplified-engineering-english/references/dictionary.md": "93ca70b1fc419005ab110c4f6e52270a3b2dabe44fb46ec086c37af245aecdc0",
+    "evals/see-rubric.json": "e11626411fa94b26dfaafdd8d207bf3038ec8692f748d167527d03fe5f708e0e",
+    "evals/cases/see-behavior-development.jsonl": "547d03790fd31f4f55c7dc57d0ce7abb242f82bb34b5ae0e9bb83155eaf9fd90",
+    "evals/cases/see-behavior-independent-holdout-v11.jsonl": "da9a649a496a4163614eea3302a98ab3102bf31dec499ec95f65e32ffa96ff7f",
+    "evals/cases/see-routing-development.jsonl": "7aec2346a04c2363f73230e7308332bc663d148390925ea8cf3ffc0f0820ada7",
+    "evals/cases/see-routing-independent-holdout.jsonl": "19b95bfc5f067ea8e71bd8f1106aef96a837993a271621589fc23da063906437f"
+  }
+}

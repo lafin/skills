@@ -1,0 +1,57 @@
+{
+  "frozen_at": "2026-09-11T17:11:02Z",
+  "supersedes": "remediation-freeze-v16.json",
+  "prior_freeze_sha256": "64a3aabb813094924a721c1fd21b2d90fde21238ce62698f54157dab6109c2d9",
+  "reason": "The final V16 development capture exposed one candidate failure to state an unknown cause explicitly and two deterministic false negatives for faithful ambiguity and memo-provenance wording. V17 clarifies the unknown-cause rule and corrects only those development lexical oracles. A focused six-artifact treatment smoke passed before freeze.",
+  "rejected_v16_evidence": {
+    "development": {
+      "baseline": "remediation-v16-development-behavior-baseline",
+      "treatment": "remediation-v16-development-behavior-treatment",
+      "baseline_passed": 31,
+      "treatment_passed": 39,
+      "artifacts": 42,
+      "oracle_false_positive_artifacts": 2,
+      "candidate_defect_artifacts": 1
+    },
+    "holdout": {
+      "baseline": "remediation-v16-independent-behavior-baseline",
+      "treatment": "remediation-v16-independent-behavior-treatment",
+      "baseline_passed": 28,
+      "treatment_passed": 36,
+      "artifacts": 36,
+      "note": "This holdout passed but was invalidated by the subsequent candidate change and is not final evidence."
+    }
+  },
+  "development_smoke": {
+    "run": "remediation-v17-regression-smoke-treatment",
+    "passed": 6,
+    "artifacts": 6,
+    "note": "Supporting pre-freeze smoke only; final development runs bind the frozen evaluator and candidate."
+  },
+  "response_blind_holdout_audit": {
+    "independent_author": "IndependentBehaviorHoldoutV17",
+    "independent_auditor": "HoldoutV17ScoutAudit",
+    "candidate_or_prior_evidence_visible_to_author_or_auditor": false,
+    "corrections_before_freeze": [
+      "Added the QuarrayPulse command to protected spans for boundary-aware checking.",
+      "Required risk, verification, and recovery terms before the first Atlas purge command while permitting other inline-code spans.",
+      "Strengthened actor, object, and clock-owner ambiguity anchors.",
+      "Aligned the BrambleKite prompt with all three declared quotations."
+    ],
+    "final_recheck": "All 12 schemas, fields, no-op anchors, exact spans, ambiguity anchors, and ordering probes passed. The response-blind auditor recommended freeze.",
+    "semantic_only_disposition": "Obligation equivalence, typed relations, causality, uncertainty, and ambiguity meaning remain in judge_criteria."
+  },
+  "sha256": {
+    "evals/run.py": "be310d7d73869c11412724d66d66105850b22cd3210e4c753f1cbc4aa443cca0",
+    "evals/grade.py": "dd04a7a7d85d129245f1885bac5ff3845b3f3adb292b90394570f08b5827fe72",
+    "tests/test_evaluation_harness.py": "52b8028e972ed34ec2d3d2ff78390ce13cfe65ca41c756423acd270aaf4b6680",
+    "simplified-engineering-english/SKILL.md": "5a9e04a1d2eae3c3c8577c3f42076ea4aa3f98f8a3c1cda2c8a87414dd07d98b",
+    "simplified-engineering-english/references/rules.md": "bebe88700dded668c6610ec26c4c0cebdf3b56f47c3364455ec80466ca00ea7d",
+    "simplified-engineering-english/references/dictionary.md": "93ca70b1fc419005ab110c4f6e52270a3b2dabe44fb46ec086c37af245aecdc0",
+    "evals/see-rubric.json": "e11626411fa94b26dfaafdd8d207bf3038ec8692f748d167527d03fe5f708e0e",
+    "evals/cases/see-behavior-development.jsonl": "517651e9df87c8e9bb263e68dfc7736896a5fabd10992915755a880c3bbec84e",
+    "evals/cases/see-behavior-independent-holdout-v17.jsonl": "d9c307c5f4102ea0424e04ac0a4273b85f41f15779b1a5de089e694d609cd6e3",
+    "evals/cases/see-routing-development.jsonl": "7aec2346a04c2363f73230e7308332bc663d148390925ea8cf3ffc0f0820ada7",
+    "evals/cases/see-routing-independent-holdout.jsonl": "19b95bfc5f067ea8e71bd8f1106aef96a837993a271621589fc23da063906437f"
+  }
+}

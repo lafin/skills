@@ -1,0 +1,26 @@
+{
+  "frozen_at": "2026-09-11T14:12:10Z",
+  "supersedes": "remediation-freeze-v5.json",
+  "reason": "V5 final development capture found one deterministic checker false positive: the valid phrase 'try the unspecified operation again' did not match the narrower retry predicate. V6 broadens only that predicate, adds a regression assertion, and requires a fresh independent holdout. The candidate skill and evaluator are unchanged.",
+  "rejected_v5_development_capture": {
+    "baseline": "remediation-v5-development-behavior-baseline",
+    "treatment": "remediation-v5-development-behavior-treatment",
+    "treatment_recorded_deterministic_passes": 29,
+    "treatment_recorded_artifacts": 30,
+    "false_positive": "see-error-ordinary:1 keeps_retry",
+    "valid_observed_phrase": "try the unspecified operation again",
+    "v5_holdout_executed": false,
+    "v5_holdout_removed_before_capture": true
+  },
+  "sha256": {
+    "evals/run.py": "be310d7d73869c11412724d66d66105850b22cd3210e4c753f1cbc4aa443cca0",
+    "evals/grade.py": "b194f75962c5cfdc798773c3ddb3394522fe72fefef9baaa02c17f9dcd50cb9e",
+    "tests/test_evaluation_harness.py": "6d111db5e8731f4b51b052aed05aceffbbc476d9c80b5bd01d8284c2c2804e73",
+    "simplified-engineering-english/SKILL.md": "f0de48ca9c9b9fb9c1f4bf161ef8484456daed8868ddf769a38ee5eeae7b9b4a",
+    "simplified-engineering-english/references/rules.md": "2de228a5eeda69b1bba6c5d6ec7a0b5343747d662a6f0b1776803a88ef5e5a79",
+    "simplified-engineering-english/references/dictionary.md": "93ca70b1fc419005ab110c4f6e52270a3b2dabe44fb46ec086c37af245aecdc0",
+    "evals/see-rubric.json": "e11626411fa94b26dfaafdd8d207bf3038ec8692f748d167527d03fe5f708e0e",
+    "evals/cases/see-behavior-development.jsonl": "9d7d196be5bafb4b2397d108effafb90036e70e1064140f4838713aa199feaf3",
+    "evals/cases/see-routing-development.jsonl": "7aec2346a04c2363f73230e7308332bc663d148390925ea8cf3ffc0f0820ada7"
+  }
+}

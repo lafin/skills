@@ -1,0 +1,127 @@
+{
+  "family": "error",
+  "rubric_path": "evals/see-rubric.json",
+  "records": [
+    {
+      "case_id": "see-error-ordinary",
+      "split": "development",
+      "artifact_family": "error and incident record",
+      "prompt": "Rewrite this user-facing error with the engineering-default SEE profile. Source: Something went wrong. Check the thing and try again. Retain the instruction to try again. Do not invent the operation, input, cause, or recovery outcome. Respond with exactly three newline-separated fields: PROFILE: strict|engineering-default; REWRITE: <one line>; AMBIGUITIES: <text or none>.",
+      "case_manifest": {
+        "ambiguity_traps": [
+          "A fluent specific error would invent facts."
+        ],
+        "artifact_family": "error and incident record",
+        "conditions_and_exceptions": [],
+        "expected_obligation_force": [],
+        "numbers_units_versions_status_codes": [],
+        "permitted_rewrites": [
+          "Use direct language without adding technical detail.",
+          "Report missing operation, input, cause, and actionable recovery."
+        ],
+        "prohibited_inventions": [
+          "An operation name, input name, cause, status code, or successful retry promise."
+        ],
+        "protected_spans": [],
+        "quoted_spans": [],
+        "required_structure": [
+          "Failure and known next action.",
+          "Missing details identified as ambiguities."
+        ],
+        "selected_profile": "engineering-default",
+        "source_facts": [
+          "An unspecified operation failed.",
+          "The source suggests checking an unspecified item and retrying.",
+          "The source provides no cause or affected resource."
+        ]
+      },
+      "baseline": {
+        "response": "PROFILE: engineering-default\nREWRITE: Something went wrong. Check the relevant item and try again.\nAMBIGUITIES: “the thing” does not identify what the user should check.",
+        "deterministic_passed": false,
+        "critical_passed": false,
+        "failed_checks": [
+          {
+            "name": "reports_missing_details",
+            "detail": "regex '(?i)(operation|input|resource).*(cause|item|thing)|(?:cause|item|thing).*(operation|input|resource)' in fields.AMBIGUITIES"
+          }
+        ]
+      },
+      "treatment": {
+        "response": "PROFILE: engineering-default\nREWRITE: An error occurred. Check the thing. Then try again.\nAMBIGUITIES: The failed operation, the thing to check, and the required check are not specified.",
+        "deterministic_passed": true,
+        "critical_passed": true,
+        "failed_checks": []
+      }
+    },
+    {
+      "case_id": "see-release-error-redaction",
+      "split": "holdout",
+      "artifact_family": "error and incident record",
+      "prompt": "Rewrite this user-facing error with the engineering-default SEE profile. Preserve the local path and quoted log text. Preserve uncertainty about the cause. Replace the sensitive server path with `[internal path redacted]`. Report the uncertain cause in AMBIGUITIES. Do not invent a recovery step or claim that the header caused the failure. Source: Upload failed for `/Users/lee/report.csv`. The service log shows \"parser accepted and/or normalized the header\". The cause might be an invalid header. Diagnostic details are stored at `/srv/private/uploads/781/debug.log`. Respond with exactly three newline-separated fields: PROFILE: strict|engineering-default; REWRITE: <one line>; AMBIGUITIES: <text or none>.",
+      "case_manifest": {
+        "ambiguity_traps": [
+          "The log text does not prove the cause.",
+          "The local path is actionable, but the server path is sensitive."
+        ],
+        "artifact_family": "error and incident record",
+        "conditions_and_exceptions": [
+          "might be an invalid header"
+        ],
+        "expected_obligation_force": [],
+        "numbers_units_versions_status_codes": [
+          "781"
+        ],
+        "permitted_rewrites": [
+          "Redact the sensitive server path.",
+          "Report the uncertain cause."
+        ],
+        "prohibited_inventions": [
+          "A recovery action, definite cause, or successful retry claim."
+        ],
+        "protected_spans": [
+          "`/Users/lee/report.csv`"
+        ],
+        "quoted_spans": [
+          "\"parser accepted and/or normalized the header\""
+        ],
+        "required_structure": [
+          "Failure before diagnostic evidence.",
+          "Uncertain cause remains qualified."
+        ],
+        "selected_profile": "engineering-default",
+        "source_facts": [
+          "The upload failed for a local file.",
+          "The service log contains quoted text.",
+          "An invalid header is only a possible cause.",
+          "Diagnostic details have a sensitive server path."
+        ]
+      },
+      "baseline": {
+        "response": "PROFILE: engineering-default\nREWRITE: Upload failed for `/Users/lee/report.csv`. The service log shows \"parser accepted and/or normalized the header\". The cause might be an invalid header. Diagnostic details are stored at `[internal path redacted]`.\nAMBIGUITIES: The cause is uncertain; the header might be invalid, but the log does not establish that it caused the failure.",
+        "deterministic_passed": false,
+        "critical_passed": false,
+        "failed_checks": [
+          {
+            "name": "manifest_numbers_units_versions_status_codes_1",
+            "detail": "Missing exactly matched numbers_units_versions_status_codes value: '781'"
+          }
+        ]
+      },
+      "treatment": {
+        "response": "PROFILE: engineering-default\nREWRITE: Upload failed for `/Users/lee/report.csv`. The service log shows \"parser accepted and/or normalized the header\". An invalid header might be the cause. Diagnostic details are stored at `[internal path redacted]`.\nAMBIGUITIES: It is uncertain whether an invalid header caused the upload failure.",
+        "deterministic_passed": false,
+        "critical_passed": false,
+        "failed_checks": [
+          {
+            "name": "manifest_conditions_and_exceptions_1",
+            "detail": "Missing case-insensitively matched conditions_and_exceptions value: 'might be an invalid header'"
+          },
+          {
+            "name": "manifest_numbers_units_versions_status_codes_1",
+            "detail": "Missing exactly matched numbers_units_versions_status_codes value: '781'"
+          }
+        ]
+      }
+    }
+  ]
+}

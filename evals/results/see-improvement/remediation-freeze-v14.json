@@ -1,0 +1,30 @@
+{
+  "frozen_at": "2026-09-11T16:05:21Z",
+  "supersedes": "remediation-freeze-v13.json",
+  "prior_freeze_sha256": "25e99dd01bd1939618a1039c32e2b800ede0d5cdf1b87d91783788199c269f09",
+  "reason": "The V13 development treatment exposed one candidate defect: a moved exact quotation gained sentence punctuation inside the closing quotation mark. V14 makes quoted spans indivisible and requires new sentence punctuation after the exact span. The existing development regression detects the defect.",
+  "rejected_v13_development": {
+    "baseline": "remediation-v13-development-behavior-baseline",
+    "treatment": "remediation-v13-development-behavior-treatment",
+    "baseline_passed": 27,
+    "treatment_passed": 41,
+    "artifacts": 42,
+    "classification": {
+      "oracle_false_positive_artifacts": 0,
+      "candidate_defects": 1
+    },
+    "candidate_defect": "The response changed the exact source span \"massively improved\" to \"massively improved.\" when it moved the quotation to sentence end."
+  },
+  "sha256": {
+    "evals/run.py": "be310d7d73869c11412724d66d66105850b22cd3210e4c753f1cbc4aa443cca0",
+    "evals/grade.py": "f19fdfd06d88ba78ed911eb3059205e95025fd9258b5ddc8f6b447476ae424f8",
+    "tests/test_evaluation_harness.py": "72922a04b8bf66fc55e31e223874fb7e79d0ae6dcc093d38ab2d443e385ec5e0",
+    "simplified-engineering-english/SKILL.md": "ffc23001ce96c3bb05eab684b00f440e622aea608442c936e24c0c6bee6efb50",
+    "simplified-engineering-english/references/rules.md": "bebe88700dded668c6610ec26c4c0cebdf3b56f47c3364455ec80466ca00ea7d",
+    "simplified-engineering-english/references/dictionary.md": "93ca70b1fc419005ab110c4f6e52270a3b2dabe44fb46ec086c37af245aecdc0",
+    "evals/see-rubric.json": "e11626411fa94b26dfaafdd8d207bf3038ec8692f748d167527d03fe5f708e0e",
+    "evals/cases/see-behavior-development.jsonl": "547d03790fd31f4f55c7dc57d0ce7abb242f82bb34b5ae0e9bb83155eaf9fd90",
+    "evals/cases/see-routing-development.jsonl": "7aec2346a04c2363f73230e7308332bc663d148390925ea8cf3ffc0f0820ada7",
+    "evals/cases/see-routing-independent-holdout.jsonl": "19b95bfc5f067ea8e71bd8f1106aef96a837993a271621589fc23da063906437f"
+  }
+}

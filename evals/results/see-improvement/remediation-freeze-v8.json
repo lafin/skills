@@ -1,0 +1,30 @@
+{
+  "frozen_at": "2026-09-11T14:52:28Z",
+  "supersedes": "remediation-freeze-v7.json",
+  "reason": "V7 development capture found one repeated exact-quotation punctuation regression. V8 adds a final literal-preservation gate that searches for every exact source span and pastes back any missing span before return. The unexecuted V7 holdout was removed; a fresh independent holdout is required.",
+  "rejected_v7_development_capture": {
+    "baseline": "remediation-v7-development-behavior-baseline",
+    "treatment": "remediation-v7-development-behavior-treatment",
+    "baseline_passed": 17,
+    "treatment_passed": 32,
+    "artifacts": 33,
+    "failed_treatment_artifact": "see-explanation-quote-punctuation:1",
+    "defect": "Moved the sentence period inside the exact quotation."
+  },
+  "development_smoke": {
+    "run": "remediation-v8-quote-smoke-treatment",
+    "passed": 3,
+    "artifacts": 3
+  },
+  "sha256": {
+    "evals/run.py": "be310d7d73869c11412724d66d66105850b22cd3210e4c753f1cbc4aa443cca0",
+    "evals/grade.py": "b194f75962c5cfdc798773c3ddb3394522fe72fefef9baaa02c17f9dcd50cb9e",
+    "tests/test_evaluation_harness.py": "6d111db5e8731f4b51b052aed05aceffbbc476d9c80b5bd01d8284c2c2804e73",
+    "simplified-engineering-english/SKILL.md": "d48e8f7f4f2dc2e542e190e7f0fdcc244fe76f9bba71d6f5d162c44400025bc2",
+    "simplified-engineering-english/references/rules.md": "ab5507b57bf31a600ca94e11f472f4603ccecb1955b182db3c8604f6ee793447",
+    "simplified-engineering-english/references/dictionary.md": "93ca70b1fc419005ab110c4f6e52270a3b2dabe44fb46ec086c37af245aecdc0",
+    "evals/see-rubric.json": "e11626411fa94b26dfaafdd8d207bf3038ec8692f748d167527d03fe5f708e0e",
+    "evals/cases/see-behavior-development.jsonl": "635d78df4f4552e19c36e0f53026318c3707186b03560aada104f1a41df4d998",
+    "evals/cases/see-routing-development.jsonl": "7aec2346a04c2363f73230e7308332bc663d148390925ea8cf3ffc0f0820ada7"
+  }
+}

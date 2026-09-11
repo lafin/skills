@@ -1,0 +1,43 @@
+{
+  "all_passed": true,
+  "artifacts": 24,
+  "condition": "baseline",
+  "critical_passed": 24,
+  "deterministic_grades": "grades.jsonl",
+  "efficacy_claim": null,
+  "input_binding": {
+    "artifacts": {
+      "artifacts/see-routing-development-see--evaluation-negative/1.json": "cd3e15e64195dd1a0c939cbc5b82194a06c7b28819a19167cf4c01bd876046f1",
+      "artifacts/see-routing-development-see--evaluation-negative/2.json": "d7985d5429b5a1d8674e2ea721d64124c5893aa54053461807adf768717c38ba",
+      "artifacts/see-routing-development-see--evaluation-negative/3.json": "1684459d0bf8ef505105a06852d9c23392dd44b2621dbef7d2d7df3b94612ca5",
+      "artifacts/see-routing-development-see--evaluation-positive/1.json": "41f2c5139b9331356e65c62299850e1f867ba1f57fdeea4f8628d28333704bc4",
+      "artifacts/see-routing-development-see--evaluation-positive/2.json": "99989d2a541f163958d09f9c3acff3bfe0ad5968d5fdb3a2cb20c465fa08df43",
+      "artifacts/see-routing-development-see--evaluation-positive/3.json": "21aa9ae5dc8ea9cbf2d78ce6c392f3f62fab1b72dab87db7b98fe53be4d8647b",
+      "artifacts/see-routing-development-see--leancode-negative/1.json": "aa30cff78520ae136734b95a328202f215f600260490649d60f05733e95de8db",
+      "artifacts/see-routing-development-see--leancode-negative/2.json": "e89074f5f9f878b36d681da0a8f92813457562f3b932ec826f802c241b51f82f",
+      "artifacts/see-routing-development-see--leancode-negative/3.json": "334467e87a8ff623094c7e17bbbb31ec4176e509d74145912358f580c19439ca",
+      "artifacts/see-routing-development-see--leancode-positive/1.json": "a01628777f419f72f95d393b807ad9c33ce998105814c5038bb1ad981a47ec0a",
+      "artifacts/see-routing-development-see--leancode-positive/2.json": "0db0cb564b76b41e06bcf3670b02a10b475588c66b2e3a6e8074dcf955eb40a0",
+      "artifacts/see-routing-development-see--leancode-positive/3.json": "f3c66a90ecfe9eb4a00e94bc01fb21a287e0ea436f1768fed2c9aab49d010ed4",
+      "artifacts/see-routing-development-see--lossless-negative/1.json": "2d197907de62b69a0b5744d4f69893b975cd51defa233a35fce6cb2a89ccdbc0",
+      "artifacts/see-routing-development-see--lossless-negative/2.json": "ec11d71ebbf20b90cddaf53f28713a5db9e8bef1ce015ced579afc3d6837ad7e",
+      "artifacts/see-routing-development-see--lossless-negative/3.json": "0999836d89125e67e232bb8e5da23b68dffdebc93850c65125da09cb73fa8fa5",
+      "artifacts/see-routing-development-see--lossless-positive/1.json": "19c170ea86729c2aa63919ea24b56b4bdfe442004d936c08889fc2aa91a6af66",
+      "artifacts/see-routing-development-see--lossless-positive/2.json": "27ed5f96470e7e79c7b172db77b0ee35b350a3237b66877bc729851b994d3efd",
+      "artifacts/see-routing-development-see--lossless-positive/3.json": "346f57460c9d688e14f8f8e9a1e3be7663e97325b963af42da9c1d03f4a8b1ba",
+      "artifacts/see-routing-development-see--tool-design-negative/1.json": "a2bd15c881917420f1c52ebc18d4b48c1961f282d121e39293c222103a131b15",
+      "artifacts/see-routing-development-see--tool-design-negative/2.json": "f285d474f105bdaae568e2a29be0aa54163717ed8177b89be76b9a5c71ab64be",
+      "artifacts/see-routing-development-see--tool-design-negative/3.json": "fdf16260f9b387df0cd2164c70dc94f38e18522149953efabf212c0b0a9cf143",
+      "artifacts/see-routing-development-see--tool-design-positive/1.json": "b755986a90daef2bde5f9b069baab35cf3703d54d5563e06dbb9f01eaf0d4d26",
+      "artifacts/see-routing-development-see--tool-design-positive/2.json": "68afb6aaea8de6ef0c0508257caf212e7ae8ceb1d85a1b609d8eaba3a1118a08",
+      "artifacts/see-routing-development-see--tool-design-positive/3.json": "8a2c32678bf46147b9ffa503a3211e85566561480a97b676bd5c471c8d5e082c"
+    },
+    "case_snapshot_sha256": "f09b793f5ccbcb2cc761a090e8a6b941af46393cd3673834a4077491f07a8d27",
+    "grader_sha256": "5883e79e7ef2179ffd6ccbfd7a096105f4f0b0b3cb55327e5fe92b3211bdb5f7",
+    "manifest_sha256": "52edf5b349b7a87c599aa9ab4b479332ca6d17fafafb0280c4051c6f7cc46648"
+  },
+  "passed": 24,
+  "reason": "A single condition cannot support an efficacy claim; pair it with the other condition.",
+  "run_id": "routing-development-baseline",
+  "schema_version": 3
+}

@@ -1,0 +1,257 @@
+{
+  "pairs": {
+    "0b4f87dc58d7baf6": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 2,
+      "case_id": "see-release-error-redaction",
+      "order": "swapped"
+    },
+    "11433844a47fcc8d": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 2,
+      "case_id": "see-release-procedure-ambiguity",
+      "order": "swapped"
+    },
+    "199b06548ac6897a": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 2,
+      "case_id": "see-release-procedure-noop",
+      "order": "forward"
+    },
+    "1a48ef50caff34b3": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 3,
+      "case_id": "see-release-requirement-noop",
+      "order": "forward"
+    },
+    "232be100b1aae7eb": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 3,
+      "case_id": "see-release-explanation-timing",
+      "order": "swapped"
+    },
+    "2cd29599c6b8953e": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "see-release-error-redaction",
+      "order": "forward"
+    },
+    "34272e1b882eeb06": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 3,
+      "case_id": "see-release-procedure-noop",
+      "order": "forward"
+    },
+    "400d5585f2f6c559": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "see-release-explanation-timing",
+      "order": "forward"
+    },
+    "452d1db4236f2b4f": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 3,
+      "case_id": "see-release-procedure-ambiguity",
+      "order": "forward"
+    },
+    "512c41500c5bc11a": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 3,
+      "case_id": "see-release-procedure-noop",
+      "order": "swapped"
+    },
+    "54fab931dcb10baf": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 1,
+      "case_id": "see-release-requirement-noop",
+      "order": "swapped"
+    },
+    "575153a85ee88766": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "see-release-procedure-noop",
+      "order": "forward"
+    },
+    "588391b5d17a7c6b": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 3,
+      "case_id": "see-release-procedure-ambiguity",
+      "order": "swapped"
+    },
+    "5ac1a88f471c21d7": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "see-release-requirement-force",
+      "order": "forward"
+    },
+    "608cfaffedaa1c4d": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 3,
+      "case_id": "see-release-error-redaction",
+      "order": "swapped"
+    },
+    "8163f1c9cbddfc46": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 2,
+      "case_id": "see-release-requirement-force",
+      "order": "forward"
+    },
+    "90c5804fee651e95": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 1,
+      "case_id": "see-release-requirement-force",
+      "order": "swapped"
+    },
+    "936ff0aad1a2d4cc": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 3,
+      "case_id": "see-release-requirement-force",
+      "order": "swapped"
+    },
+    "947d61a6cc42bf51": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 2,
+      "case_id": "see-release-requirement-noop",
+      "order": "swapped"
+    },
+    "9e42238c7ca6ef26": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "see-release-requirement-noop",
+      "order": "forward"
+    },
+    "a4b86f94a1db645a": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 2,
+      "case_id": "see-release-procedure-ambiguity",
+      "order": "forward"
+    },
+    "abb67f5c007c4e04": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 2,
+      "case_id": "see-release-explanation-timing",
+      "order": "swapped"
+    },
+    "ae56279fdfc8370a": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 3,
+      "case_id": "see-release-requirement-force",
+      "order": "forward"
+    },
+    "b995e3c86eea1a91": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 1,
+      "case_id": "see-release-procedure-ambiguity",
+      "order": "swapped"
+    },
+    "bbc0bc5d2c21ce69": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 1,
+      "case_id": "see-release-explanation-timing",
+      "order": "swapped"
+    },
+    "bfeb6103af24800c": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 3,
+      "case_id": "see-release-explanation-timing",
+      "order": "forward"
+    },
+    "c7fe075fc0a8d978": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 2,
+      "case_id": "see-release-explanation-timing",
+      "order": "forward"
+    },
+    "c9dc8382763d094b": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 2,
+      "case_id": "see-release-procedure-noop",
+      "order": "swapped"
+    },
+    "ca290e72bf075d8a": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "see-release-procedure-ambiguity",
+      "order": "forward"
+    },
+    "d2ecc80369543c0a": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 1,
+      "case_id": "see-release-error-redaction",
+      "order": "swapped"
+    },
+    "db09ea20612ae68b": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 2,
+      "case_id": "see-release-requirement-noop",
+      "order": "forward"
+    },
+    "e2aa1952148b56d4": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 3,
+      "case_id": "see-release-error-redaction",
+      "order": "forward"
+    },
+    "ebb13451d96510ec": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 2,
+      "case_id": "see-release-requirement-force",
+      "order": "swapped"
+    },
+    "ebcb09d796c4ae4c": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 1,
+      "case_id": "see-release-procedure-noop",
+      "order": "swapped"
+    },
+    "f34f7cff52989d88": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 2,
+      "case_id": "see-release-error-redaction",
+      "order": "forward"
+    },
+    "fd2ac6428cb2d3eb": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 3,
+      "case_id": "see-release-requirement-noop",
+      "order": "swapped"
+    }
+  },
+  "schema_version": 3
+}

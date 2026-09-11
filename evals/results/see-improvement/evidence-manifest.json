@@ -1,0 +1,178 @@
+{
+  "schema_version": 2,
+  "decision": "no-go",
+  "automated_gate_decision": "pass",
+  "efficacy_claim": null,
+  "decision_report": {
+    "path": "evals/results/see-improvement/release-report.md",
+    "sha256": "d2bb5a2e374c907fd923d04c6d627532f4959cfd3ae52e421feecc74fbd4c27d"
+  },
+  "release_gate": {
+    "path": "evals/results/see-improvement/release-gate-final.json",
+    "sha256": "1fffda7fca3530aec5bdd9e775736ce955ea336f067ba1e7c56b96562bccd77e"
+  },
+  "automated_gate": {
+    "path": "evals/results/see-improvement/remediation-v24-gate.json",
+    "sha256": "21886442e9d8a5f16fba34ba4e69ead31336832f66ffe9642f12a5ce9a5242a4"
+  },
+  "evaluation_contract": {
+    "model": "openai-codex/gpt-5.6-sol",
+    "omp_version": "omp/18.1.17",
+    "profile": "skill-eval-isolated",
+    "thinking": "off",
+    "attempts_per_case": 3,
+    "tools": [],
+    "behavior_max_time": "10m",
+    "routing_max_time": "2m"
+  },
+  "evaluated_sources": {
+    "evals/run.py": "be310d7d73869c11412724d66d66105850b22cd3210e4c753f1cbc4aa443cca0",
+    "evals/grade.py": "21f818a084b4aecf52a6980f15558b2424bcedc640fb6b59647804d3a5fb0cc8",
+    "tests/test_evaluation_harness.py": "3a0ca63c287dcffedef730e1a5483332ef766d102f0dd040396075d93850e6b7",
+    "simplified-engineering-english/SKILL.md": "256976f959ac379e0080835f7b6f5201908b722dbab4384d0e32cc12e31e20a8",
+    "simplified-engineering-english/references/rules.md": "bebe88700dded668c6610ec26c4c0cebdf3b56f47c3364455ec80466ca00ea7d",
+    "simplified-engineering-english/references/dictionary.md": "93ca70b1fc419005ab110c4f6e52270a3b2dabe44fb46ec086c37af245aecdc0",
+    "evals/see-rubric.json": "e11626411fa94b26dfaafdd8d207bf3038ec8692f748d167527d03fe5f708e0e"
+  },
+  "case_files": {
+    "evals/cases/see-behavior-development.jsonl": "58a77441872e44aa8fc98f4cbe7b786543cd068d88c1a579b7605782c1d8adab",
+    "evals/cases/see-behavior-independent-holdout-v21.jsonl": "c69cf79fc08fe1e97cad6fa35f5759ea8df53362b0e2eb83ea3cc6f001907842",
+    "evals/cases/see-routing-development.jsonl": "7aec2346a04c2363f73230e7308332bc663d148390925ea8cf3ffc0f0820ada7",
+    "evals/cases/see-routing-independent-holdout.jsonl": "19b95bfc5f067ea8e71bd8f1106aef96a837993a271621589fc23da063906437"
+  },
+  "freeze_evidence": {
+    "evals/results/see-improvement/remediation-freeze-v24.json": "32f711920cc13d0bd66581df783e3e5d4faee7383daaab5d2d2df641cb066f05",
+    "evals/results/see-improvement/remediation-holdout-freeze-v24.json": "37f443b2ebf4aecbf40fc85920be34c3060c0245691e35799080285be3579d0e"
+  },
+  "paired_results": {
+    "path": "evals/results/see-improvement/paired-results.json",
+    "sha256": "2badd548288ac0a5c9affaf8de57f4ca95f4213cd97a56ae1f785296d8733564"
+  },
+  "accepted_runs": [
+    {
+      "path": "evals/results/see-improvement/remediation-v24-development-behavior-baseline",
+      "manifest_sha256": "36f8e37063180d35a2ba70f0e7452ef090d850f42ae287c92720e5d34ea75f34",
+      "grade_summary_sha256": "ef2391023083084d4becdf46b29a2dafafc35ca881c1bbbc3c64df0e46cb47d2",
+      "passed": 29,
+      "total": 42
+    },
+    {
+      "path": "evals/results/see-improvement/remediation-v24b-development-behavior-treatment",
+      "manifest_sha256": "0a0947cc3aadb8f361436e2aacb8c8081223beddb4c2bcd98a13956f9eb355a5",
+      "grade_summary_sha256": "682166ee9d5916524f1a035c489fa4e2cdb405dec1b9c5c24de4872e3910b477",
+      "passed": 42,
+      "total": 42
+    },
+    {
+      "path": "evals/results/see-improvement/remediation-v23-independent-behavior-baseline",
+      "manifest_sha256": "a1203a782eb58ce8c454369eff2e906b22760483d02fd1c589d542c623e7533b",
+      "grade_summary_sha256": "7327961f1d1cd2eb24eb86e27528ccd5d4a8886cff49c6c0a04c0fd5cf678c0c",
+      "passed": 24,
+      "total": 36
+    },
+    {
+      "path": "evals/results/see-improvement/remediation-v23-independent-behavior-treatment",
+      "manifest_sha256": "67efb1fd5cbd402d42a728b46e026540c3c5a67b10455d03194b8aee32873085",
+      "grade_summary_sha256": "b99027b2404bcc70af2c204984ef2494d8ac58ed647f5fe4699db790abb2d86e",
+      "passed": 36,
+      "total": 36
+    },
+    {
+      "path": "evals/results/see-improvement/remediation-v19-development-routing-baseline",
+      "manifest_sha256": "52bdd7d3b6fc4185505507c2162fbf07d6309f9d6c7ea19371ef8bba679de21d",
+      "grade_summary_sha256": "a300ff43bd7143fee0946b5d1f948ea4e48de715de4d80c63ed9d7f54c21f78e",
+      "passed": 30,
+      "total": 30
+    },
+    {
+      "path": "evals/results/see-improvement/remediation-v23-development-routing-treatment",
+      "manifest_sha256": "a13c05cfec10a4a0603b69bf4ef73581eb80144a56f43651e748617a6441e93c",
+      "grade_summary_sha256": "f0f4b6c770292a54402c8652d7d4a0ce5340603230f8da2ebe99ea8a3b9ae716",
+      "passed": 30,
+      "total": 30
+    },
+    {
+      "path": "evals/results/see-improvement/remediation-v19-independent-routing-baseline",
+      "manifest_sha256": "9d64f5e8f02da5e317629578df2e3c89388bdcee6c556aa56405e60ded9e3c8b",
+      "grade_summary_sha256": "61d7a2332cf3390c4821c5fe1a9a6fe78f928125448cfb3f0927d59957126a17",
+      "passed": 36,
+      "total": 36
+    },
+    {
+      "path": "evals/results/see-improvement/remediation-v23-independent-routing-treatment",
+      "manifest_sha256": "52f3c67c3857ced8534991bb410913844dad40d85cdb0af7ee767bf7d52fd4ef",
+      "grade_summary_sha256": "ab256ab4f2effed6aa8e79aa61ddc47ac0d44a5f544d0cbe0f15970d7fa67545",
+      "passed": 36,
+      "total": 36
+    }
+  ],
+  "review_packets": {
+    "human_calibration": {
+      "packet_path": "evals/results/see-improvement/remediation-v24-human-calibration-packet.json",
+      "packet_sha256": "c179096acd375db1add2ff3d419c771e2111e65ff54f7bbd6406ea797b25fca7",
+      "key_path": "evals/results/see-improvement/remediation-v24-human-calibration-key.json",
+      "key_sha256": "d4b6d829cedf98670c2d1b91f4cc62815d510830c4e1dbea470fee278cf0c521",
+      "pairs": 26,
+      "status": "awaiting_qualified_human_review"
+    },
+    "technical_attestation": {
+      "path": "evals/results/see-improvement/remediation-v24-technical-attestation.json",
+      "sha256": "0a6836c13b6fcabf9b75c493b5a41f2e4bdf25295b9461654219f50f2bf64df8",
+      "status": "awaiting_named_qualified_technical_authority"
+    },
+    "model_judge_analysis": {
+      "path": "evals/results/see-improvement/remediation-v24-model-judge-analysis.json",
+      "sha256": "d1cf6ad5a0b935ad9001a5cb1d65adbb7cc860c21828556cec3151c2f2eb28eb",
+      "status": "complete_uncalibrated"
+    },
+    "development_model_judge": {
+      "payloads_sha256": "d765137d0a60864ba978c73ca750cba8d99c7500ae70a389f840a0af25964c2e",
+      "key_sha256": "2eef5ba0789a7ac4699635a4e1f8d3e8cdb384d81d31c76a1009399637aecb53",
+      "payload_summary_sha256": "73d1fd14e58bf1d4d939d7b69b27f9981fc9e0ef6d712598deec52d5968f8ee2",
+      "results_sha256": "856755f8f1fdfb69149bdff7af6f12e594e125f0347b5ae36993b33da369c5b4",
+      "judge_summary_sha256": "67a43ab13d44a6db8cfa327a07aa3da6cddb7e82dd9500588ea18fdd7db5166b",
+      "model_capture_sha256": "37b2026693dccae40f196b52fd3dc29b34fe0c2f88e20d9484605780c0864294",
+      "prior_blocked_capture_sha256": "673b8f15fc06dffe2baa06b1acaff6d3e82e41391fed1e5ca4da061895398ecb",
+      "raw_capture_tree_sha256": "779937f3dd7535b3a05693d49f2b326bba55c30a060620a47ab1a1ef28c6eacc",
+      "raw_capture_tree_algorithm": "sha256 of newline-joined sorted filename, NUL, file-sha256 records",
+      "payloads": 84,
+      "swapped_pairs": 42,
+      "position_sensitive_pairs": 19,
+      "critical_flagged_pairs": 5,
+      "results_used_as_supporting_evidence": true
+    },
+    "holdout_model_judge": {
+      "payloads_sha256": "858b987b81fe937c718c34ca771e71ab9d4e2a788b84dc99ac6f4f7debbbbe2f",
+      "key_sha256": "a20faa6b44fd447db7c0e98c9e4ef96f43ce139849ffcdd563512edb7a3b1a50",
+      "payload_summary_sha256": "63fc352b0515bb371684a0871c46c80351c11732a2b923c949c3cfce9a4cc5f6",
+      "results_sha256": "ffcdb7feb9288155339c45cd6dde4f2ebe49e6ddc2a1842efe7a3d6ce793d810",
+      "judge_summary_sha256": "0644711d7e57bc721f99abf9d116420ec19d6f07d628f53cb64455354213f682",
+      "model_capture_sha256": "89826cf345c66382397532001aa801424a6d94e3f8577a73846b62c9a84901d3",
+      "prior_blocked_capture_sha256": "673b8f15fc06dffe2baa06b1acaff6d3e82e41391fed1e5ca4da061895398ecb",
+      "raw_capture_tree_sha256": "95ccfe44484ec062bafacc8ed96cd8bdf6931cd9ad32a4e6b1d8228467c92763",
+      "raw_capture_tree_algorithm": "sha256 of newline-joined sorted filename, NUL, file-sha256 records",
+      "payloads": 72,
+      "swapped_pairs": 36,
+      "position_sensitive_pairs": 11,
+      "critical_flagged_pairs": 1,
+      "results_used_as_supporting_evidence": true
+    }
+  },
+  "raw_evidence": {
+    "retention": "local_gitignored_only",
+    "durable_external_storage": false,
+    "publication_ready": false
+  },
+  "release_blockers": [
+    "qualified human calibration and model-judge adjudication incomplete",
+    "named qualified technical attestation incomplete",
+    "durable external artifact storage not configured"
+  ],
+  "prior_rollback_inputs": {
+    "repository_commit": "a2384f71dc317446706c66799d26e15e6b18836a",
+    "skill_sha256": "8016301f988af5b7a27d1219e819bdc64d9e9d7818880260d5958d7369693b56",
+    "dictionary_sha256": "965dd00aacb08ee95dd63a9a59a1ccdd4f8aed68c11c98ae3ab4dc5a54345fed",
+    "method": "Restore the prior skill and dictionary together; do not retain partial aliases."
+  },
+  "manifest_note": "This file intentionally does not hash itself. V1-V23 rejected or audit-only evidence and the incomplete remediation-v24-development-behavior-treatment capture are excluded from accepted runs."
+}

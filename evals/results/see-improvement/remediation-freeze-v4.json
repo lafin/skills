@@ -1,0 +1,22 @@
+{
+  "frozen_at": "2026-09-11T13:46:26Z",
+  "supersedes": "remediation-freeze-v3.json",
+  "reason": "The sealed v3 holdout exposed one invented ambiguity, one descriptive fact upgraded to SHALL, and two security-authorization tense or exclusivity regressions. V4 adds direct preservation rules and development regressions. The grader now treats equals as exact; routing keeps its separate punctuation-tolerant parser. A fresh independent behavior holdout is required; v3 holdout results remain rejected evidence.",
+  "development_smoke": {
+    "run": "remediation-v4-development-smoke-treatment",
+    "attempts_per_case": 1,
+    "passed": 10,
+    "total": 10
+  },
+  "sha256": {
+    "evals/run.py": "be310d7d73869c11412724d66d66105850b22cd3210e4c753f1cbc4aa443cca0",
+    "evals/grade.py": "b194f75962c5cfdc798773c3ddb3394522fe72fefef9baaa02c17f9dcd50cb9e",
+    "tests/test_evaluation_harness.py": "cb0cb4a081e3a07c3b1f238608c397cc953ec1fc4397f6e02bd502512cd1751c",
+    "simplified-engineering-english/SKILL.md": "6761fd8face1ef272d1e689068ff15d7795ff083d834f948572ad0289defbcdb",
+    "simplified-engineering-english/references/rules.md": "05c36dd8a3665ac6c54de37169200ebc8f57495413c5b0c3e5b91105481e8ad7",
+    "simplified-engineering-english/references/dictionary.md": "93ca70b1fc419005ab110c4f6e52270a3b2dabe44fb46ec086c37af245aecdc0",
+    "evals/see-rubric.json": "e11626411fa94b26dfaafdd8d207bf3038ec8692f748d167527d03fe5f708e0e",
+    "evals/cases/see-behavior-development.jsonl": "f1496e4f512fcdcffaf6314b530f178a0d000e063668c4e4a433824cd55d8302",
+    "evals/cases/see-routing-development.jsonl": "7aec2346a04c2363f73230e7308332bc663d148390925ea8cf3ffc0f0820ada7"
+  }
+}

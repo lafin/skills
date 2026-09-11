@@ -1,0 +1,49 @@
+{
+  "schema_version": 4,
+  "status": "supporting-review-only",
+  "human_calibration": false,
+  "technical_approval": false,
+  "reviewed_run": "remediation-v3-independent-behavior-treatment",
+  "reviewed_failed_artifacts": 24,
+  "failed_check_occurrences": {
+    "deterministic_false_positive": 46,
+    "genuine_candidate_defect": 4,
+    "uncertain": 0
+  },
+  "checker_misses": {
+    "definite_candidate_defects": 2,
+    "uncertain_candidate_defects": 1
+  },
+  "candidate_critical_defects": [
+    {
+      "case_id": "see-v3-independent-requirement-ordinary-04",
+      "attempt": 1,
+      "source": "the gateway copies that nonce",
+      "response": "The Orin gateway SHALL copy the client nonce into response header X-Orin-Nonce.",
+      "finding": "Added a mandatory contract obligation to a descriptive fact."
+    },
+    {
+      "case_id": "see-v3-independent-incident-adversarial-11",
+      "attempt": 1,
+      "source": "Security authorizes replacing only the header value",
+      "response": "Security authorized this value redaction.",
+      "finding": "Changed current authorization to historical authorization and removed the exclusive scope."
+    },
+    {
+      "case_id": "see-v3-independent-incident-adversarial-11",
+      "attempt": 2,
+      "source": "Security authorizes replacing only the request-header value",
+      "response": "Security authorized replacing only the request-header value.",
+      "finding": "Changed current authorization to a past event."
+    },
+    {
+      "case_id": "see-v3-independent-procedure-ordinary-01",
+      "attempt": 3,
+      "source": "manifold pressure ... the pressure",
+      "response": "the pressure does not identify whether it refers to the manifold pressure or a different pressure",
+      "finding": "Invented a merely possible second referent and reported it as ambiguity."
+    }
+  ],
+  "decision": "no-go-v3",
+  "reason": "The frozen deterministic gate failed, and semantic review found preservation-critical candidate defects. The frozen corpus and grades remain unchanged."
+}

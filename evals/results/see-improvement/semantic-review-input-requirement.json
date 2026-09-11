@@ -1,0 +1,117 @@
+{
+  "family": "requirement",
+  "rubric_path": "evals/see-rubric.json",
+  "records": [
+    {
+      "case_id": "see-requirement-ordinary",
+      "split": "development",
+      "artifact_family": "requirement and contract",
+      "prompt": "Rewrite this contract text with the engineering-default SEE profile. The contract declares RFC 2119 and RFC 8174 semantics. Use the declaration only to interpret the keywords; do not repeat it in the rewrite. Source: The API MUST be fast and reliable, and SHOULD retry requests. Do not invent thresholds, retry counts, or exception conditions. Respond with exactly three newline-separated fields: PROFILE: strict|engineering-default; REWRITE: <one line>; AMBIGUITIES: <text or none>.",
+      "case_manifest": {
+        "ambiguity_traps": [
+          "fast and reliable are not measurable.",
+          "The valid SHOULD does not require an invented exhaustive exception."
+        ],
+        "artifact_family": "requirement and contract",
+        "conditions_and_exceptions": [],
+        "expected_obligation_force": [
+          "MUST",
+          "SHOULD"
+        ],
+        "numbers_units_versions_status_codes": [],
+        "permitted_rewrites": [
+          "Split the compound normative statement.",
+          "Report undefined quality and retry criteria."
+        ],
+        "prohibited_inventions": [
+          "Latency, availability, retry count, backoff, or exception values."
+        ],
+        "protected_spans": [],
+        "quoted_spans": [],
+        "required_structure": [
+          "One obligation per statement.",
+          "Objective verification gap identified."
+        ],
+        "selected_profile": "engineering-default",
+        "source_facts": [
+          "The API has an absolute performance and reliability obligation.",
+          "Retrying requests is a defeasible recommendation.",
+          "The source defines no measurable targets or retry policy."
+        ]
+      },
+      "baseline": {
+        "response": "PROFILE: engineering-default\nREWRITE: The API MUST provide fast responses and reliable operation, and SHOULD retry requests.\nAMBIGUITIES: “fast” and “reliable” lack measurable thresholds; retry count, timing, and applicable requests are unspecified.",
+        "deterministic_passed": false,
+        "critical_passed": false,
+        "failed_checks": [
+          {
+            "name": "split_obligations",
+            "detail": "regex 'MUST[^.]*\\\\.[^\\n]*SHOULD' in fields.REWRITE"
+          }
+        ]
+      },
+      "treatment": {
+        "response": "PROFILE: engineering-default\nREWRITE: The API MUST be fast. The API MUST be reliable. The API SHOULD retry requests.\nAMBIGUITIES: “fast” has no measurable threshold; “reliable” has no measurable threshold; the retry trigger, retry count, and exception conditions are not specified.",
+        "deterministic_passed": true,
+        "critical_passed": true,
+        "failed_checks": []
+      }
+    },
+    {
+      "case_id": "see-release-requirement-force",
+      "split": "holdout",
+      "artifact_family": "requirement and contract",
+      "prompt": "Rewrite this contract text with the engineering-default SEE profile. Preserve each obligation force, the 30-day interval, and the legal-hold exception. Split distinct obligations. Report why the response-time obligation is not measurable, and do not invent a threshold. Source: The service MUST NOT write a token to logs. The service SHOULD delete completed exports after 30 days unless a legal hold is active. Response time MUST be acceptable. Respond with exactly three newline-separated fields: PROFILE: strict|engineering-default; REWRITE: <one line>; AMBIGUITIES: <text or none>.",
+      "case_manifest": {
+        "ambiguity_traps": [
+          "Acceptable does not define a measurable response time.",
+          "SHOULD must not become MUST."
+        ],
+        "artifact_family": "requirement and contract",
+        "conditions_and_exceptions": [
+          "unless a legal hold is active"
+        ],
+        "expected_obligation_force": [
+          "MUST NOT",
+          "SHOULD",
+          "MUST"
+        ],
+        "numbers_units_versions_status_codes": [
+          "30 days"
+        ],
+        "permitted_rewrites": [
+          "Split the three obligations.",
+          "Report the undefined response-time criterion."
+        ],
+        "prohibited_inventions": [
+          "A latency threshold or an exhaustive exception policy."
+        ],
+        "protected_spans": [],
+        "quoted_spans": [],
+        "required_structure": [
+          "One obligation per statement.",
+          "The deletion exception remains attached to deletion."
+        ],
+        "selected_profile": "engineering-default",
+        "source_facts": [
+          "Writing a token to logs is prohibited.",
+          "Deleting completed exports after 30 days is recommended.",
+          "An active legal hold is an exception to deletion.",
+          "The response-time obligation has no measurable threshold."
+        ]
+      },
+      "baseline": {
+        "response": "PROFILE: engineering-default\nREWRITE: 1. The service MUST NOT write tokens to logs. 2. The service SHOULD delete completed exports 30 days after completion unless a legal hold is active. 3. The service MUST have an acceptable response time.\nAMBIGUITIES: “Acceptable response time” is not measurable because no response-time threshold, percentile, workload, measurement point, or evaluation period is defined.",
+        "deterministic_passed": true,
+        "critical_passed": true,
+        "failed_checks": []
+      },
+      "treatment": {
+        "response": "PROFILE: engineering-default\nREWRITE: The service MUST NOT write a token to logs. The service SHOULD delete completed exports after 30 days unless a legal hold is active. The service response time MUST be acceptable.\nAMBIGUITIES: The response-time obligation is not measurable because “acceptable” does not define a threshold or an objective pass-or-fail criterion.",
+        "deterministic_passed": true,
+        "critical_passed": true,
+        "failed_checks": []
+      }
+    }
+  ]
+}

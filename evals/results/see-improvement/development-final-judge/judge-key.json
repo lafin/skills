@@ -1,0 +1,257 @@
+{
+  "pairs": {
+    "19897702b7dfa01b": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 3,
+      "case_id": "see-error-ordinary",
+      "order": "swapped"
+    },
+    "1d3afa8ee838421a": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 2,
+      "case_id": "see-explanation-ordinary",
+      "order": "swapped"
+    },
+    "1e28b359ae32438c": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 3,
+      "case_id": "see-procedure-ordinary",
+      "order": "forward"
+    },
+    "236e4cc4eb87e48c": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 1,
+      "case_id": "see-procedure-ordinary",
+      "order": "swapped"
+    },
+    "256c5b8558f926eb": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 3,
+      "case_id": "see-explanation-ordinary",
+      "order": "swapped"
+    },
+    "2b78b1e11e4dd476": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 3,
+      "case_id": "see-requirement-noop",
+      "order": "forward"
+    },
+    "2def92de9122f20f": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 3,
+      "case_id": "see-explanation-ordinary",
+      "order": "forward"
+    },
+    "409106b77bffcd28": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 2,
+      "case_id": "see-procedure-noop",
+      "order": "forward"
+    },
+    "4245e46f833cebbd": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 3,
+      "case_id": "see-procedure-ordinary",
+      "order": "swapped"
+    },
+    "4862005ad45d22e5": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 3,
+      "case_id": "see-procedure-noop",
+      "order": "forward"
+    },
+    "49c0129a48de12f8": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 3,
+      "case_id": "see-requirement-ordinary",
+      "order": "swapped"
+    },
+    "53d631af79b96d4c": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 3,
+      "case_id": "see-error-ordinary",
+      "order": "forward"
+    },
+    "54363161c822f18e": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 2,
+      "case_id": "see-procedure-ordinary",
+      "order": "swapped"
+    },
+    "54e9b67edee0147c": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "see-requirement-ordinary",
+      "order": "forward"
+    },
+    "57cda676e6dceb68": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 2,
+      "case_id": "see-explanation-ordinary",
+      "order": "forward"
+    },
+    "5f76542cb3fcb24b": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "see-error-ordinary",
+      "order": "forward"
+    },
+    "679cf894fc5a4389": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 1,
+      "case_id": "see-explanation-ordinary",
+      "order": "swapped"
+    },
+    "6bd5581914c8ba3e": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 1,
+      "case_id": "see-requirement-noop",
+      "order": "swapped"
+    },
+    "849b0e1c7ce4380e": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 3,
+      "case_id": "see-requirement-ordinary",
+      "order": "forward"
+    },
+    "86f57c719dad5398": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 2,
+      "case_id": "see-error-ordinary",
+      "order": "swapped"
+    },
+    "9d8b2cbc7e91a369": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 3,
+      "case_id": "see-requirement-noop",
+      "order": "swapped"
+    },
+    "a3ad5b6753ae4b8b": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "see-explanation-ordinary",
+      "order": "forward"
+    },
+    "a92323298bd897c6": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 2,
+      "case_id": "see-procedure-ordinary",
+      "order": "forward"
+    },
+    "a94fc133e5abca88": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 2,
+      "case_id": "see-requirement-ordinary",
+      "order": "swapped"
+    },
+    "a9f0ddcf45565079": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 1,
+      "case_id": "see-error-ordinary",
+      "order": "swapped"
+    },
+    "ac662ad62f5ee040": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 3,
+      "case_id": "see-procedure-noop",
+      "order": "swapped"
+    },
+    "b4beedbeeec0b866": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "see-procedure-noop",
+      "order": "forward"
+    },
+    "b63b423706d9ed20": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 2,
+      "case_id": "see-requirement-ordinary",
+      "order": "forward"
+    },
+    "b915c34a1ac897ab": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 2,
+      "case_id": "see-error-ordinary",
+      "order": "forward"
+    },
+    "c4ecd06dea7fe3c7": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "see-procedure-ordinary",
+      "order": "forward"
+    },
+    "cae9f6a41474991d": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "see-requirement-noop",
+      "order": "forward"
+    },
+    "cc97553674695e76": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 2,
+      "case_id": "see-procedure-noop",
+      "order": "swapped"
+    },
+    "e52cf0e16178b2b7": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 1,
+      "case_id": "see-procedure-noop",
+      "order": "swapped"
+    },
+    "e5491b4de890aea7": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 2,
+      "case_id": "see-requirement-noop",
+      "order": "swapped"
+    },
+    "ebdfeebe86094914": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 1,
+      "case_id": "see-requirement-ordinary",
+      "order": "swapped"
+    },
+    "ffdbf1c8996affc7": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 2,
+      "case_id": "see-requirement-noop",
+      "order": "forward"
+    }
+  },
+  "schema_version": 3
+}

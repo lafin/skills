@@ -1,0 +1,56 @@
+{
+  "frozen_at": "2026-09-11T16:48:13Z",
+  "supersedes": "remediation-freeze-v15.json",
+  "prior_freeze_sha256": "648203546c35caf503508414f49be277aa4c6bb76c44d83487c7e462e7375833",
+  "reason": "The V15 development and rejected V14 holdout captures exposed a repeated candidate defect: the exact profile value strict gained a semicolon. V16 makes task-declared exact field values literal tokens and broadens one development ambiguity anchor from the source word 'thing' to the faithful paraphrase 'item'. A focused 9-artifact regression smoke passed before freeze.",
+  "rejected_v15_evidence": {
+    "development": {
+      "baseline": "remediation-v15-development-behavior-baseline",
+      "treatment": "remediation-v15-development-behavior-treatment",
+      "baseline_passed": 28,
+      "treatment_passed": 40,
+      "artifacts": 42,
+      "oracle_false_positive_artifacts": 1,
+      "candidate_defect_artifacts": 1
+    },
+    "holdout": {
+      "baseline": "remediation-v15-independent-behavior-baseline",
+      "treatment": "remediation-v15-independent-behavior-treatment",
+      "baseline_passed": 33,
+      "treatment_passed": 34,
+      "artifacts": 36,
+      "candidate_defect_artifacts": 2,
+      "note": "This holdout was invalidated by the candidate change and is not final evidence."
+    }
+  },
+  "development_smoke": {
+    "run": "remediation-v16-regression-smoke-treatment",
+    "passed": 9,
+    "artifacts": 9,
+    "note": "Supporting pre-freeze smoke only; final development runs bind the frozen evaluator and candidate."
+  },
+  "response_blind_holdout_audit": {
+    "independent_author": "IndependentBehaviorHoldoutV16",
+    "independent_auditor": "HoldoutV16ScoutAudit",
+    "candidate_or_prior_evidence_visible_to_author_or_auditor": false,
+    "corrections_before_freeze": [
+      "Matched Release operator capitalization to the source.",
+      "Added non-none and both-actor checks for two adversarial ambiguity fields."
+    ],
+    "final_recheck": "All 12 schemas, profiles, field paths, exact spans, no-op anchors, ambiguity anchors, and boundary probes passed. No deterministic blocker remained.",
+    "semantic_only_disposition": "Obligation equivalence, typed relationships, causality, ambiguity meaning, and safety meaning remain in judge_criteria."
+  },
+  "sha256": {
+    "evals/run.py": "be310d7d73869c11412724d66d66105850b22cd3210e4c753f1cbc4aa443cca0",
+    "evals/grade.py": "dd04a7a7d85d129245f1885bac5ff3845b3f3adb292b90394570f08b5827fe72",
+    "tests/test_evaluation_harness.py": "52b8028e972ed34ec2d3d2ff78390ce13cfe65ca41c756423acd270aaf4b6680",
+    "simplified-engineering-english/SKILL.md": "78cf0580674756ea8d8ae3c356df09f3e18c7a1f44c7853ed47bfd12e22dfa20",
+    "simplified-engineering-english/references/rules.md": "bebe88700dded668c6610ec26c4c0cebdf3b56f47c3364455ec80466ca00ea7d",
+    "simplified-engineering-english/references/dictionary.md": "93ca70b1fc419005ab110c4f6e52270a3b2dabe44fb46ec086c37af245aecdc0",
+    "evals/see-rubric.json": "e11626411fa94b26dfaafdd8d207bf3038ec8692f748d167527d03fe5f708e0e",
+    "evals/cases/see-behavior-development.jsonl": "545c66ddbf89c53b3656cf80fc7a56d7de7f37ab6c77cffffc53bf8cc4c75652",
+    "evals/cases/see-behavior-independent-holdout-v16.jsonl": "7db0c0f1b69c95652cb214b97ced08dc526bd2539926e8a27566717ace1c86fe",
+    "evals/cases/see-routing-development.jsonl": "7aec2346a04c2363f73230e7308332bc663d148390925ea8cf3ffc0f0820ada7",
+    "evals/cases/see-routing-independent-holdout.jsonl": "19b95bfc5f067ea8e71bd8f1106aef96a837993a271621589fc23da063906437f"
+  }
+}

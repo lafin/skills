@@ -1,0 +1,43 @@
+{
+  "all_passed": false,
+  "artifacts": 24,
+  "condition": "treatment",
+  "critical_passed": 20,
+  "deterministic_grades": "grades.jsonl",
+  "efficacy_claim": null,
+  "input_binding": {
+    "artifacts": {
+      "artifacts/see-routing-development-see--evaluation-negative/1.json": "9fdc37df7c50150a5e595a2a8188cf30b597f983b0e5df1d0bf1b2abccd23e46",
+      "artifacts/see-routing-development-see--evaluation-negative/2.json": "b02dbac40d63011f95b9e216ea0d4b9081d1b6ed61d58ec2a276a102b1b6f146",
+      "artifacts/see-routing-development-see--evaluation-negative/3.json": "a95f0fb8e8e26d8556eafe878b89c0979dbe6ae25dd094556ac8f302b415227c",
+      "artifacts/see-routing-development-see--evaluation-positive/1.json": "bbda1b40b48cf4024e5e5588bd664e14822ee97ac897de8882aa4555e499ca40",
+      "artifacts/see-routing-development-see--evaluation-positive/2.json": "75779709eed27be4281486f246cc9445a9d03a27be1943a11fcfc1134eff0709",
+      "artifacts/see-routing-development-see--evaluation-positive/3.json": "9b0e9a4fd6c61c1f93037332e3cc1d40404ed4e4a05e1c3ec0fd46b2260fc124",
+      "artifacts/see-routing-development-see--leancode-negative/1.json": "9f6bf0232a58e22a53f71cb44eb4c0b3f39cafd2ceaac2157e8a16c2e6c3028e",
+      "artifacts/see-routing-development-see--leancode-negative/2.json": "1060a671b83cdb2ffbb05b3280cccc8a91a51e6f522f1d73bd13d91a0aa6625e",
+      "artifacts/see-routing-development-see--leancode-negative/3.json": "bbc800ca0c16220862c7c19cf71edf86a7fa99614d966bee0def961b397fccb0",
+      "artifacts/see-routing-development-see--leancode-positive/1.json": "1fa7aefb4f421c28c6fe7e2ca96f93fdd0619dd2dcce7e77c93459ad1f6ca921",
+      "artifacts/see-routing-development-see--leancode-positive/2.json": "bc78f8cd4beb5cfdc81d91071c45863c968c52dd4cee696530dc5e278a87237a",
+      "artifacts/see-routing-development-see--leancode-positive/3.json": "090bf7e310ed57d1eab776e0a35a8fa638edfc3358cce7808b21405628ddb4fb",
+      "artifacts/see-routing-development-see--lossless-negative/1.json": "3e648d43ae7aa45a35c08ed340e90e5c71dd359e33bd25cf3b8000558ddba00a",
+      "artifacts/see-routing-development-see--lossless-negative/2.json": "6a070681c6a70ed7400323d17d4ca7f2bc8657d74e5ea47b8c1cdecd72bda4af",
+      "artifacts/see-routing-development-see--lossless-negative/3.json": "2d061c7a6cb4ea6ed92fd56479f85591007373d844770e839ec7864a2c47c880",
+      "artifacts/see-routing-development-see--lossless-positive/1.json": "c077329953e0f156c04cf78e48b8b2c8f2cf0535362fe8594f853522216105ee",
+      "artifacts/see-routing-development-see--lossless-positive/2.json": "fca50e0abf1ad229cfcb4a11aaa6f86a63cb95e65b03d31770d332ebafe180f9",
+      "artifacts/see-routing-development-see--lossless-positive/3.json": "e8f7a08bc4e23de8417cd3765ed35a07928072c07df65f226e4d686594c2703b",
+      "artifacts/see-routing-development-see--tool-design-negative/1.json": "41d3b818af330d3b0b8fce81aa16377a10e09b525ffcf5e8704a72bf2baba8d2",
+      "artifacts/see-routing-development-see--tool-design-negative/2.json": "aa2242630a24754218183f295385a0df61dad495557bcde8be84cb3e8f74e9f5",
+      "artifacts/see-routing-development-see--tool-design-negative/3.json": "2dadfb223dc8fd318d7a92d79226a537bfa26882ca2980c588dad0acb7ac51c1",
+      "artifacts/see-routing-development-see--tool-design-positive/1.json": "f432607b4a99aba41abd8b4ebd40d8e32de246308967bf9f3c81717a1a1171db",
+      "artifacts/see-routing-development-see--tool-design-positive/2.json": "02591aa9bd92955fbffbb4840039b332c15cf43e94edfe2660f06f382ba113da",
+      "artifacts/see-routing-development-see--tool-design-positive/3.json": "c21d255feeea9d6a1b8f616f7c38ac619043dd28ec99ece61a8691ace1f34e93"
+    },
+    "case_snapshot_sha256": "129ac70575c31a7ba6714c927d187432a9d4d768970570a86599f772cdbd05bc",
+    "grader_sha256": "3fdfc89e015a0e2cf61bf921c3b82958dae02d9f2c29bd20a8cc109c6b7f536f",
+    "manifest_sha256": "638e6ba97cc8beb412760f783abf0b61348e50ae9e13e6e409678c17411448b5"
+  },
+  "passed": 20,
+  "reason": "A single condition cannot support an efficacy claim; pair it with the other condition.",
+  "run_id": "release-routing-development-treatment",
+  "schema_version": 3
+}

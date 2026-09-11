@@ -1,0 +1,10 @@
+{
+  "deterministic_grade_summaries": [
+    "evals/results/see-improvement/remediation-v11-independent-behavior-baseline/grade-summary.json",
+    "evals/results/see-improvement/remediation-v11-independent-behavior-treatment/grade-summary.json"
+  ],
+  "efficacy_claim": null,
+  "payloads": 72,
+  "schema_version": 4,
+  "swapped_pairs": 36
+}

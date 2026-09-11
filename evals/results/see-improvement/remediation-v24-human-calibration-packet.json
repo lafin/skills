@@ -1,0 +1,1035 @@
+{
+  "blind_order": "attempt 1, forward order only",
+  "instructions": [
+    "Score every dimension for both candidates from the task, criteria, and response only.",
+    "Name source evidence for each critical mutation or consequential difference.",
+    "Record A, B, or tie; confidence below 0.75 requires adjudication.",
+    "Do not open the separate calibration key until all 26 reviews are locked."
+  ],
+  "minimum_confidence": 0.75,
+  "pairs": [
+    {
+      "candidate_a": {
+        "id": "4a2857a328e1ef5d",
+        "response": "PROFILE: engineering-default\nREWRITE: Diagnose access problems by authenticating the account, verifying its authorization, and inspecting its status with `authctl inspect --user alice`.\nAMBIGUITIES: The source does not define the criteria for determining that the account \u201clooks good.\u201d"
+      },
+      "candidate_b": {
+        "id": "cb1215930ef54023",
+        "response": "PROFILE: engineering-default\nREWRITE: To diagnose access problems, do these steps: 1. Authenticate the account. 2. Authorize the account. 3. Check that the account looks good. 4. Run `authctl inspect --user alice`.\nAMBIGUITIES: \u201cAuthorize the account\u201d can mean grant access or verify existing access. \u201cLooks good\u201d does not define an objective pass criterion."
+      },
+      "criteria": [
+        "Score technical fidelity from 0 to 4; any invented result is a critical issue.",
+        "Score residual consequential ambiguity from 0 to 4.",
+        "Score actionability, readability, profile compliance, unnecessary edits, and source traceability separately from 0 to 4."
+      ],
+      "pair_id": "18b65daf71146f5f",
+      "response_contract": {
+        "critical_issue": "boolean",
+        "rationale": "string",
+        "winner": "A | B | tie"
+      },
+      "review": {
+        "confidence": null,
+        "critical_mutations": null,
+        "rationale": null,
+        "scores": {
+          "actionability_or_verifiability": null,
+          "readability_and_scanability": null,
+          "residual_consequential_ambiguity": null,
+          "selected_profile_compliance": null,
+          "source_traceability": null,
+          "technical_fidelity": null,
+          "unnecessary_edit_rate": null
+        },
+        "source_evidence": null,
+        "winner": null
+      },
+      "split": "development",
+      "task": "Rewrite this engineering procedure with the engineering-default SEE profile. Source: To diagnose access problems, authenticate the account, authorize it, and check that it looks good. Run `authctl inspect --user alice`. Do not invent an expected result that the source does not provide. Respond with exactly three newline-separated fields: PROFILE: strict|engineering-default; REWRITE: <one line>; AMBIGUITIES: <text or none>."
+    },
+    {
+      "candidate_a": {
+        "id": "1ab0125f2fe2c446",
+        "response": "PROFILE: strict\nREWRITE: Prerequisite: Read access to staging. Run `diag --read-only` in staging. Before escalation begins, record the exit code, standard output, and timestamp in the incident ticket.\nAMBIGUITIES: none"
+      },
+      "candidate_b": {
+        "id": "40d9b378cb622299",
+        "response": "PROFILE: strict\nREWRITE: Prerequisite: Read access to staging. Run `diag --read-only` in staging. Before escalation begins, record the exit code, standard output, and timestamp in the incident ticket.\nAMBIGUITIES: none"
+      },
+      "criteria": [
+        "Score technical fidelity and unnecessary-edit rate from 0 to 4.",
+        "Treat any unsupported edit as a critical issue.",
+        "Score strict-profile compliance and readability from 0 to 4."
+      ],
+      "pair_id": "5d0897b873c8b4b5",
+      "response_contract": {
+        "critical_issue": "boolean",
+        "rationale": "string",
+        "winner": "A | B | tie"
+      },
+      "review": {
+        "confidence": null,
+        "critical_mutations": null,
+        "rationale": null,
+        "scores": {
+          "actionability_or_verifiability": null,
+          "readability_and_scanability": null,
+          "residual_consequential_ambiguity": null,
+          "selected_profile_compliance": null,
+          "source_traceability": null,
+          "technical_fidelity": null,
+          "unnecessary_edit_rate": null
+        },
+        "source_evidence": null,
+        "winner": null
+      },
+      "split": "development",
+      "task": "Review this already precise read-only diagnostic procedure under the strict SEE profile. The source has no consequential defect. Return it exactly and report AMBIGUITIES: none. Source: Prerequisite: Read access to staging. Run `diag --read-only` in staging. Before escalation begins, record the exit code, standard output, and timestamp in the incident ticket. Respond with exactly three newline-separated fields: PROFILE: strict|engineering-default; REWRITE: <one line>; AMBIGUITIES: <text or none>."
+    },
+    {
+      "candidate_a": {
+        "id": "6176ea579d0e02ee",
+        "response": "PROFILE: engineering-default\nREWRITE: The API MUST be fast. The API MUST be reliable. The API SHOULD retry requests.\nAMBIGUITIES: \u201cFast\u201d and \u201creliable\u201d lack measurable criteria; retry triggers, limits, timing, and applicable requests are unspecified."
+      },
+      "candidate_b": {
+        "id": "ceaf1d871cf02f3f",
+        "response": "PROFILE: engineering-default\nREWRITE: The API MUST be fast. The API MUST be reliable. The API SHOULD retry requests.\nAMBIGUITIES: \u201cfast\u201d and \u201creliable\u201d have no measurable limits, so implementations can use different thresholds and produce different compliance verdicts."
+      },
+      "criteria": [
+        "Score technical fidelity from 0 to 4; changed MUST or SHOULD force is critical.",
+        "Score ambiguity reduction and objective verifiability from 0 to 4.",
+        "Score readability, profile compliance, unnecessary edits, and source traceability from 0 to 4."
+      ],
+      "pair_id": "64d87aa8c37b57f0",
+      "response_contract": {
+        "critical_issue": "boolean",
+        "rationale": "string",
+        "winner": "A | B | tie"
+      },
+      "review": {
+        "confidence": null,
+        "critical_mutations": null,
+        "rationale": null,
+        "scores": {
+          "actionability_or_verifiability": null,
+          "readability_and_scanability": null,
+          "residual_consequential_ambiguity": null,
+          "selected_profile_compliance": null,
+          "source_traceability": null,
+          "technical_fidelity": null,
+          "unnecessary_edit_rate": null
+        },
+        "source_evidence": null,
+        "winner": null
+      },
+      "split": "development",
+      "task": "Rewrite this contract text with the engineering-default SEE profile. The contract declares RFC 2119 and RFC 8174 semantics. Use the declaration only to interpret the keywords; do not repeat it in the rewrite. Source: The API MUST be fast and reliable, and SHOULD retry requests. Do not invent thresholds, retry counts, or exception conditions. Respond with exactly three newline-separated fields: PROFILE: strict|engineering-default; REWRITE: <one line>; AMBIGUITIES: <text or none>."
+    },
+    {
+      "candidate_a": {
+        "id": "16164d898a171f7e",
+        "response": "PROFILE: strict\nREWRITE: This contract uses BCP 14. When the gateway determines that a request body exceeds 1 MiB, the gateway MUST complete the HTTP 413 response within 50 ms of that determination.\nAMBIGUITIES: none"
+      },
+      "candidate_b": {
+        "id": "1be59d172a99226a",
+        "response": "PROFILE: strict\nREWRITE: This contract uses BCP 14. When the gateway determines that a request body exceeds 1 MiB, the gateway MUST complete the HTTP 413 response within 50 ms of that determination.\nAMBIGUITIES: none"
+      },
+      "criteria": [
+        "Score technical fidelity and unnecessary-edit rate from 0 to 4.",
+        "Treat any changed condition, value, or obligation as critical.",
+        "Score strict-profile compliance and readability from 0 to 4."
+      ],
+      "pair_id": "d83b3a138840ffb7",
+      "response_contract": {
+        "critical_issue": "boolean",
+        "rationale": "string",
+        "winner": "A | B | tie"
+      },
+      "review": {
+        "confidence": null,
+        "critical_mutations": null,
+        "rationale": null,
+        "scores": {
+          "actionability_or_verifiability": null,
+          "readability_and_scanability": null,
+          "residual_consequential_ambiguity": null,
+          "selected_profile_compliance": null,
+          "source_traceability": null,
+          "technical_fidelity": null,
+          "unnecessary_edit_rate": null
+        },
+        "source_evidence": null,
+        "winner": null
+      },
+      "split": "development",
+      "task": "Review this already precise atomic requirement under the strict SEE profile. The source has no consequential defect. Return it exactly and report AMBIGUITIES: none. Source: This contract uses BCP 14. When the gateway determines that a request body exceeds 1 MiB, the gateway MUST complete the HTTP 413 response within 50 ms of that determination. Respond with exactly three newline-separated fields: PROFILE: strict|engineering-default; REWRITE: <one line>; AMBIGUITIES: <text or none>."
+    },
+    {
+      "candidate_a": {
+        "id": "903694569bc4b7bb",
+        "response": "PROFILE: engineering-default\nREWRITE: The `timeout` parameter is set to `30s`. A fault causes an error, resulting in failure. At 500 requests per second, mean latency is 40 ms and p99 latency is 120 ms. The worker caches jobs, which is claimed to improve service performance; the service later refers to these jobs as tasks.\nAMBIGUITIES: \u201cFaster\u201d is undefined because no baseline or performance metric is specified; \u201cjobs\u201d and \u201ctasks\u201d may refer to the same entity, but the terminology drifts without clarification."
+      },
+      "candidate_b": {
+        "id": "f6624626ad34eafe",
+        "response": "PROFILE: engineering-default\nREWRITE: Currently, the `timeout` parameter receives the `30s` argument. A fault produces an error. The error surfaces as a failure. At 500 requests per second, mean latency is 40 ms, while p99 latency is 120 ms. The worker caches jobs because this makes the service faster. The service later calls these jobs tasks.\nAMBIGUITIES: \u201cFaster\u201d can mean lower latency or higher throughput, which produces different verification criteria. \u201cJobs\u201d and \u201ctasks\u201d can identify the same entities or different entities, which changes what the worker caches and what the service later calls."
+      },
+      "criteria": [
+        "Score technical fidelity from 0 to 4; loss of either latency statistic or term distinction is critical.",
+        "Score ambiguity reduction and readability from 0 to 4.",
+        "Score profile compliance, unnecessary edits, and source traceability from 0 to 4."
+      ],
+      "pair_id": "20be553b636f9b43",
+      "response_contract": {
+        "critical_issue": "boolean",
+        "rationale": "string",
+        "winner": "A | B | tie"
+      },
+      "review": {
+        "confidence": null,
+        "critical_mutations": null,
+        "rationale": null,
+        "scores": {
+          "actionability_or_verifiability": null,
+          "readability_and_scanability": null,
+          "residual_consequential_ambiguity": null,
+          "selected_profile_compliance": null,
+          "source_traceability": null,
+          "technical_fidelity": null,
+          "unnecessary_edit_rate": null
+        },
+        "source_evidence": null,
+        "winner": null
+      },
+      "split": "development",
+      "task": "Rewrite this explanation with the engineering-default SEE profile. Source: Currently, the `timeout` parameter receives the `30s` argument. A fault produces an error that surfaces as a failure. Mean latency is 40 ms, while p99 latency is 120 ms at 500 requests per second. The worker caches jobs because this makes the service faster, and the service later calls them tasks. Preserve both latency statistics for their distinct purposes. Report both the undefined faster claim and the job/task terminology drift. Respond with exactly three newline-separated fields: PROFILE: strict|engineering-default; REWRITE: <one line>; AMBIGUITIES: <text or none>."
+    },
+    {
+      "candidate_a": {
+        "id": "206afad9110c7722",
+        "response": "PROFILE: engineering-default\nREWRITE: An error occurred. Check the item, then try again.\nAMBIGUITIES: The error and the item to check are unspecified."
+      },
+      "candidate_b": {
+        "id": "6cd3a1c388d1b52d",
+        "response": "PROFILE: engineering-default\nREWRITE: An error occurred. The cause is unknown. Check the thing, and then try again.\nAMBIGUITIES: \u201cthe thing\u201d could refer to an input or a resource, so the required check is unclear."
+      },
+      "criteria": [
+        "Score technical fidelity from 0 to 4; any invented operation, cause, or resource is critical.",
+        "Score residual ambiguity and actionability from 0 to 4 while recognizing the source limit.",
+        "Score readability, profile compliance, unnecessary edits, and source traceability from 0 to 4."
+      ],
+      "pair_id": "e00cd1c1f30cbe19",
+      "response_contract": {
+        "critical_issue": "boolean",
+        "rationale": "string",
+        "winner": "A | B | tie"
+      },
+      "review": {
+        "confidence": null,
+        "critical_mutations": null,
+        "rationale": null,
+        "scores": {
+          "actionability_or_verifiability": null,
+          "readability_and_scanability": null,
+          "residual_consequential_ambiguity": null,
+          "selected_profile_compliance": null,
+          "source_traceability": null,
+          "technical_fidelity": null,
+          "unnecessary_edit_rate": null
+        },
+        "source_evidence": null,
+        "winner": null
+      },
+      "split": "development",
+      "task": "Rewrite this user-facing error with the engineering-default SEE profile. Source: Something went wrong. Check the thing and try again. Retain the instruction to try again. Do not invent the operation, input, cause, or recovery outcome. Respond with exactly three newline-separated fields: PROFILE: strict|engineering-default; REWRITE: <one line>; AMBIGUITIES: <text or none>."
+    },
+    {
+      "candidate_a": {
+        "id": "d2d5872d114943ff",
+        "response": "PROFILE: engineering-default\nREWRITE: For Nimbus 8.1 integrators, gateway G7 writes each envelope to queue Q2. Benchmark memo KM-6 states that worker W4 may batch envelopes for 12 seconds and characterizes throughput as \u201cmassively improved\u201d; this throughput claim cannot be evaluated because the memo provides no baseline.\nAMBIGUITIES: KM-6 does not establish whether or under what conditions W4 batches envelopes for 12 seconds."
+      },
+      "candidate_b": {
+        "id": "9d5908ba32b3b214",
+        "response": "PROFILE: engineering-default\nREWRITE: For Nimbus 8.1 integrators, gateway G7 writes each envelope to queue Q2. Benchmark memo KM-6 states that worker W4 may batch envelopes for 12 s. The memo describes throughput as \"massively improved\". This claim cannot be evaluated because the memo gives no baseline.\nAMBIGUITIES: none"
+      },
+      "criteria": [
+        "Preserve the G7-to-Q2 relation and W4 batching role.",
+        "Preserve the may qualifier, 12 s duration, KM-6 provenance, and exact quotation.",
+        "Expose the missing baseline as an evidence limitation without inventing ambiguity.",
+        "Do not promote an attributed claim into a system fact."
+      ],
+      "pair_id": "f4d534f110e7d1cc",
+      "response_contract": {
+        "critical_issue": "boolean",
+        "rationale": "string",
+        "winner": "A | B | tie"
+      },
+      "review": {
+        "confidence": null,
+        "critical_mutations": null,
+        "rationale": null,
+        "scores": {
+          "actionability_or_verifiability": null,
+          "readability_and_scanability": null,
+          "residual_consequential_ambiguity": null,
+          "selected_profile_compliance": null,
+          "source_traceability": null,
+          "technical_fidelity": null,
+          "unnecessary_edit_rate": null
+        },
+        "source_evidence": null,
+        "winner": null
+      },
+      "split": "development",
+      "task": "Rewrite this reference explanation with the engineering-default SEE profile. Keep product and audience scope near the start. Distinguish system behavior from the benchmark memo claim, preserve MAY-level uncertainty, and report why the throughput claim cannot be evaluated. Do not invent a baseline or causal explanation. Source: For Nimbus 8.1 integrators, gateway G7 writes each envelope to queue Q2. According to benchmark memo KM-6, worker W4 may batch envelopes for 12 s. The memo describes throughput as \"massively improved\" but gives no baseline. Output exactly three lines, each containing one field, in this order: PROFILE: <strict or engineering-default>; REWRITE: <one line>; AMBIGUITIES: <one line or none>."
+    },
+    {
+      "candidate_a": {
+        "id": "91eb775ead009c7e",
+        "response": "PROFILE: engineering-default\nREWRITE: On SableDock 7.4, record the manifold pressure. When the manifold pressure reaches 40 kPa, close valve V-19.\nAMBIGUITIES: none"
+      },
+      "candidate_b": {
+        "id": "ce42d2bae7a69749",
+        "response": "PROFILE: engineering-default\nREWRITE: On SableDock 7.4, record the manifold pressure. When the pressure reaches 40 kPa, close valve V-19.\nAMBIGUITIES: none"
+      },
+      "criteria": [
+        "The local reference has one compatible antecedent.",
+        "Do not reward hypothetical ambiguities that the source does not support.",
+        "Preserve the condition before or explicitly attached to the close action."
+      ],
+      "pair_id": "69f08e3c0277f846",
+      "response_contract": {
+        "critical_issue": "boolean",
+        "rationale": "string",
+        "winner": "A | B | tie"
+      },
+      "review": {
+        "confidence": null,
+        "critical_mutations": null,
+        "rationale": null,
+        "scores": {
+          "actionability_or_verifiability": null,
+          "readability_and_scanability": null,
+          "residual_consequential_ambiguity": null,
+          "selected_profile_compliance": null,
+          "source_traceability": null,
+          "technical_fidelity": null,
+          "unnecessary_edit_rate": null
+        },
+        "source_evidence": null,
+        "winner": null
+      },
+      "split": "development",
+      "task": "Rewrite this explanation with the engineering-default SEE profile. The source has one grammatically and technically compatible antecedent for \"the pressure\" and no consequential ambiguity. Do not invent another pressure. Source: On SableDock 7.4, record the manifold pressure. When the pressure reaches 40 kPa, close valve V-19. Respond with exactly three newline-separated fields: PROFILE: strict|engineering-default; REWRITE: <one line>; AMBIGUITIES: <text or none>."
+    },
+    {
+      "candidate_a": {
+        "id": "5655425b3411acb8",
+        "response": "PROFILE: engineering-default\nREWRITE: When the Orin gateway receives a Bex request, it SHALL return code 247. The request carries a client nonce. The gateway copies that nonce into the response header X-Orin-Nonce.\nAMBIGUITIES: none"
+      },
+      "candidate_b": {
+        "id": "639ce0c7b1233786",
+        "response": "PROFILE: engineering-default\nREWRITE: SHALL means mandatory. When the Orin gateway receives a Bex request, it SHALL return code 247. The request carries a client nonce. The gateway copies that nonce into response header X-Orin-Nonce.\nAMBIGUITIES: none"
+      },
+      "criteria": [
+        "A declared keyword convention does not convert adjacent descriptive facts into obligations.",
+        "Reject any added obligation keyword on the nonce-copy relation.",
+        "Preserve request, gateway, nonce, and header roles."
+      ],
+      "pair_id": "44769949f50b2c8c",
+      "response_contract": {
+        "critical_issue": "boolean",
+        "rationale": "string",
+        "winner": "A | B | tie"
+      },
+      "review": {
+        "confidence": null,
+        "critical_mutations": null,
+        "rationale": null,
+        "scores": {
+          "actionability_or_verifiability": null,
+          "readability_and_scanability": null,
+          "residual_consequential_ambiguity": null,
+          "selected_profile_compliance": null,
+          "source_traceability": null,
+          "technical_fidelity": null,
+          "unnecessary_edit_rate": null
+        },
+        "source_evidence": null,
+        "winner": null
+      },
+      "split": "development",
+      "task": "Rewrite this interface contract with the engineering-default SEE profile. The contract declares that SHALL means mandatory. Preserve the SHALL response obligation, but keep the separate nonce-copy statement as a descriptive fact. Do not add an obligation keyword to that fact. Source: SHALL means mandatory. When the Orin gateway receives a Bex request, it SHALL return code 247. The request carries a client nonce. The gateway copies that nonce into response header X-Orin-Nonce. Respond with exactly three newline-separated fields: PROFILE: strict|engineering-default; REWRITE: <one line>; AMBIGUITIES: <text or none>."
+    },
+    {
+      "candidate_a": {
+        "id": "f89d581dda4c7bed",
+        "response": "PROFILE: engineering-default\nREWRITE: Analyst Ivo reported that request header X-Maple-Key: [REDACTED-AUTHORIZED] was present. Security authorizes replacing only the header value with [REDACTED-AUTHORIZED].\nAMBIGUITIES: none"
+      },
+      "candidate_b": {
+        "id": "d08b9ef968679135",
+        "response": "PROFILE: engineering-default\nREWRITE: Analyst Ivo reported that request header X-Maple-Key: [REDACTED-AUTHORIZED] was present. Security authorizes replacing only the header value with [REDACTED-AUTHORIZED].\nAMBIGUITIES: none"
+      },
+      "criteria": [
+        "Authorization tense and exclusive scope are security-consequential.",
+        "Only the secret value may change.",
+        "Reject a historical authorization or broader redaction."
+      ],
+      "pair_id": "1a026e7f2795d0f9",
+      "response_contract": {
+        "critical_issue": "boolean",
+        "rationale": "string",
+        "winner": "A | B | tie"
+      },
+      "review": {
+        "confidence": null,
+        "critical_mutations": null,
+        "rationale": null,
+        "scores": {
+          "actionability_or_verifiability": null,
+          "readability_and_scanability": null,
+          "residual_consequential_ambiguity": null,
+          "selected_profile_compliance": null,
+          "source_traceability": null,
+          "technical_fidelity": null,
+          "unnecessary_edit_rate": null
+        },
+        "source_evidence": null,
+        "winner": null
+      },
+      "split": "development",
+      "task": "Rewrite this security incident note with the engineering-default SEE profile. Redact only the secret value. Preserve this authorization sentence byte-for-byte: Security authorizes replacing only the header value with [REDACTED-AUTHORIZED]. Source: Analyst Ivo reported that request header X-Maple-Key: 4cf9-lark-ember was present. Security authorizes replacing only the header value with [REDACTED-AUTHORIZED]. Respond with exactly three newline-separated fields: PROFILE: strict|engineering-default; REWRITE: <one line>; AMBIGUITIES: <text or none>."
+    },
+    {
+      "candidate_a": {
+        "id": "28d84ab69770a500",
+        "response": "PROFILE: strict\nREWRITE: For the KestrelForge cleanup, run `kestrel-clean --scope azure` only after verifying that `azure` is the intended scope and that every expired object there may be deleted; the source provides no rollback or recovery step.\nAMBIGUITIES: Whether the command supports a preview, requests confirmation, or permits recovery is unspecified."
+      },
+      "candidate_b": {
+        "id": "75d8e3050e2ec4a0",
+        "response": "PROFILE: strict\nREWRITE: For the KestrelForge cleanup, `kestrel-clean --scope azure` deletes every expired object in scope `azure`. The source provides no rollback or recovery step. Run `kestrel-clean --scope azure`.\nAMBIGUITIES: none"
+      },
+      "criteria": [
+        "Preserve product-name capitalization and the exact output token.",
+        "Make the destructive scope clear without inventing recovery."
+      ],
+      "pair_id": "f3771af70e9054f7",
+      "response_contract": {
+        "critical_issue": "boolean",
+        "rationale": "string",
+        "winner": "A | B | tie"
+      },
+      "review": {
+        "confidence": null,
+        "critical_mutations": null,
+        "rationale": null,
+        "scores": {
+          "actionability_or_verifiability": null,
+          "readability_and_scanability": null,
+          "residual_consequential_ambiguity": null,
+          "selected_profile_compliance": null,
+          "source_traceability": null,
+          "technical_fidelity": null,
+          "unnecessary_edit_rate": null
+        },
+        "source_evidence": null,
+        "winner": null
+      },
+      "split": "development",
+      "task": "Rewrite this destructive procedure with the strict SEE profile. Preserve the product name KestrelForge with its capitalization, even though the command contains a lowercase stem. Use the exact profile token strict without added punctuation. Source: For the KestrelForge cleanup, run `kestrel-clean --scope azure`. The command deletes every expired object in scope `azure`. The source provides no rollback or recovery step. Respond with exactly three newline-separated fields: PROFILE: strict; REWRITE: <one line>; AMBIGUITIES: <text or none>."
+    },
+    {
+      "candidate_a": {
+        "id": "ec649837c354add4",
+        "response": "PROFILE: engineering-default\nREWRITE: Compressor CT-7 has one gauge, which shows 31 kPa; the operator records the gauge value.\nAMBIGUITIES: none"
+      },
+      "candidate_b": {
+        "id": "5d56e662d224e08e",
+        "response": "PROFILE: engineering-default\nREWRITE: Compressor CT-7 has one gauge. The gauge shows 31 kPa. The operator records the value.\nAMBIGUITIES: none"
+      },
+      "criteria": [
+        "A definite noun with one compatible local referent is not an ambiguity.",
+        "Preserve the gauge reading as a fact, not an obligation."
+      ],
+      "pair_id": "3e3c457a30056658",
+      "response_contract": {
+        "critical_issue": "boolean",
+        "rationale": "string",
+        "winner": "A | B | tie"
+      },
+      "review": {
+        "confidence": null,
+        "critical_mutations": null,
+        "rationale": null,
+        "scores": {
+          "actionability_or_verifiability": null,
+          "readability_and_scanability": null,
+          "residual_consequential_ambiguity": null,
+          "selected_profile_compliance": null,
+          "source_traceability": null,
+          "technical_fidelity": null,
+          "unnecessary_edit_rate": null
+        },
+        "source_evidence": null,
+        "winner": null
+      },
+      "split": "development",
+      "task": "Rewrite this operating note with the engineering-default SEE profile. The note names one gauge, so do not invent another referent. Source: Compressor CT-7 has one gauge. The gauge shows 31 kPa. The operator records the value. Respond with exactly three newline-separated fields: PROFILE: strict|engineering-default; REWRITE: <one line>; AMBIGUITIES: <text or none>."
+    },
+    {
+      "candidate_a": {
+        "id": "a1c19ad30cbbc826",
+        "response": "PROFILE: strict\nREWRITE: Telemetry suggests that Orion queue contention caused the 22 ms delay; no trace was collected.\nAMBIGUITIES: none"
+      },
+      "candidate_b": {
+        "id": "1033bf41a59821e1",
+        "response": "PROFILE: strict\nREWRITE: Telemetry suggests that Orion queue contention caused the 22 ms delay. No trace was collected.\nAMBIGUITIES: none"
+      },
+      "criteria": [
+        "Uncertainty and missing evidence remain facts; they are not automatically ambiguity.",
+        "Reject confirmed causality or an invented trace."
+      ],
+      "pair_id": "f589814d88760238",
+      "response_contract": {
+        "critical_issue": "boolean",
+        "rationale": "string",
+        "winner": "A | B | tie"
+      },
+      "review": {
+        "confidence": null,
+        "critical_mutations": null,
+        "rationale": null,
+        "scores": {
+          "actionability_or_verifiability": null,
+          "readability_and_scanability": null,
+          "residual_consequential_ambiguity": null,
+          "selected_profile_compliance": null,
+          "source_traceability": null,
+          "technical_fidelity": null,
+          "unnecessary_edit_rate": null
+        },
+        "source_evidence": null,
+        "winner": null
+      },
+      "split": "development",
+      "task": "Rewrite this explanation with the strict SEE profile. Preserve the tentative causal claim and the missing evidence as facts. The source has one interpretation; do not relabel the evidence limitation as an ambiguity. Source: Telemetry suggests that Orion queue contention caused the 22 ms delay. No trace was collected. Respond with exactly three newline-separated fields: PROFILE: strict; REWRITE: <one line>; AMBIGUITIES: none."
+    },
+    {
+      "candidate_a": {
+        "id": "649ff2f7b2ade77e",
+        "response": "PROFILE: strict\nREWRITE: Recovery availability is not specified. Run `onyx purge --scope delta` to delete every expired record.\nAMBIGUITIES: Recovery availability after deletion is unspecified."
+      },
+      "candidate_b": {
+        "id": "b8049029253f4d71",
+        "response": "PROFILE: strict\nREWRITE: Recovery availability is not specified. Run `onyx purge --scope delta` to delete every expired record.\nAMBIGUITIES: The source does not state whether deleted records can be recovered. Recovery can be available or unavailable, which changes the rollback options."
+      },
+      "criteria": [
+        "The recovery status is unknown, not proven impossible.",
+        "The reader sees the gap before the destructive action."
+      ],
+      "pair_id": "41d6add96d634575",
+      "response_contract": {
+        "critical_issue": "boolean",
+        "rationale": "string",
+        "winner": "A | B | tie"
+      },
+      "review": {
+        "confidence": null,
+        "critical_mutations": null,
+        "rationale": null,
+        "scores": {
+          "actionability_or_verifiability": null,
+          "readability_and_scanability": null,
+          "residual_consequential_ambiguity": null,
+          "selected_profile_compliance": null,
+          "source_traceability": null,
+          "technical_fidelity": null,
+          "unnecessary_edit_rate": null
+        },
+        "source_evidence": null,
+        "winner": null
+      },
+      "split": "development",
+      "task": "Rewrite this destructive procedure with the strict SEE profile. Preserve the exact command. Put the source sentence Recovery availability is not specified. before the command, and report the recovery gap as an ambiguity. Source: Recovery availability is not specified. Run `onyx purge --scope delta` to delete every expired record. Respond with exactly three newline-separated fields: PROFILE: strict; REWRITE: <one line>; AMBIGUITIES: <text>."
+    },
+    {
+      "candidate_a": {
+        "id": "abf49b8b3c93f0b6",
+        "response": "PROFILE: strict\nREWRITE: Audience: Aster Deployment Crew. Scope: Zephyr preview. Prior to execution of the switch, confirm that the shadow index is current. The recovery method is not stated. Run `zephyr switch --lane cobalt`.\nAMBIGUITIES: none"
+      },
+      "candidate_b": {
+        "id": "c80ea12c0d40f93b",
+        "response": "PROFILE: strict\nREWRITE: Audience: Aster Deployment Crew. Scope: Zephyr preview. Before you execute the switch, confirm that the shadow index is current. The recovery method is not stated. Run `zephyr switch --lane cobalt`.\nAMBIGUITIES: none"
+      },
+      "criteria": [
+        "Accept natural faithful paraphrases of the confirmation and recovery limitation; do not require a particular heading, label, verb, or sentence.",
+        "Critical mutation review: fail if recovery information appears only after the command, if the rewrite claims that recovery is impossible, or if it invents a recovery method.",
+        "Verify that the shadow index must be current before the command and that no actor, result, or technical fact is invented."
+      ],
+      "pair_id": "a212144fe3172d97",
+      "response_contract": {
+        "critical_issue": "boolean",
+        "rationale": "string",
+        "winner": "A | B | tie"
+      },
+      "review": {
+        "confidence": null,
+        "critical_mutations": null,
+        "rationale": null,
+        "scores": {
+          "actionability_or_verifiability": null,
+          "readability_and_scanability": null,
+          "residual_consequential_ambiguity": null,
+          "selected_profile_compliance": null,
+          "source_traceability": null,
+          "technical_fidelity": null,
+          "unnecessary_edit_rate": null
+        },
+        "source_evidence": null,
+        "winner": null
+      },
+      "split": "holdout",
+      "task": "Author metadata (evaluation only): author=IndependentV21Author; suite=see-behavior-independent-holdout-v21; record=sib21-procedure-ordinary-aster. Do not include this metadata in the output. Apply the strict profile to the following procedure source. Preserve all facts. Put the missing-recovery statement before the command, and do not invent a recovery method. Preserve each exact technical, audience, and scope token. The command must occur exactly once. Source: Audience: Aster Deployment Crew. Scope: Zephyr preview. Prior to execution of the switch, make a confirmation that the shadow index is current. The recovery method is not stated. Run `zephyr switch --lane cobalt`. Emit exactly three single-line fields in this order. Use the exact value strict for PROFILE. Use the exact token none for AMBIGUITIES when no consequential source ambiguity exists. PROFILE: <profile>\nREWRITE: <rewritten procedure>\nAMBIGUITIES: <ambiguities>"
+    },
+    {
+      "candidate_a": {
+        "id": "86bae10ffb53cd46",
+        "response": "PROFILE: engineering-default\nREWRITE: Audience: Bramble Release Steward. Scope: Quasar live. The command permanently removes the selected segment. Recovery information is absent. The Bramble Release Steward authorizes only the Mistral Operator role to run `quasar purge --segment amber`.\nAMBIGUITIES: none"
+      },
+      "candidate_b": {
+        "id": "0a61f4d35f5dcb19",
+        "response": "PROFILE: engineering-default\nREWRITE: Audience: Bramble Release Steward. Scope: Quasar live. The command permanently removes the selected segment. Recovery information is absent. The Bramble Release Steward authorizes only the Mistral Operator role to run `quasar purge --segment amber`.\nAMBIGUITIES: none"
+      },
+      "criteria": [
+        "Critical mutation review: fail if anyone other than the Mistral Operator role is authorized, if Bramble Release Steward no longer grants the authority, or if exclusive scope is weakened.",
+        "Fail if the permanent-removal consequence or missing-recovery fact appears only after the command; accept any clear paraphrase and any risk label that does not alter severity.",
+        "Preserve present authorization rather than changing it to past authorization, and do not invent recovery or success."
+      ],
+      "pair_id": "9012b55099ba8588",
+      "response_contract": {
+        "critical_issue": "boolean",
+        "rationale": "string",
+        "winner": "A | B | tie"
+      },
+      "review": {
+        "confidence": null,
+        "critical_mutations": null,
+        "rationale": null,
+        "scores": {
+          "actionability_or_verifiability": null,
+          "readability_and_scanability": null,
+          "residual_consequential_ambiguity": null,
+          "selected_profile_compliance": null,
+          "source_traceability": null,
+          "technical_fidelity": null,
+          "unnecessary_edit_rate": null
+        },
+        "source_evidence": null,
+        "winner": null
+      },
+      "split": "holdout",
+      "task": "Author metadata (evaluation only): author=IndependentV21Author; suite=see-behavior-independent-holdout-v21; record=sib21-procedure-adversarial-bramble. Do not include this metadata in the output. Apply the engineering-default profile to this procedure source. Preserve the present authorization relation and its exclusive boundary. Put the permanent-removal risk and the missing-recovery fact before the command. Do not infer a recovery method. Preserve each exact technical, product, audience, and scope token. The command must occur exactly once. Source: Audience: Bramble Release Steward. Scope: Quasar live. The Bramble Release Steward authorizes only the Mistral Operator role to run `quasar purge --segment amber`. The command permanently removes the selected segment. Recovery information is absent. Emit exactly three single-line fields in this order. Use the exact value engineering-default for PROFILE. Use the exact token none for AMBIGUITIES when no consequential source ambiguity exists. PROFILE: <profile>\nREWRITE: <rewritten procedure>\nAMBIGUITIES: <ambiguities>"
+    },
+    {
+      "candidate_a": {
+        "id": "1013e832a417c49a",
+        "response": "PROFILE: engineering-default\nREWRITE: Audience: Juniper Operators. Scope: Nimbus test. Prerequisite: Save the current map. Recovery: Restore the saved map if inspection changes state. Step 1: Run `nimbus inspect --mode safe`. Result: Nimbus displays the inspection summary.\nAMBIGUITIES: none"
+      },
+      "candidate_b": {
+        "id": "96bf5ea4b87680bc",
+        "response": "PROFILE: engineering-default\nREWRITE: Audience: Juniper Operators. Scope: Nimbus test. Prerequisite: Save the current map. Recovery: Restore the saved map if inspection changes state. Step 1: Run `nimbus inspect --mode safe`. Result: Nimbus displays the inspection summary.\nAMBIGUITIES: none"
+      },
+      "criteria": [
+        "Critical mutation review: any change to REWRITE fails because the prompt explicitly declares an exact no-op contract.",
+        "Do not award style-driven edits; the source is authoritative as compliant unless a safety, security, obligation, or preservation contradiction is present."
+      ],
+      "pair_id": "fbd498a4ed5a8015",
+      "response_contract": {
+        "critical_issue": "boolean",
+        "rationale": "string",
+        "winner": "A | B | tie"
+      },
+      "review": {
+        "confidence": null,
+        "critical_mutations": null,
+        "rationale": null,
+        "scores": {
+          "actionability_or_verifiability": null,
+          "readability_and_scanability": null,
+          "residual_consequential_ambiguity": null,
+          "selected_profile_compliance": null,
+          "source_traceability": null,
+          "technical_fidelity": null,
+          "unnecessary_edit_rate": null
+        },
+        "source_evidence": null,
+        "winner": null
+      },
+      "split": "holdout",
+      "task": "Author metadata (evaluation only): author=IndependentV21Author; suite=see-behavior-independent-holdout-v21; record=sib21-procedure-noop-juniper. Do not include this metadata in the output. Apply the engineering-default profile. The source is compliant and has no error-level defect. Return the source text character-for-character in REWRITE. Use the exact token none for AMBIGUITIES. Source: Audience: Juniper Operators. Scope: Nimbus test. Prerequisite: Save the current map. Recovery: Restore the saved map if inspection changes state. Step 1: Run `nimbus inspect --mode safe`. Result: Nimbus displays the inspection summary. Emit exactly three single-line fields in this order. Use the exact value engineering-default for PROFILE. PROFILE: <profile>\nREWRITE: <unchanged source>\nAMBIGUITIES: <ambiguities>"
+    },
+    {
+      "candidate_a": {
+        "id": "039bba8651208a12",
+        "response": "PROFILE: strict\nREWRITE: The Lumen Gateway SHOULD NOT cache a response when it evaluates the `Cache-Control` field as `no-store`. The Lumen Gateway copies `trace_id` to the audit record.\nAMBIGUITIES: none"
+      },
+      "candidate_b": {
+        "id": "393b4ba758b3be89",
+        "response": "PROFILE: strict\nREWRITE: This requirement uses RFC 2119 and RFC 8174. When the Lumen Gateway evaluates the `Cache-Control` field as `no-store`, it SHOULD NOT cache the response. The Lumen Gateway copies `trace_id` to the audit record.\nAMBIGUITIES: none"
+      },
+      "criteria": [
+        "Critical mutation review: fail if SHOULD NOT changes force, scope, or condition, or if the plain-present copy fact becomes normative.",
+        "Preserve the typed relations: Lumen Gateway evaluates Cache-Control for caching and Lumen Gateway copies trace_id to the audit record.",
+        "Accept atomic statements in any natural order that keeps the RFC declaration applicable and does not change meaning."
+      ],
+      "pair_id": "c6e3c0a5dd06fb76",
+      "response_contract": {
+        "critical_issue": "boolean",
+        "rationale": "string",
+        "winner": "A | B | tie"
+      },
+      "review": {
+        "confidence": null,
+        "critical_mutations": null,
+        "rationale": null,
+        "scores": {
+          "actionability_or_verifiability": null,
+          "readability_and_scanability": null,
+          "residual_consequential_ambiguity": null,
+          "selected_profile_compliance": null,
+          "source_traceability": null,
+          "technical_fidelity": null,
+          "unnecessary_edit_rate": null
+        },
+        "source_evidence": null,
+        "winner": null
+      },
+      "split": "holdout",
+      "task": "Author metadata (evaluation only): author=IndependentV21Author; suite=see-behavior-independent-holdout-v21; record=sib21-requirement-ordinary-lumen. Do not include this metadata in the output. Apply the strict profile to the requirement source. The source declares RFC 2119 and RFC 8174 semantics. Preserve SHOULD NOT exactly once and do not convert the descriptive copy behavior into an obligation. Preserve the typed relation: the Lumen Gateway evaluates the Cache-Control field and copies trace_id to the audit record. Source: This requirement uses RFC 2119 and RFC 8174. The Lumen Gateway SHOULD NOT cache a response when the `Cache-Control` field is `no-store`. The Lumen Gateway copies `trace_id` to the audit record. Emit exactly three single-line fields in this order. Use the exact value strict for PROFILE and the exact token none for AMBIGUITIES. PROFILE: <profile>\nREWRITE: <rewritten requirement>\nAMBIGUITIES: <ambiguities>"
+    },
+    {
+      "candidate_a": {
+        "id": "38fae3d9377454b1",
+        "response": "PROFILE: engineering-default\nREWRITE: Audience: Quartz Compliance Readers. Scope: Opal Ledger API v8. Under RFC 2119 and RFC 8174, exclusively a principal with the Quartz Auditor role MAY call `/v8/audit/export`; authentication alone does not grant export permission, and an authenticated principal without that role receives status 403.\nAMBIGUITIES: none"
+      },
+      "candidate_b": {
+        "id": "3ec2b5127fa91bab",
+        "response": "PROFILE: engineering-default\nREWRITE: Audience: Quartz Compliance Readers. Scope: Opal Ledger API v8. Under RFC 2119 and RFC 8174, a principal with the Quartz Auditor role MAY call `/v8/audit/export`. An authenticated principal without that role receives status 403.\nAMBIGUITIES: none"
+      },
+      "criteria": [
+        "Critical mutation review: fail if the rewrite lets any authenticated principal export, weakens the Quartz Auditor role condition, or conflates authentication with authorization.",
+        "Preserve MAY as permission rather than obligation and preserve the 403 response for an authenticated principal without the role.",
+        "Accept any natural faithful phrasing; do not require one authorization sentence pattern."
+      ],
+      "pair_id": "810fb3145c633253",
+      "response_contract": {
+        "critical_issue": "boolean",
+        "rationale": "string",
+        "winner": "A | B | tie"
+      },
+      "review": {
+        "confidence": null,
+        "critical_mutations": null,
+        "rationale": null,
+        "scores": {
+          "actionability_or_verifiability": null,
+          "readability_and_scanability": null,
+          "residual_consequential_ambiguity": null,
+          "selected_profile_compliance": null,
+          "source_traceability": null,
+          "technical_fidelity": null,
+          "unnecessary_edit_rate": null
+        },
+        "source_evidence": null,
+        "winner": null
+      },
+      "split": "holdout",
+      "task": "Author metadata (evaluation only): author=IndependentV21Author; suite=see-behavior-independent-holdout-v21; record=sib21-requirement-adversarial-quartz. Do not include this metadata in the output. Apply the engineering-default profile. The source declares RFC 2119 and RFC 8174 semantics. Preserve MAY exactly once. Preserve the exclusive authorization boundary; authentication alone does not grant export permission. Preserve each exact technical, product, audience, and scope token. Source: Audience: Quartz Compliance Readers. Scope: Opal Ledger API v8. Under RFC 2119 and RFC 8174, a principal with the Quartz Auditor role MAY call `/v8/audit/export`. An authenticated principal without that role receives status 403. Emit exactly three single-line fields in this order. Use the exact value engineering-default for PROFILE and the exact token none for AMBIGUITIES. PROFILE: <profile>\nREWRITE: <rewritten requirement>\nAMBIGUITIES: <ambiguities>"
+    },
+    {
+      "candidate_a": {
+        "id": "1cb13154c78586f6",
+        "response": "PROFILE: strict\nREWRITE: Audience: Maple SDK Maintainers. Scope: Kestrel API v6. RFC 2119 and RFC 8174 apply. The Kestrel Client MUST send `request_nonce` exactly once with each create request. Verification: Inspect the captured request and count one `request_nonce` field.\nAMBIGUITIES: none"
+      },
+      "candidate_b": {
+        "id": "35e826ff42dc274b",
+        "response": "PROFILE: strict\nREWRITE: Audience: Maple SDK Maintainers. Scope: Kestrel API v6. RFC 2119 and RFC 8174 apply. The Kestrel Client MUST send `request_nonce` exactly once with each create request. Verification: Inspect the captured request and count one `request_nonce` field.\nAMBIGUITIES: none"
+      },
+      "criteria": [
+        "Critical mutation review: any change to REWRITE fails under the explicit character-for-character no-op contract.",
+        "Do not convert the inspection method into a test command or add implementation details."
+      ],
+      "pair_id": "1a537e028f0c6343",
+      "response_contract": {
+        "critical_issue": "boolean",
+        "rationale": "string",
+        "winner": "A | B | tie"
+      },
+      "review": {
+        "confidence": null,
+        "critical_mutations": null,
+        "rationale": null,
+        "scores": {
+          "actionability_or_verifiability": null,
+          "readability_and_scanability": null,
+          "residual_consequential_ambiguity": null,
+          "selected_profile_compliance": null,
+          "source_traceability": null,
+          "technical_fidelity": null,
+          "unnecessary_edit_rate": null
+        },
+        "source_evidence": null,
+        "winner": null
+      },
+      "split": "holdout",
+      "task": "Author metadata (evaluation only): author=IndependentV21Author; suite=see-behavior-independent-holdout-v21; record=sib21-requirement-noop-maple. Do not include this metadata in the output. Apply the strict profile. The source is compliant and has no error-level defect. Return the source text character-for-character in REWRITE. Use the exact token none for AMBIGUITIES. Source: Audience: Maple SDK Maintainers. Scope: Kestrel API v6. RFC 2119 and RFC 8174 apply. The Kestrel Client MUST send `request_nonce` exactly once with each create request. Verification: Inspect the captured request and count one `request_nonce` field. Emit exactly three single-line fields in this order. Use the exact value strict for PROFILE. PROFILE: <profile>\nREWRITE: <unchanged source>\nAMBIGUITIES: <ambiguities>"
+    },
+    {
+      "candidate_a": {
+        "id": "7efa909b6f221ca3",
+        "response": "PROFILE: engineering-default\nREWRITE: For Boreal Sync integrations, the Boreal Worker records the upload result only after Glacier Store acknowledges the write. The retention period for that result is not specified.\nAMBIGUITIES: none"
+      },
+      "candidate_b": {
+        "id": "4d387b4e3d1ee48d",
+        "response": "PROFILE: engineering-default\nREWRITE: For Boreal Integration Authors using Boreal Sync: After the Glacier Store acknowledges the write, the Boreal Worker records the upload result. The source does not state how long Boreal Sync retains that result.\nAMBIGUITIES: none"
+      },
+      "criteria": [
+        "Critical mutation review: fail if absent retention information is labeled ambiguous, if a duration is invented, or if the absence is omitted.",
+        "Preserve the technical relation and order: Glacier Store acknowledges the write before Boreal Worker records the upload result.",
+        "Accept at least natural variants such as retention is unspecified, no retention period is provided, or the source does not say how long the result is retained."
+      ],
+      "pair_id": "17e30dbb7fcdc80e",
+      "response_contract": {
+        "critical_issue": "boolean",
+        "rationale": "string",
+        "winner": "A | B | tie"
+      },
+      "review": {
+        "confidence": null,
+        "critical_mutations": null,
+        "rationale": null,
+        "scores": {
+          "actionability_or_verifiability": null,
+          "readability_and_scanability": null,
+          "residual_consequential_ambiguity": null,
+          "selected_profile_compliance": null,
+          "source_traceability": null,
+          "technical_fidelity": null,
+          "unnecessary_edit_rate": null
+        },
+        "source_evidence": null,
+        "winner": null
+      },
+      "split": "holdout",
+      "task": "Author metadata (evaluation only): author=IndependentV21Author; suite=see-behavior-independent-holdout-v21; record=sib21-explanation-ordinary-boreal. Do not include this metadata in the output. Apply the engineering-default profile. Rewrite the explanation for the named audience and scope. Preserve the order relation between acknowledgement and recording. The source lacks retention information; that absence is not a source ambiguity. State the missing retention information in REWRITE without inventing a duration. Use the exact token none for AMBIGUITIES. Source: Audience: Boreal Integration Authors. Scope: Boreal Sync. The Boreal Worker records the upload result after the Glacier Store acknowledges the write. The source does not state how long Boreal Sync retains that result. Emit exactly three single-line fields in this order. Use the exact value engineering-default for PROFILE. PROFILE: <profile>\nREWRITE: <rewritten explanation>\nAMBIGUITIES: <ambiguities>"
+    },
+    {
+      "candidate_a": {
+        "id": "7901aa33b287f92f",
+        "response": "PROFILE: strict\nREWRITE: In Delta Sandbox, the Helix Broker sends the package to the Prism Scanner after the signature has been verified.\nAMBIGUITIES: \u201cIt\u201d may refer to the Helix Broker, meaning the broker verifies the signature before sending the package, or to the Prism Scanner, meaning the scanner performs the verification; the source does not resolve which component is the verifier."
+      },
+      "candidate_b": {
+        "id": "a614d0938536735b",
+        "response": "PROFILE: strict\nREWRITE: Audience: Pine Extension Developers. Scope: Delta Sandbox. The Helix Broker sends the package to the Prism Scanner after it verifies the signature.\nAMBIGUITIES: \u201cIt\u201d can refer to the Helix Broker or the Prism Scanner. Thus, either the Helix Broker verifies the signature before sending the package, or the Prism Scanner verifies the signature before the Helix Broker sends the package."
+      },
+      "criteria": [
+        "Critical mutation review: fail if REWRITE or AMBIGUITIES selects either Helix Broker or Prism Scanner as the verifier rather than preserving both supported readings.",
+        "AMBIGUITIES must state the consequential difference: under one reading Helix Broker verifies the signature, and under the other Prism Scanner verifies it. Accept any faithful wording.",
+        "Preserve the transfer from Helix Broker to Prism Scanner and that sending occurs after the unresolved verifier completes signature verification."
+      ],
+      "pair_id": "3c595057825b2799",
+      "response_contract": {
+        "critical_issue": "boolean",
+        "rationale": "string",
+        "winner": "A | B | tie"
+      },
+      "review": {
+        "confidence": null,
+        "critical_mutations": null,
+        "rationale": null,
+        "scores": {
+          "actionability_or_verifiability": null,
+          "readability_and_scanability": null,
+          "residual_consequential_ambiguity": null,
+          "selected_profile_compliance": null,
+          "source_traceability": null,
+          "technical_fidelity": null,
+          "unnecessary_edit_rate": null
+        },
+        "source_evidence": null,
+        "winner": null
+      },
+      "split": "holdout",
+      "task": "Author metadata (evaluation only): author=IndependentV21Author; suite=see-behavior-independent-holdout-v21; record=sib21-explanation-adversarial-helix. Do not include this metadata in the output. Apply the strict profile. Preserve the consequential source ambiguity instead of choosing an actor. In AMBIGUITIES, describe both supported interpretations and their difference; no exact wording is required. Do not invent which component verifies the signature. Source: Audience: Pine Extension Developers. Scope: Delta Sandbox. The Helix Broker sends the package to the Prism Scanner after it verifies the signature. Emit exactly three single-line fields in this order. Use the exact value strict for PROFILE. PROFILE: <profile>\nREWRITE: <rewritten explanation>\nAMBIGUITIES: <ambiguities>"
+    },
+    {
+      "candidate_a": {
+        "id": "16dc29ec6294498a",
+        "response": "PROFILE: engineering-default\nREWRITE: Audience: Topaz Analysts. Scope: Echo reports. Behavior: The Echo Indexer reads `event_key` and returns the matching row. Rationale: This lookup avoids a full table scan.\nAMBIGUITIES: none"
+      },
+      "candidate_b": {
+        "id": "2c92d8837fc611b6",
+        "response": "PROFILE: engineering-default\nREWRITE: Audience: Topaz Analysts. Scope: Echo reports. Behavior: The Echo Indexer reads `event_key` and returns the matching row. Rationale: This lookup avoids a full table scan.\nAMBIGUITIES: none"
+      },
+      "criteria": [
+        "Critical mutation review: any change to REWRITE fails under the explicit no-op contract.",
+        "Keep the behavior and rationale distinct; do not infer performance measurements from the full-scan statement."
+      ],
+      "pair_id": "0a6b4f314e6cfed9",
+      "response_contract": {
+        "critical_issue": "boolean",
+        "rationale": "string",
+        "winner": "A | B | tie"
+      },
+      "review": {
+        "confidence": null,
+        "critical_mutations": null,
+        "rationale": null,
+        "scores": {
+          "actionability_or_verifiability": null,
+          "readability_and_scanability": null,
+          "residual_consequential_ambiguity": null,
+          "selected_profile_compliance": null,
+          "source_traceability": null,
+          "technical_fidelity": null,
+          "unnecessary_edit_rate": null
+        },
+        "source_evidence": null,
+        "winner": null
+      },
+      "split": "holdout",
+      "task": "Author metadata (evaluation only): author=IndependentV21Author; suite=see-behavior-independent-holdout-v21; record=sib21-explanation-noop-topaz. Do not include this metadata in the output. Apply the engineering-default profile. The source is compliant and has no error-level defect. Return it character-for-character in REWRITE. Use the exact token none for AMBIGUITIES. Source: Audience: Topaz Analysts. Scope: Echo reports. Behavior: The Echo Indexer reads `event_key` and returns the matching row. Rationale: This lookup avoids a full table scan. Emit exactly three single-line fields in this order. Use the exact value engineering-default for PROFILE. PROFILE: <profile>\nREWRITE: <unchanged source>\nAMBIGUITIES: <ambiguities>"
+    },
+    {
+      "candidate_a": {
+        "id": "61273cd30fa1102b",
+        "response": "PROFILE: strict\nREWRITE: Ember Portal upload failed for local file `/Users/rowan/q3.csv`; the response exposed a server path that has been redacted. The cause is unknown. Retry the upload through Ember Portal.\nAMBIGUITIES: none"
+      },
+      "candidate_b": {
+        "id": "c1ac6880eed94bc3",
+        "response": "PROFILE: strict\nREWRITE: Audience: Rowan Customer. Scope: Ember Portal upload. The upload failed for local file `/Users/rowan/q3.csv`. The response exposed a server path, which is redacted. The cause is unknown. Retry the upload through Ember Portal.\nAMBIGUITIES: none"
+      },
+      "criteria": [
+        "Critical mutation review: fail if the server path is disclosed, the local path is removed, or other safe actionable facts are hidden under the redaction.",
+        "Accept arbitrary clear redaction paraphrases; require the rewrite to communicate that an internal server-path detail was withheld without reproducing it.",
+        "Preserve observed failure status, unknown cause, and retry as a next action rather than a promised recovery."
+      ],
+      "pair_id": "9f2089fbd6ef34ec",
+      "response_contract": {
+        "critical_issue": "boolean",
+        "rationale": "string",
+        "winner": "A | B | tie"
+      },
+      "review": {
+        "confidence": null,
+        "critical_mutations": null,
+        "rationale": null,
+        "scores": {
+          "actionability_or_verifiability": null,
+          "readability_and_scanability": null,
+          "residual_consequential_ambiguity": null,
+          "selected_profile_compliance": null,
+          "source_traceability": null,
+          "technical_fidelity": null,
+          "unnecessary_edit_rate": null
+        },
+        "source_evidence": null,
+        "winner": null
+      },
+      "split": "holdout",
+      "task": "Author metadata (evaluation only): author=IndependentV21Author; suite=see-behavior-independent-holdout-v21; record=sib21-incident-ordinary-rowan. Do not include this metadata in the output. Apply the strict profile and rewrite this incident for the external audience. Preserve the actionable local path, product name, observation, unknown cause, and next action. Redact the server path `/srv/ember/tenants/rowan/q3.csv` from REWRITE. Use any clear redaction wording; no exact redaction phrase is required. Source: Audience: Rowan Customer. Scope: Ember Portal upload. Observed: Upload failed for local file `/Users/rowan/q3.csv`. The response exposed server path `/srv/ember/tenants/rowan/q3.csv`. Cause: unknown. Next action: Retry the upload through Ember Portal. Emit exactly three single-line fields in this order. Use the exact value strict for PROFILE and the exact token none for AMBIGUITIES. PROFILE: <profile>\nREWRITE: <rewritten incident>\nAMBIGUITIES: <ambiguities>"
+    },
+    {
+      "candidate_a": {
+        "id": "d070c2b12bb9a6aa",
+        "response": "PROFILE: engineering-default\nREWRITE: For the Saffron Response Team: Osprey checkout payment attempts returned HTTP 502 responses. The vendor reported router maintenance during the same interval; whether that maintenance caused the failures remains an unconfirmed hypothesis.\nAMBIGUITIES: none"
+      },
+      "candidate_b": {
+        "id": "f93005eb31535126",
+        "response": "PROFILE: engineering-default\nREWRITE: Audience: Saffron Response Team. Scope: Osprey checkout. Observed: Payment attempts returned status 502. Vendor report: Router maintenance occurred during the same interval. Hypothesis: The maintenance caused the failures. Cause: not confirmed.\nAMBIGUITIES: none"
+      },
+      "criteria": [
+        "Critical mutation review: fail if maintenance becomes a confirmed, observed, established, or proven cause, even when an unconfirmed phrase also appears elsewhere.",
+        "Preserve typed evidence relations: payment status is observed, maintenance comes from the vendor report, and causation remains a hypothesis.",
+        "Preserve only temporal overlap; do not infer that maintenance preceded, triggered, or explains the failures."
+      ],
+      "pair_id": "f56e5f9d80e45af4",
+      "response_contract": {
+        "critical_issue": "boolean",
+        "rationale": "string",
+        "winner": "A | B | tie"
+      },
+      "review": {
+        "confidence": null,
+        "critical_mutations": null,
+        "rationale": null,
+        "scores": {
+          "actionability_or_verifiability": null,
+          "readability_and_scanability": null,
+          "residual_consequential_ambiguity": null,
+          "selected_profile_compliance": null,
+          "source_traceability": null,
+          "technical_fidelity": null,
+          "unnecessary_edit_rate": null
+        },
+        "source_evidence": null,
+        "winner": null
+      },
+      "split": "holdout",
+      "task": "Author metadata (evaluation only): author=IndependentV21Author; suite=see-behavior-independent-holdout-v21; record=sib21-incident-adversarial-saffron. Do not include this metadata in the output. Apply the engineering-default profile. Preserve evidence status: the 502 responses are observed, router maintenance is vendor-reported, and the causal link is only a hypothesis. Do not promote coincidence or hypothesis to a confirmed cause. Source: Audience: Saffron Response Team. Scope: Osprey checkout. Observed: Payment attempts returned status 502. Vendor report: Router maintenance occurred during the same interval. Hypothesis: The maintenance caused the failures. Cause: not confirmed. Emit exactly three single-line fields in this order. Use the exact value engineering-default for PROFILE and the exact token none for AMBIGUITIES because the causal status is explicit rather than ambiguous. PROFILE: <profile>\nREWRITE: <rewritten incident>\nAMBIGUITIES: <ambiguities>"
+    },
+    {
+      "candidate_a": {
+        "id": "4d3a35935a9e81a2",
+        "response": "PROFILE: strict\nREWRITE: Audience: Violet Support. Scope: Mica Mobile v3. Observed: Sign-in returned `E_AUTH_19` for account `sample-27`. Cause: unknown. Next action: Ask the user to try one more time.\nAMBIGUITIES: none"
+      },
+      "candidate_b": {
+        "id": "e4881ffa277b8b11",
+        "response": "PROFILE: strict\nREWRITE: Audience: Violet Support. Scope: Mica Mobile v3. Observed: Sign-in returned `E_AUTH_19` for account `sample-27`. Cause: unknown. Next action: Ask the user to try one more time.\nAMBIGUITIES: none"
+      },
+      "criteria": [
+        "Critical mutation review: any change to REWRITE fails under the explicit character-for-character no-op contract.",
+        "Do not infer authentication versus authorization mechanics from the error code or promise that another attempt will succeed."
+      ],
+      "pair_id": "9282a333732f6779",
+      "response_contract": {
+        "critical_issue": "boolean",
+        "rationale": "string",
+        "winner": "A | B | tie"
+      },
+      "review": {
+        "confidence": null,
+        "critical_mutations": null,
+        "rationale": null,
+        "scores": {
+          "actionability_or_verifiability": null,
+          "readability_and_scanability": null,
+          "residual_consequential_ambiguity": null,
+          "selected_profile_compliance": null,
+          "source_traceability": null,
+          "technical_fidelity": null,
+          "unnecessary_edit_rate": null
+        },
+        "source_evidence": null,
+        "winner": null
+      },
+      "split": "holdout",
+      "task": "Author metadata (evaluation only): author=IndependentV21Author; suite=see-behavior-independent-holdout-v21; record=sib21-incident-noop-violet. Do not include this metadata in the output. Apply the strict profile. The source is compliant and has no error-level defect. Return it character-for-character in REWRITE. Use the exact token none for AMBIGUITIES. Source: Audience: Violet Support. Scope: Mica Mobile v3. Observed: Sign-in returned `E_AUTH_19` for account `sample-27`. Cause: unknown. Next action: Ask the user to try one more time. Emit exactly three single-line fields in this order. Use the exact value strict for PROFILE. PROFILE: <profile>\nREWRITE: <unchanged source>\nAMBIGUITIES: <ambiguities>"
+    }
+  ],
+  "reviewer": {
+    "name": null,
+    "organization": null,
+    "role": null
+  },
+  "rubric_dimensions": [
+    "technical_fidelity",
+    "residual_consequential_ambiguity",
+    "actionability_or_verifiability",
+    "readability_and_scanability",
+    "selected_profile_compliance",
+    "unnecessary_edit_rate",
+    "source_traceability"
+  ],
+  "schema_version": 1,
+  "status": "awaiting_qualified_human_review"
+}

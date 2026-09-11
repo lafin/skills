@@ -1,0 +1,26 @@
+{
+  "frozen_at": "2026-09-11T13:23:52Z",
+  "candidate_freeze": "remediation-freeze-v3.json",
+  "independence": "Generated after the v3 candidate, evaluator, and development corpus were frozen. A response-blind contract audit corrected only case predicates and manifest metadata before this freeze; no candidate, evaluator, grader, rubric, or development case changed. No v3 holdout response existed before this freeze.",
+  "review": {
+    "behavior_cases": 12,
+    "artifact_families": 4,
+    "cases_per_family": 3,
+    "variants_per_family": [
+      "ordinary",
+      "adversarial",
+      "noop"
+    ],
+    "routing_cases": 12,
+    "confusable_pairs": 6,
+    "field_qualified_checks": true,
+    "exact_values_source_bound": true,
+    "manifest_redaction_conflicts": 0,
+    "noop_rewrites_byte_exact": true,
+    "response_blind_audit": "pass"
+  },
+  "sha256": {
+    "evals/cases/see-behavior-independent-holdout-v3.jsonl": "0d75f6449368830ae81eb085f1d69877d50a5e01852658ba24284af4b0b0fb75",
+    "evals/cases/see-routing-independent-holdout.jsonl": "19b95bfc5f067ea8e71bd8f1106aef96a837993a271621589fc23da063906437"
+  }
+}

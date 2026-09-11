@@ -1,0 +1,43 @@
+{
+  "all_passed": false,
+  "artifacts": 24,
+  "condition": "treatment",
+  "critical_passed": 22,
+  "deterministic_grades": "grades.jsonl",
+  "efficacy_claim": null,
+  "input_binding": {
+    "artifacts": {
+      "artifacts/see-routing-development-see--evaluation-negative/1.json": "9a55eac2b30cf020a5940ef017d5d529aa041f6437ee7a14dbec1df1fc68183b",
+      "artifacts/see-routing-development-see--evaluation-negative/2.json": "63564bdfb4f0516c5881e129b483ce0d4589a43bdcb63031b0cdc79babc3947b",
+      "artifacts/see-routing-development-see--evaluation-negative/3.json": "a73daaa11de9d4e48bf59de85024ee77ea29e750d5b70c9d74f4fd1a2c52b027",
+      "artifacts/see-routing-development-see--evaluation-positive/1.json": "9c0b5875e227c133f85889fe89105288c8a204418e5e757a4d7b9eac3588b751",
+      "artifacts/see-routing-development-see--evaluation-positive/2.json": "ed58174d675b5f01a05dc1f612752122286910532bb8b31694518f0c2e755fe7",
+      "artifacts/see-routing-development-see--evaluation-positive/3.json": "d38db85cdab57965a1a1418896619d3436839051627ebe7ad4f3621b8a6c17a4",
+      "artifacts/see-routing-development-see--leancode-negative/1.json": "4244e727fc6223a8fdfd15684496953043db3c1585eea8a8e3fc0ab8fede185d",
+      "artifacts/see-routing-development-see--leancode-negative/2.json": "4a13504d9e8e02b63d93abcfbd408ece7742b9f5e555170fdacebfe8f473677d",
+      "artifacts/see-routing-development-see--leancode-negative/3.json": "029b7a582c5caea18e14e3d9f656fc3f7325cc6a34701731f3b5c291d3c91283",
+      "artifacts/see-routing-development-see--leancode-positive/1.json": "90bf6a15fc12a1022c9f8a51ff2aeb350191a9b885b249fdbd89504edbb8dc8b",
+      "artifacts/see-routing-development-see--leancode-positive/2.json": "1363264fed2fa1507f116f78ebf365107487be0a55bec844856b1b76ab470baf",
+      "artifacts/see-routing-development-see--leancode-positive/3.json": "1a0731664a2bcc763a6fa9c674276b9976a0649467f966ca9b6ad3f0a3989b1f",
+      "artifacts/see-routing-development-see--lossless-negative/1.json": "02531db2f1ef197cbf820a934466fbc2cce80eb63a3ddbd92b4e9d72be7393d2",
+      "artifacts/see-routing-development-see--lossless-negative/2.json": "426af1d96b8ddcc78bd1da7327c0b1332a6f2557ba9b2084a5185ca8ea01578d",
+      "artifacts/see-routing-development-see--lossless-negative/3.json": "2ac22b4245f8de133ff4fdbdff0a1e804fcecf0da6e15e55bfcc6104a256d5e5",
+      "artifacts/see-routing-development-see--lossless-positive/1.json": "f0b89060e6a6a3448691c241bdacfa9a07ddebb0cb4c8dc3ef5c3c978922565c",
+      "artifacts/see-routing-development-see--lossless-positive/2.json": "ff1d6a7c5239356f74706f0a39fffb80bee6183b136fcfbc988469a8dabe5ca5",
+      "artifacts/see-routing-development-see--lossless-positive/3.json": "f0152ff64367bf653b2d887cd2f3562a16fc0884a95d5b91526677b9492bb9f0",
+      "artifacts/see-routing-development-see--tool-design-negative/1.json": "26495a545fc00ea177961b7424a408b5e3a5bf6bf3f47650305b1b370bdb9a0f",
+      "artifacts/see-routing-development-see--tool-design-negative/2.json": "1c65e946b730983aef13af06d9b95b792d5cc802120f2c4f32d35002f365293c",
+      "artifacts/see-routing-development-see--tool-design-negative/3.json": "96841bf8c8713a3e6687cc27bad4da0f2d4365378f77e0439a1f2470609249cd",
+      "artifacts/see-routing-development-see--tool-design-positive/1.json": "9c68c1096960bca839ec50de05ccab94ab9a5ab832d6a99d094393dfafe1041d",
+      "artifacts/see-routing-development-see--tool-design-positive/2.json": "eb22ddab72d7a57fb8b92d25b08b63ea44fa572b28e92c402cb484e3270ae828",
+      "artifacts/see-routing-development-see--tool-design-positive/3.json": "8b525bd7c9c9dd605696e2570c716d4728a05624551b65aae4696c1f0cddc6e7"
+    },
+    "case_snapshot_sha256": "129ac70575c31a7ba6714c927d187432a9d4d768970570a86599f772cdbd05bc",
+    "grader_sha256": "5883e79e7ef2179ffd6ccbfd7a096105f4f0b0b3cb55327e5fe92b3211bdb5f7",
+    "manifest_sha256": "4dee69ba88b87387c1dcffa86cee338a5128fe7c213810bfefb235273ad81eb2"
+  },
+  "passed": 22,
+  "reason": "A single condition cannot support an efficacy claim; pair it with the other condition.",
+  "run_id": "routing-development-v2-treatment",
+  "schema_version": 3
+}

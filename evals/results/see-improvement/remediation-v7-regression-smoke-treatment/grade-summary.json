@@ -1,0 +1,22 @@
+{
+  "all_passed": true,
+  "artifacts": 3,
+  "condition": "treatment",
+  "critical_passed": 3,
+  "deterministic_grades": "grades.jsonl",
+  "efficacy_claim": null,
+  "input_binding": {
+    "artifacts": {
+      "artifacts/see-exact-profile-proper-name-regression/1.json": "b5613a36f74af0aab0da37803ce6c896ffbff94068a7bcf0dd3eb3200405fa78",
+      "artifacts/see-exact-profile-proper-name-regression/2.json": "52d029262186c30e571a8a15a31f8637a9a56dfea5844697acf89d5f77bdf48e",
+      "artifacts/see-exact-profile-proper-name-regression/3.json": "3ce87665dbbe6a8925b21ea1ec9bffad65faf27a6096e122404a2f83c6005a9a"
+    },
+    "case_snapshot_sha256": "6c1146fe93922e79c63bf155d123b02ab06c1892dae376c59adcce517cd1b687",
+    "grader_sha256": "b194f75962c5cfdc798773c3ddb3394522fe72fefef9baaa02c17f9dcd50cb9e",
+    "manifest_sha256": "7fe31f4beaf59790af643331f62a768c28b744c543fd61e69179782bad36107b"
+  },
+  "passed": 3,
+  "reason": "A single condition cannot support an efficacy claim; pair it with the other condition.",
+  "run_id": "remediation-v7-regression-smoke-treatment",
+  "schema_version": 4
+}

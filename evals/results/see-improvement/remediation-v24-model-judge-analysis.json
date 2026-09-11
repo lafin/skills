@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "status": "complete_uncalibrated",
+  "efficacy_claim": null,
+  "judge": {
+    "authentication_source": "work profile credential store",
+    "profile": "work",
+    "provider": "anthropic",
+    "model": "claude-sonnet-4-6",
+    "thinking": "off",
+    "tools": []
+  },
+  "development": {
+    "pairs_scored": 42,
+    "verdicts": {
+      "baseline": 11,
+      "treatment": 3,
+      "tie": 9,
+      "position_sensitive": 19
+    },
+    "critical_flagged_pairs": 5,
+    "critical_flagged_cases": [
+      "see-descriptive-fact-regression",
+      "see-error-ordinary",
+      "see-explanation-quote-punctuation"
+    ]
+  },
+  "holdout": {
+    "pairs_scored": 36,
+    "verdicts": {
+      "baseline": 3,
+      "treatment": 1,
+      "tie": 21,
+      "position_sensitive": 11
+    },
+    "critical_flagged_pairs": 1,
+    "critical_flagged_cases": [
+      "sib21-requirement-ordinary-lumen"
+    ]
+  },
+  "position_sensitive_pairs": 30,
+  "total_pairs": 78,
+  "interpretation": "The independent model capture is complete and is supporting evidence only. Thirty of 78 swapped pairs were position-sensitive. Six pairs contained a critical-issue flag; the pair-level boolean does not identify the affected condition, and several rationales conflict across orderings. Qualified human calibration and adjudication are required before using these judgments for an efficacy or release claim.",
+  "automated_gate_effect": "none"
+}

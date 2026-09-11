@@ -8,8 +8,11 @@ This evaluation uses OMP's real noninteractive adapter. `run.py` invokes `omp --
 - `cases/repository-development.jsonl` contains seven editable repository cases.
 - `cases/repository-holdout.jsonl` contains three held-out repository cases. Do not use holdout results to tune a change.
 - `cases/routing-development.jsonl` and `cases/routing-holdout.jsonl` contain distinct cases for each confusable skill pair.
+- `cases/see-behavior-development.jsonl` and `cases/see-behavior-holdout.jsonl` contain the frozen SEE transformation corpus.
+- `cases/see-routing-development.jsonl` and `cases/see-routing-holdout.jsonl` distinguish SEE from adjacent writing, evaluation, design, implementation, and review skills.
 
-Every case names observable success, prohibited outcomes, and deterministic checks. Repository cases copy an immutable `fixtures/<fixture>/initial` tree into a temporary worktree and run the fixture's `verify.py` against the final tree. Behavior prompts request an explicit decision record because these cases measure change scope and verification choices without modifying this repository. Routing requests append both exact candidate names and their captured frontmatter descriptions, then require one exact selection.
+Every case names observable success, prohibited outcomes, and deterministic checks. Repository cases copy an immutable `fixtures/<fixture>/initial` tree into a temporary worktree and run the fixture's `verify.py` against the final tree. Behavior prompts request an explicit decision record because these cases measure change scope and verification choices without modifying this repository. Each routing case declares the confusable `available_skills` pair and the `evaluated_skills` whose content may differ between paired conditions.
+SEE behavior cases also contain a fixed `case_manifest`. It records the artifact family, selected profile, source facts, protected and quoted spans, conditions, values, obligation force, permitted rewrites, required structure, ambiguity traps, and prohibited inventions. The grader checks only protected spans, quotations, values, and obligation force byte-for-byte. Conditions and exceptions require semantic review unless a case declares a valid structural predicate. Case validation rejects a value that is both declared for exact preservation and contained in a rewrite span that a `not_contains` check prohibits. `see-rubric.json` defines the separate semantic and technical review dimensions and critical floors.
 
 ## Capture real runs
 
@@ -82,13 +85,7 @@ For behavior cases, both arms use the same minimal structured-response system
 prompt and disable discovered rules, extensions, sessions, and tools. Baseline
 disables skills. Treatment exposes only the canonical target and sends
 `/skill:<target>` as one RPC prompt before the case prompt in the same session.
-For routing cases, both arms preserve OMP's default skill-discovery prompt and
-expose the complete canonical repository skill catalog through one `--skills`
-filter. The runner places the two candidate frontmatter descriptions in the
-case prompt and verifies them against OMP's runtime command catalog. The
-repository commit and canonical content hashes distinguish a pre-change
-baseline from a post-change treatment. The repository hook and always-active
-configuration remain disabled in both conditions.
+For routing cases, both arms use a dedicated classification prompt and expose only the declared confusable pair through `--skills`. The runner places those two frontmatter descriptions in the case prompt and verifies them against OMP's runtime command catalog. Each case declares which candidate skill is under evaluation. A paired comparison fails when no declared evaluated skill differs between conditions, or when any undeclared skill differs. The repository hook and always-active configuration remain disabled in both conditions.
 
 A run directory is immutable and contains:
 
@@ -143,8 +140,7 @@ python3 evals/grade.py judge-payload \
   --output evals/results/change-id/development-judge
 ```
 
-`judge-payloads.jsonl` contains two payloads per judged artifact with opaque candidate IDs and swapped A/B order. `judge-key.json` is separate and must not be shown to the judge. There is no fake judge implementation. To acquire one real judgment with OMP, place the judge instruction plus one payload in `one-judge-payload.json`, then run:
-
+`judge-payloads.jsonl` contains two payloads per judged artifact with opaque candidate IDs and swapped A/B order. `judge-key.json` is separate and must not be shown to the judge. There is no fake judge implementation. Use a different authenticated model family from the evaluated model when one is available. To acquire one real judgment with OMP, place the judge instruction plus one payload in `one-judge-payload.json`, then run:
 ```sh
 omp -p --no-session --mode=json --no-extensions --no-skills --no-tools \
   --model "$JUDGE_MODEL" @one-judge-payload.json
@@ -173,6 +169,7 @@ python3 evals/grade.py gate \
   --routing-holdout-treatment evals/results/change-id/routing-holdout-treatment \
   --output evals/results/change-id/merge-gate.json
 ```
+For SEE behavior runs, add `--case-kind behavior`. This mode also requires every treatment behavior case to pass its deterministic checks.
 
 The gate fails on a critical regression, no deterministic improvement in development, loss of any baseline-passing repository holdout result, any failed routing holdout case, mismatched model/runtime/tool configuration, incomplete pairing, or an unexplained increase in tokens, tool events, or questions. Supply `--correctness-benefit 'observed benefit'` only when raw paired evidence supports the extra cost. Only a passing report contains an efficacy claim; every other report sets it to `null`.
 

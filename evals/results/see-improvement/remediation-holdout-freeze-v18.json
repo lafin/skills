@@ -1,0 +1,44 @@
+{
+  "frozen_at": "2026-09-11T17:34:52Z",
+  "candidate_freeze": {
+    "path": "evals/results/see-improvement/remediation-freeze-v18.json",
+    "sha256": "c8c276a3f61108d2941bb195eaea9aaa8d9d28ac47f67bdcaddcb1b0b53174eb"
+  },
+  "holdout": {
+    "path": "evals/cases/see-behavior-independent-holdout-v18.jsonl",
+    "sha256": "d5505643f4aa84e8277fe8f5fdf55c759fe0284b292922a09273a8fdad77f60c",
+    "records": 12,
+    "families": {
+      "procedure/runbook": 3,
+      "requirement/contract": 3,
+      "explanation/reference": 3,
+      "error/incident": 3
+    },
+    "variants": {
+      "ordinary": 4,
+      "adversarial": 4,
+      "noop": 4
+    }
+  },
+  "response_blind_audit": {
+    "mechanical_validation": "pass",
+    "independent_author": "IndependentBehaviorHoldoutV18",
+    "independent_auditor": "HoldoutV18ScoutAudit",
+    "candidate_or_prior_evidence_visible_to_author_or_auditor": false,
+    "declared_checks": 65,
+    "declared_critical_checks": 59,
+    "generated_exact_preservation_checks": 59,
+    "corrections_before_freeze": [
+      "Hardened Cinder secret, suffix, ordering, stop-control, and command-cardinality checks.",
+      "Added positive ambiguity anchors for Pico and Rook.",
+      "Expanded Pico evidence-placement exclusions."
+    ],
+    "final_recheck": "The current holdout passed schema validation and targeted redaction, boundary, ambiguity, cardinality, and ordering probes. The response-blind auditor recommended freeze.",
+    "semantic_only_disposition": "Actor relations, obligation equivalence, causality, uncertainty, and ambiguity meaning remain in judge_criteria."
+  },
+  "evaluator": {
+    "evals/run.py": "be310d7d73869c11412724d66d66105850b22cd3210e4c753f1cbc4aa443cca0",
+    "evals/grade.py": "dd04a7a7d85d129245f1885bac5ff3845b3f3adb292b90394570f08b5827fe72"
+  },
+  "candidate_skill_sha256": "9cfd3a02ee895fa74e4c28606efa876c2662d17780d382c3e829619e22637f0b"
+}

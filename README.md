@@ -59,7 +59,7 @@ evaluation framework, artifact contract, and reproduction commands.
 
 ## Writing
 
-- `simplified-engineering-english` — write and review software-engineering prose in a controlled subset of English derived from ASD-STE100.
+- `simplified-engineering-english` — write and review consequential software-engineering prose while preserving technical meaning and reducing ambiguity; adapts selected ASD-STE100 mechanisms.
 - `lossless-doc-compress` — compress and de-slop design docs, PRDs, and RFCs without losing facts, numbers, decisions, or caveats.
 
 ## Reviews

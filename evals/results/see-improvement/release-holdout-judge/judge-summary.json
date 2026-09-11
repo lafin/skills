@@ -1,0 +1,314 @@
+{
+  "efficacy_claim": null,
+  "pairs_scored": 18,
+  "reason": "Judge output is optional evidence and cannot replace deterministic paired merge gates.",
+  "results": [
+    {
+      "attempt": 1,
+      "case_id": "see-release-error-redaction",
+      "critical_issues": [
+        false,
+        false
+      ],
+      "rationales": [
+        "Both candidates preserve the local path and quoted log text, redact the server path, and keep the cause uncertain. A is stronger because it explicitly states that the log does not establish causation, giving clearer source traceability without inventing a diagnosis.",
+        "Both responses satisfy the redaction, quotation, and uncertainty requirements. B is preferable because its AMBIGUITIES field explicitly separates the possible invalid header from the unsupported causal conclusion, whereas A states the uncertainty more generally."
+      ],
+      "verdict": "baseline",
+      "votes": [
+        "baseline",
+        "baseline"
+      ]
+    },
+    {
+      "attempt": 2,
+      "case_id": "see-release-error-redaction",
+      "critical_issues": [
+        false,
+        false
+      ],
+      "rationales": [
+        "B preserves the source\u2019s causal hypothesis in the rewrite as \u201cThe cause might be an invalid header\u201d and repeats it as uncertain in AMBIGUITIES. A omits that hypothesis from the rewrite and changes the ambiguity to whether the header itself is invalid, which is less faithful to the stated possible cause.",
+        "A directly preserves the source\u2019s uncertain causal statement in the rewrite and reports it again as uncertain in AMBIGUITIES. B omits the causal hypothesis from the rewrite and weakens it to the different proposition that the header might be invalid."
+      ],
+      "verdict": "treatment",
+      "votes": [
+        "treatment",
+        "treatment"
+      ]
+    },
+    {
+      "attempt": 3,
+      "case_id": "see-release-error-redaction",
+      "critical_issues": [
+        false,
+        false
+      ],
+      "rationales": [
+        "Both responses preserve the protected path and quotation, redact the server path, and avoid asserting causation. A is more readable and source-traceable because its rewrite follows the source wording closely and its concise ambiguity note explains that the log does not prove the suspected cause.",
+        "B follows the source wording closely in the rewrite and concisely explains in AMBIGUITIES that the log does not establish the suspected cause. A is also faithful, but its repeated \u201cinvalid header might be the cause\u201d wording is more redundant and less readable."
+      ],
+      "verdict": "baseline",
+      "votes": [
+        "baseline",
+        "baseline"
+      ]
+    },
+    {
+      "attempt": 1,
+      "case_id": "see-release-explanation-timing",
+      "critical_issues": [
+        false,
+        false
+      ],
+      "rationales": [
+        "Both preserve version 4.8, future asynchronous dispatch, `legacyFlag`, and both ambiguities without inventing an actor or version. B is better because its rewrite tracks the source exactly and uses clearer sentence boundaries, while A paraphrases \u201ccalls\u201d as \u201crefers to\u201d and joins two source sentences with a semicolon.",
+        "Both responses preserve the required facts and report the two ambiguities without invention. A is preferable because it reproduces the source wording and sentence structure exactly, giving stronger traceability and readability than B\u2019s paraphrase and semicolon join."
+      ],
+      "verdict": "treatment",
+      "votes": [
+        "treatment",
+        "treatment"
+      ]
+    },
+    {
+      "attempt": 2,
+      "case_id": "see-release-explanation-timing",
+      "critical_issues": [
+        false,
+        false
+      ],
+      "rationales": [
+        "B preserves every source fact in the rewrite and explicitly reports both required ambiguities. A preserves the terminology drift only in AMBIGUITIES and omits the dashboard/task statement from REWRITE, so B has better completeness and source traceability; neither invents an actor or removal version.",
+        "A preserves every source fact in the rewrite, including that the dashboard calls the same item a task, and then clearly reports both the unknown removal version and the job/task terminology drift. B remains compliant but leaves the dashboard relationship only implicit in AMBIGUITIES and is slightly less source-traceable."
+      ],
+      "verdict": "treatment",
+      "votes": [
+        "treatment",
+        "treatment"
+      ]
+    },
+    {
+      "attempt": 3,
+      "case_id": "see-release-explanation-timing",
+      "critical_issues": [
+        false,
+        false
+      ],
+      "rationales": [
+        "B retains the dashboard\u2019s same-item/task fact in the rewrite and explicitly records both required ambiguities. A preserves the core timing and asynchronous dispatch but moves the dashboard fact entirely into AMBIGUITIES, making it marginally less complete and traceable.",
+        "A is more source-traceable because its rewrite preserves the dashboard\u2019s statement that the same item is called a task, while its AMBIGUITIES field also reports both required uncertainties. B is accurate but relegates that dashboard fact to the ambiguity report."
+      ],
+      "verdict": "treatment",
+      "votes": [
+        "treatment",
+        "treatment"
+      ]
+    },
+    {
+      "attempt": 1,
+      "case_id": "see-release-procedure-ambiguity",
+      "critical_issues": [
+        true,
+        true
+      ],
+      "rationales": [
+        "B preserves the source\u2019s unconditional final health check as a separate sentence. A places \u201cthen check whether the tenant is healthy\u201d inside the exit-code-2 condition, changing when that action occurs.",
+        "A preserves the source\u2019s unconditional final health check as a separate sentence. B places \u201cthen check whether the tenant is healthy\u201d inside the exit-code-2 condition, changing when that action occurs."
+      ],
+      "verdict": "treatment",
+      "votes": [
+        "treatment",
+        "treatment"
+      ]
+    },
+    {
+      "attempt": 2,
+      "case_id": "see-release-procedure-ambiguity",
+      "critical_issues": [
+        true,
+        true
+      ],
+      "rationales": [
+        "B uses separate numbered actions, so only saving standard error is conditional on exit code 2 and the health check remains unconditional. A\u2019s \u201cif \u2026 save \u2026, then check\u201d makes both actions conditional.",
+        "A uses separate numbered actions, so only saving standard error is conditional on exit code 2 and the health check remains unconditional. B\u2019s \u201cif \u2026 save \u2026, then check\u201d makes both actions conditional."
+      ],
+      "verdict": "treatment",
+      "votes": [
+        "treatment",
+        "treatment"
+      ]
+    },
+    {
+      "attempt": 3,
+      "case_id": "see-release-procedure-ambiguity",
+      "critical_issues": [
+        true,
+        true
+      ],
+      "rationales": [
+        "B clearly preserves the prerequisite, exact command, exit code, path, and unconditional health check. A\u2019s compound conditional makes the final health check occur only after exit code 2, unlike the source.",
+        "A clearly preserves the prerequisite, exact command, exit code, path, and unconditional health check. B\u2019s compound conditional makes the final health check occur only after exit code 2, unlike the source."
+      ],
+      "verdict": "treatment",
+      "votes": [
+        "treatment",
+        "treatment"
+      ]
+    },
+    {
+      "attempt": 1,
+      "case_id": "see-release-procedure-noop",
+      "critical_issues": [
+        false,
+        false
+      ],
+      "rationales": [
+        "A and B are textually identical: both select the strict profile, reproduce the source procedure exactly, preserve all technical content, and report no ambiguities.",
+        "A and B are textually identical: both select the strict profile, reproduce the source procedure exactly, preserve all technical content, and report no ambiguities."
+      ],
+      "verdict": "tie",
+      "votes": [
+        "tie",
+        "tie"
+      ]
+    },
+    {
+      "attempt": 2,
+      "case_id": "see-release-procedure-noop",
+      "critical_issues": [
+        false,
+        false
+      ],
+      "rationales": [
+        "A and B are textually identical: both select the strict profile, reproduce the source procedure exactly, preserve all technical content, and report no ambiguities.",
+        "Both responses reproduce the strict-profile procedure exactly, preserve the protected command text, use the required three fields, and correctly report no ambiguities."
+      ],
+      "verdict": "tie",
+      "votes": [
+        "tie",
+        "tie"
+      ]
+    },
+    {
+      "attempt": 3,
+      "case_id": "see-release-procedure-noop",
+      "critical_issues": [
+        false,
+        false
+      ],
+      "rationales": [
+        "The candidates are textually identical: each preserves every source sentence and the exact command, selects the strict profile, and reports AMBIGUITIES: none.",
+        "Both candidates return the source without alteration or invented results and satisfy the exact three-line response contract, so neither has a quality advantage."
+      ],
+      "verdict": "tie",
+      "votes": [
+        "tie",
+        "tie"
+      ]
+    },
+    {
+      "attempt": 1,
+      "case_id": "see-release-requirement-force",
+      "critical_issues": [
+        true,
+        true
+      ],
+      "rationales": [
+        "B preserves the source timing as \u201cafter 30 days\u201d and clearly identifies the missing objective criterion. A invents \u201cafter completion\u201d as the interval anchor, a critical change to the source condition, despite its stronger enumeration of measurement details.",
+        "A retains the source\u2019s unanchored \u201cafter 30 days\u201d condition and gives a clear measurability analysis. B critically adds \u201cafter completion,\u201d resolving an unspecified interval anchor by invention rather than preserving the source."
+      ],
+      "verdict": "treatment",
+      "votes": [
+        "treatment",
+        "treatment"
+      ]
+    },
+    {
+      "attempt": 2,
+      "case_id": "see-release-requirement-force",
+      "critical_issues": [
+        false,
+        false
+      ],
+      "rationales": [
+        "Both candidates preserve MUST NOT, SHOULD, MUST, the 30-day interval, and the legal-hold exception. B is more readable without pipe separators and more specifically identifies the missing workload, percentile, and measurement method.",
+        "Both responses preserve all obligation forces, timing, and the legal-hold exception. A wins because its natural sentence separation and more complete list of missing measurement parameters are clearer than B\u2019s pipe-delimited rewrite."
+      ],
+      "verdict": "treatment",
+      "votes": [
+        "treatment",
+        "treatment"
+      ]
+    },
+    {
+      "attempt": 3,
+      "case_id": "see-release-requirement-force",
+      "critical_issues": [
+        true,
+        true
+      ],
+      "rationales": [
+        "A closely preserves the source clauses and thoroughly identifies the absent threshold, percentile, window, workload, and test conditions. B critically invents \u201cafter completion\u201d as the 30-day interval\u2019s starting point.",
+        "B preserves the source\u2019s unspecified \u201cafter 30 days\u201d wording and supplies the more complete measurability analysis. A critically adds completion as the interval anchor, introducing a condition not stated in the source."
+      ],
+      "verdict": "baseline",
+      "votes": [
+        "baseline",
+        "baseline"
+      ]
+    },
+    {
+      "attempt": 1,
+      "case_id": "see-release-requirement-noop",
+      "critical_issues": [
+        false,
+        false
+      ],
+      "rationales": [
+        "Both candidates reproduce the source verbatim, select the strict profile, preserve the BCP 14 obligation and all numeric details, and correctly report no ambiguities.",
+        "The two responses are identical and fully compliant: each returns the unchanged source under the strict profile and uses the required three-field format."
+      ],
+      "verdict": "tie",
+      "votes": [
+        "tie",
+        "tie"
+      ]
+    },
+    {
+      "attempt": 2,
+      "case_id": "see-release-requirement-noop",
+      "critical_issues": [
+        false,
+        false
+      ],
+      "rationales": [
+        "Both candidates exactly preserve the source wording, including MUST, HTTP 503, 200 ms, and each write request; neither introduces an edit or ambiguity.",
+        "There is no substantive or stylistic difference: both responses reproduce the atomic requirement exactly and correctly state AMBIGUITIES: none."
+      ],
+      "verdict": "tie",
+      "votes": [
+        "tie",
+        "tie"
+      ]
+    },
+    {
+      "attempt": 3,
+      "case_id": "see-release-requirement-noop",
+      "critical_issues": [
+        false,
+        false
+      ],
+      "rationales": [
+        "Both candidates satisfy the no-op requirement exactly, retain every condition and obligation, and provide the requested strict profile and ambiguity declaration.",
+        "The candidate texts are identical to each other and to the source, with the required profile, unchanged requirement, and AMBIGUITIES: none."
+      ],
+      "verdict": "tie",
+      "votes": [
+        "tie",
+        "tie"
+      ]
+    }
+  ],
+  "schema_version": 3
+}

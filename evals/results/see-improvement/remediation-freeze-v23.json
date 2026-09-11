@@ -1,0 +1,49 @@
+{
+  "frozen_at": "2026-09-11T18:43:56Z",
+  "supersedes": "remediation-freeze-v20.json",
+  "prior_freeze_sha256": "72ea8431d57d383126ee2152756e2e918450a9c7a95e95316b2e5a3a6ed2c5c9",
+  "reason": "The rejected V19 holdout exposed one genuine stochastic omission of a source audience and named scope. V23 explicitly preserves audience, organization, product, deployment, and environment scope in rewritten content. The V19 holdout also contained exact-prose oracles that rejected faithful paraphrases; it is not reused. A corrected three-artifact scope smoke passed before freeze, and a fresh independently authored V21 holdout passed response-blind oracle audit.",
+  "rejected_evidence": {
+    "v20_holdout": {
+      "baseline": "remediation-v20-independent-behavior-baseline",
+      "treatment": "remediation-v20-independent-behavior-treatment",
+      "baseline_passed": 4,
+      "treatment_passed": 20,
+      "artifacts": 36,
+      "note": "The V19 holdout is rejected because exact-prose checks failed natural faithful paraphrases. Its responses were not used as final holdout evidence."
+    },
+    "v22_scope_smoke": {
+      "run": "remediation-v22-scope-regression-smoke-treatment",
+      "passed": 2,
+      "artifacts": 3,
+      "note": "All three responses preserved the named scope. One was rejected by a command-mention ordering oracle, so this smoke is superseded."
+    }
+  },
+  "development_smoke": {
+    "run": "remediation-v23-scope-regression-smoke-treatment",
+    "passed": 3,
+    "artifacts": 3,
+    "note": "Supporting pre-freeze smoke only; final treatment runs bind the frozen candidate."
+  },
+  "response_blind_holdout_process": {
+    "independent_author": "IndependentV21Author",
+    "independent_auditor": "V21OracleAuditor",
+    "candidate_or_prior_evidence_visible_to_author_or_auditor": false,
+    "final_audit": "GO",
+    "release_blockers": [],
+    "semantic_only_disposition": "Semantic fidelity, obligation meaning, causal status, typed relations, arbitrary paraphrases, and ambiguity meaning remain in judge_criteria. Deterministic checks cover exact values, protected scopes, field structure, command cardinality, unambiguous order, redaction literals, and no-op equality."
+  },
+  "sha256": {
+    "evals/run.py": "be310d7d73869c11412724d66d66105850b22cd3210e4c753f1cbc4aa443cca0",
+    "evals/grade.py": "21f818a084b4aecf52a6980f15558b2424bcedc640fb6b59647804d3a5fb0cc8",
+    "tests/test_evaluation_harness.py": "3a0ca63c287dcffedef730e1a5483332ef766d102f0dd040396075d93850e6b7",
+    "simplified-engineering-english/SKILL.md": "256976f959ac379e0080835f7b6f5201908b722dbab4384d0e32cc12e31e20a8",
+    "simplified-engineering-english/references/rules.md": "bebe88700dded668c6610ec26c4c0cebdf3b56f47c3364455ec80466ca00ea7d",
+    "simplified-engineering-english/references/dictionary.md": "93ca70b1fc419005ab110c4f6e52270a3b2dabe44fb46ec086c37af245aecdc0",
+    "evals/see-rubric.json": "e11626411fa94b26dfaafdd8d207bf3038ec8692f748d167527d03fe5f708e0e",
+    "evals/cases/see-behavior-development.jsonl": "d27bc4f5a2a6bd41fcb46beb8c94b36395cf1beb4f08951806ba32f1a935f766",
+    "evals/cases/see-behavior-independent-holdout-v21.jsonl": "c69cf79fc08fe1e97cad6fa35f5759ea8df53362b0e2eb83ea3cc6f001907842",
+    "evals/cases/see-routing-development.jsonl": "7aec2346a04c2363f73230e7308332bc663d148390925ea8cf3ffc0f0820ada7",
+    "evals/cases/see-routing-independent-holdout.jsonl": "19b95bfc5f067ea8e71bd8f1106aef96a837993a271621589fc23da063906437f"
+  }
+}

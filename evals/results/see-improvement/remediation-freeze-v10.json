@@ -1,0 +1,24 @@
+{
+  "frozen_at": "2026-09-11T15:06:34Z",
+  "supersedes": "remediation-freeze-v9.json",
+  "prior_freeze_sha256": "ae580b9d2548c6be6cc672471c3c6aff47d9b860989d7bdc7143eaed10049cde",
+  "reason": "The response-blind holdout audit found that parse_response_fields ignored blank physical lines despite the exact three-line contract. V10 uses splitlines without filtering, adds a regression test, and keeps the V9 development predicate correction. Candidate skill source is unchanged.",
+  "rejected_v9_capture": {
+    "baseline": "remediation-v9-development-behavior-baseline",
+    "treatment": "remediation-v9-development-behavior-treatment",
+    "status": "superseded before paired grading",
+    "reason": "The grader changed after the baseline capture; the treatment capture was cancelled. Neither run is final evidence."
+  },
+  "sha256": {
+    "evals/run.py": "be310d7d73869c11412724d66d66105850b22cd3210e4c753f1cbc4aa443cca0",
+    "evals/grade.py": "5487fa4f7ea2115d97d7b0e527852ff747d059aa86449a68fe8d38e93b8b7079",
+    "tests/test_evaluation_harness.py": "9c6c6ccfd9174de6dd3ebc06e9894793c46c59c05ddd2f79a4ced02e86b28e24",
+    "simplified-engineering-english/SKILL.md": "d48e8f7f4f2dc2e542e190e7f0fdcc244fe76f9bba71d6f5d162c44400025bc2",
+    "simplified-engineering-english/references/rules.md": "ab5507b57bf31a600ca94e11f472f4603ccecb1955b182db3c8604f6ee793447",
+    "simplified-engineering-english/references/dictionary.md": "93ca70b1fc419005ab110c4f6e52270a3b2dabe44fb46ec086c37af245aecdc0",
+    "evals/see-rubric.json": "e11626411fa94b26dfaafdd8d207bf3038ec8692f748d167527d03fe5f708e0e",
+    "evals/cases/see-behavior-development.jsonl": "762eb2f47a986191aa8975390c028d3e59121967eb01542c2b83173e79eb9d7f",
+    "evals/cases/see-routing-development.jsonl": "7aec2346a04c2363f73230e7308332bc663d148390925ea8cf3ffc0f0820ada7",
+    "evals/cases/see-routing-independent-holdout.jsonl": "19b95bfc5f067ea8e71bd8f1106aef96a837993a271621589fc23da063906437f"
+  }
+}

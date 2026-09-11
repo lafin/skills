@@ -1,0 +1,22 @@
+{
+  "all_passed": true,
+  "artifacts": 3,
+  "condition": "treatment",
+  "critical_passed": 3,
+  "deterministic_grades": "grades.jsonl",
+  "efficacy_claim": null,
+  "input_binding": {
+    "artifacts": {
+      "artifacts/see-v23-scope-preservation-smoke/1.json": "003f0ce1c3bcbdec519d0f9a36e296decbf3645b1f21554762a6a62ae3bf21bb",
+      "artifacts/see-v23-scope-preservation-smoke/2.json": "c4c5635b48d7eb7507c7de28b9e84dae936e269c12c5308fb20e05d02abbe16b",
+      "artifacts/see-v23-scope-preservation-smoke/3.json": "4b12f07c6ca86fe410b14a95208d66bc37b8474289112eb56427bd979945a13d"
+    },
+    "case_snapshot_sha256": "3f7480114edca53525d16c3615d7e957abc5c29bcbb417a271375e525e82a301",
+    "grader_sha256": "21f818a084b4aecf52a6980f15558b2424bcedc640fb6b59647804d3a5fb0cc8",
+    "manifest_sha256": "c17bf97a087bd4d0e012525eb67586db2c859bc3099a92ec96be968b4090243a"
+  },
+  "passed": 3,
+  "reason": "A single condition cannot support an efficacy claim; pair it with the other condition.",
+  "run_id": "remediation-v23-scope-regression-smoke-treatment",
+  "schema_version": 4
+}

@@ -1,0 +1,37 @@
+{
+  "all_passed": false,
+  "artifacts": 18,
+  "condition": "baseline",
+  "critical_passed": 11,
+  "deterministic_grades": "grades.jsonl",
+  "efficacy_claim": null,
+  "input_binding": {
+    "artifacts": {
+      "artifacts/see-release-error-redaction/1.json": "3a662d13c73be3bb50e0b5a91516c4c798a4e3e16205ea46b38171a9aec555c0",
+      "artifacts/see-release-error-redaction/2.json": "56e32decd3fe1cdbf30e946acb67efd9c14ef056d5b14fd9cf79c24c10246d2a",
+      "artifacts/see-release-error-redaction/3.json": "18ad58852c382df3140c92b350e5ad732f551ec14b1d7b18d6375bbf89a09174",
+      "artifacts/see-release-explanation-timing/1.json": "3f9d6584a63170bd954c0c9fe277b36daf1ee7b42c51b885cd763e722ccca5b1",
+      "artifacts/see-release-explanation-timing/2.json": "84ff5ebe5662ca9d4e6b42eaa0fdf193b1f8bd854feb6b2ba80f6eaf9bb99794",
+      "artifacts/see-release-explanation-timing/3.json": "30652f4e9794464e5af6285ad4e0709b5c51df1e7a3a8eb05fc7120d2f6b25cf",
+      "artifacts/see-release-procedure-ambiguity/1.json": "79eb190cf570694d79add6470bdc72d641a938942de0feb6e78487719e95a159",
+      "artifacts/see-release-procedure-ambiguity/2.json": "9a166f61475663e16d4a615a3a48b6f7650aac96e6df2ba0aad5e3025723917d",
+      "artifacts/see-release-procedure-ambiguity/3.json": "5bd1424e44f723a3059c47762a6993602454f59388770ddb36a6fb4fa646b635",
+      "artifacts/see-release-procedure-noop/1.json": "17882f554ea3adecb1ea9520a28d9740cbdd074c9270e93de669a901ccd9f826",
+      "artifacts/see-release-procedure-noop/2.json": "1bd9074c47390fd51bd6ee22678944b080dabc936218527062e8a0eacb6cfddd",
+      "artifacts/see-release-procedure-noop/3.json": "2356c9deaeec17dd9904075deb80e1e579c373721aee334e7c6f5f77fc2d2964",
+      "artifacts/see-release-requirement-force/1.json": "fdfeecfed0ed33c0ab28b910adb8991547a25fe147fc8450d018f1714e17ceae",
+      "artifacts/see-release-requirement-force/2.json": "faec0dbd8fc6b1d21517b8beb8499782c712c4e54c4df950b561665dbd229bc5",
+      "artifacts/see-release-requirement-force/3.json": "9cd629b58278641320c2330800ba5bcad3632b1fa2cb87000f2339a5c9f50560",
+      "artifacts/see-release-requirement-noop/1.json": "2a1a7625796231a1601098215b9039a8e297844a20b6a373e25e40ce2fd26d7c",
+      "artifacts/see-release-requirement-noop/2.json": "9a0fec9e61dcf4c56926b3d51716144835745bc93773cbe5f6c4658cd31619c5",
+      "artifacts/see-release-requirement-noop/3.json": "9984412c82d62bf6c9703ca6c4d0aa62c66e602611d4973eceace64703b3bdfb"
+    },
+    "case_snapshot_sha256": "0e137ea3d837fe60472a2c15cc40375c7a67f750a5554bb5ceb0e3e614fb6027",
+    "grader_sha256": "3fdfc89e015a0e2cf61bf921c3b82958dae02d9f2c29bd20a8cc109c6b7f536f",
+    "manifest_sha256": "e1e6a2c8d912a6c50069cbd71bc728b5e8af823d241e70d16fc2105aef18840f"
+  },
+  "passed": 11,
+  "reason": "A single condition cannot support an efficacy claim; pair it with the other condition.",
+  "run_id": "release-holdout-baseline",
+  "schema_version": 3
+}

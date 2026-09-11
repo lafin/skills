@@ -1,0 +1,593 @@
+{
+  "pairs": {
+    "03fb5e58d4ced322": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 3,
+      "case_id": "see-authorization-scope-regression",
+      "order": "swapped"
+    },
+    "04353f64a8045c1b": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 1,
+      "case_id": "see-procedure-noop",
+      "order": "swapped"
+    },
+    "04a88b6ce1d68faa": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 3,
+      "case_id": "see-exact-profile-proper-name-regression",
+      "order": "swapped"
+    },
+    "08c50463de13d4dc": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 1,
+      "case_id": "see-explanation-quote-punctuation",
+      "order": "swapped"
+    },
+    "0c30b8386745bfd7": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 3,
+      "case_id": "see-descriptive-fact-regression",
+      "order": "forward"
+    },
+    "0e8ce16589c098fb": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 2,
+      "case_id": "see-unknown-recovery-before-destructive-regression",
+      "order": "swapped"
+    },
+    "0ebfe5a97777040d": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 2,
+      "case_id": "see-error-ordinary",
+      "order": "forward"
+    },
+    "119572e77277d28d": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 2,
+      "case_id": "see-procedure-ordinary",
+      "order": "swapped"
+    },
+    "11cc2dae874b1323": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 1,
+      "case_id": "see-procedure-ordinary",
+      "order": "swapped"
+    },
+    "17d7c884f999c86a": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 1,
+      "case_id": "see-exact-profile-proper-name-regression",
+      "order": "swapped"
+    },
+    "1852005d6c47667e": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 2,
+      "case_id": "see-exact-profile-proper-name-regression",
+      "order": "forward"
+    },
+    "18b65daf71146f5f": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "see-procedure-ordinary",
+      "order": "forward"
+    },
+    "1a026e7f2795d0f9": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "see-authorization-scope-regression",
+      "order": "forward"
+    },
+    "1b2bfce84f931b66": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 2,
+      "case_id": "see-procedure-noop",
+      "order": "swapped"
+    },
+    "1d99c1857fec219a": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 3,
+      "case_id": "see-single-reference-not-ambiguity-regression",
+      "order": "forward"
+    },
+    "1ef9573e5b2b5832": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 3,
+      "case_id": "see-single-reference-not-ambiguity-regression",
+      "order": "swapped"
+    },
+    "200ce5472401cdbf": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 3,
+      "case_id": "see-procedure-noop",
+      "order": "swapped"
+    },
+    "20be553b636f9b43": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "see-explanation-ordinary",
+      "order": "forward"
+    },
+    "38b29f4716d5b5f9": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 3,
+      "case_id": "see-error-ordinary",
+      "order": "forward"
+    },
+    "3e3c457a30056658": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "see-single-reference-not-ambiguity-regression",
+      "order": "forward"
+    },
+    "41d6add96d634575": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "see-unknown-recovery-before-destructive-regression",
+      "order": "forward"
+    },
+    "42e7d92c743a121a": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 3,
+      "case_id": "see-requirement-ordinary",
+      "order": "swapped"
+    },
+    "42fa53ac3c4ccb48": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 2,
+      "case_id": "see-authorization-scope-regression",
+      "order": "forward"
+    },
+    "44769949f50b2c8c": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "see-descriptive-fact-regression",
+      "order": "forward"
+    },
+    "46eb0ff9e82ea9ed": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 3,
+      "case_id": "see-explanation-quote-punctuation",
+      "order": "swapped"
+    },
+    "48a43774211e944e": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 1,
+      "case_id": "see-requirement-ordinary",
+      "order": "swapped"
+    },
+    "518aa81e1f4e2fc5": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 2,
+      "case_id": "see-evidence-limitation-not-ambiguity-regression",
+      "order": "swapped"
+    },
+    "5390da97eaa4e8f9": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 3,
+      "case_id": "see-evidence-limitation-not-ambiguity-regression",
+      "order": "swapped"
+    },
+    "55323cd64fb1af81": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 1,
+      "case_id": "see-authorization-scope-regression",
+      "order": "swapped"
+    },
+    "588def9127c177e2": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 1,
+      "case_id": "see-error-ordinary",
+      "order": "swapped"
+    },
+    "5be23aac93a93fa6": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 2,
+      "case_id": "see-explanation-ordinary",
+      "order": "forward"
+    },
+    "5d0897b873c8b4b5": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "see-procedure-noop",
+      "order": "forward"
+    },
+    "5f576cc402de9815": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 2,
+      "case_id": "see-error-ordinary",
+      "order": "swapped"
+    },
+    "61087c6231efeeea": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 2,
+      "case_id": "see-explanation-quote-punctuation",
+      "order": "swapped"
+    },
+    "64d87aa8c37b57f0": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "see-requirement-ordinary",
+      "order": "forward"
+    },
+    "64e914c98e7cd70d": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 3,
+      "case_id": "see-unknown-recovery-before-destructive-regression",
+      "order": "swapped"
+    },
+    "662254353420ad76": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 2,
+      "case_id": "see-procedure-ordinary",
+      "order": "forward"
+    },
+    "671b1fede8ba8ebd": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 2,
+      "case_id": "see-single-reference-not-ambiguity-regression",
+      "order": "forward"
+    },
+    "69f08e3c0277f846": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "see-local-antecedent-regression",
+      "order": "forward"
+    },
+    "79bafb21c7d46e8f": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 2,
+      "case_id": "see-descriptive-fact-regression",
+      "order": "forward"
+    },
+    "7a380243f9e84e74": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 2,
+      "case_id": "see-single-reference-not-ambiguity-regression",
+      "order": "swapped"
+    },
+    "7cb3e608424142fa": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 3,
+      "case_id": "see-procedure-ordinary",
+      "order": "forward"
+    },
+    "7d5be791a28cbf6c": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 2,
+      "case_id": "see-requirement-ordinary",
+      "order": "forward"
+    },
+    "7f7ea69dc852b898": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 3,
+      "case_id": "see-error-ordinary",
+      "order": "swapped"
+    },
+    "7f809c0db70133c9": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 3,
+      "case_id": "see-descriptive-fact-regression",
+      "order": "swapped"
+    },
+    "81b384e976ff3077": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 1,
+      "case_id": "see-evidence-limitation-not-ambiguity-regression",
+      "order": "swapped"
+    },
+    "84b1ebb7dbd35f58": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 2,
+      "case_id": "see-requirement-noop",
+      "order": "swapped"
+    },
+    "9185df7aaed39ebf": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 1,
+      "case_id": "see-single-reference-not-ambiguity-regression",
+      "order": "swapped"
+    },
+    "94bbd5f07c110129": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 3,
+      "case_id": "see-procedure-ordinary",
+      "order": "swapped"
+    },
+    "95aa1c8a9c6e2f6a": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 3,
+      "case_id": "see-explanation-quote-punctuation",
+      "order": "forward"
+    },
+    "9d206bef2d180500": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 3,
+      "case_id": "see-unknown-recovery-before-destructive-regression",
+      "order": "forward"
+    },
+    "9ed6e8ead2aa4124": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 3,
+      "case_id": "see-explanation-ordinary",
+      "order": "forward"
+    },
+    "a2301f10b3ef33cf": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 1,
+      "case_id": "see-unknown-recovery-before-destructive-regression",
+      "order": "swapped"
+    },
+    "ad96dea74398020c": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 2,
+      "case_id": "see-explanation-quote-punctuation",
+      "order": "forward"
+    },
+    "b0ebced6dec97915": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 1,
+      "case_id": "see-descriptive-fact-regression",
+      "order": "swapped"
+    },
+    "b16ac20eb02c26d0": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 2,
+      "case_id": "see-requirement-noop",
+      "order": "forward"
+    },
+    "bdd8fce5beb2bc39": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 2,
+      "case_id": "see-procedure-noop",
+      "order": "forward"
+    },
+    "bebbc17133211e8f": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 3,
+      "case_id": "see-local-antecedent-regression",
+      "order": "swapped"
+    },
+    "c87276488b6e5f67": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 2,
+      "case_id": "see-evidence-limitation-not-ambiguity-regression",
+      "order": "forward"
+    },
+    "c8a5db3ce1f5d486": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 3,
+      "case_id": "see-requirement-noop",
+      "order": "forward"
+    },
+    "ccf578a4c78b3071": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 2,
+      "case_id": "see-local-antecedent-regression",
+      "order": "forward"
+    },
+    "cdb67593873074ff": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 3,
+      "case_id": "see-requirement-noop",
+      "order": "swapped"
+    },
+    "cf6f1d821ac700fa": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 1,
+      "case_id": "see-requirement-noop",
+      "order": "swapped"
+    },
+    "d303126a74c5a048": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 2,
+      "case_id": "see-requirement-ordinary",
+      "order": "swapped"
+    },
+    "d45e46b4f94c714a": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 2,
+      "case_id": "see-unknown-recovery-before-destructive-regression",
+      "order": "forward"
+    },
+    "d5bc72a59b87b28f": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 3,
+      "case_id": "see-explanation-ordinary",
+      "order": "swapped"
+    },
+    "d663daa06b5428fd": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 2,
+      "case_id": "see-authorization-scope-regression",
+      "order": "swapped"
+    },
+    "d67919a798e1c9a9": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 1,
+      "case_id": "see-local-antecedent-regression",
+      "order": "swapped"
+    },
+    "d83b3a138840ffb7": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "see-requirement-noop",
+      "order": "forward"
+    },
+    "da4c55e2c7433294": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 2,
+      "case_id": "see-local-antecedent-regression",
+      "order": "swapped"
+    },
+    "de7ceb61e62a056c": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 3,
+      "case_id": "see-evidence-limitation-not-ambiguity-regression",
+      "order": "forward"
+    },
+    "dec6e3e4ca8127c8": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 3,
+      "case_id": "see-exact-profile-proper-name-regression",
+      "order": "forward"
+    },
+    "dfd917a6a01d8bb8": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 3,
+      "case_id": "see-requirement-ordinary",
+      "order": "forward"
+    },
+    "e00cd1c1f30cbe19": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "see-error-ordinary",
+      "order": "forward"
+    },
+    "e6a5dfd30f55f02c": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 3,
+      "case_id": "see-local-antecedent-regression",
+      "order": "forward"
+    },
+    "ef53ab593722c098": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 1,
+      "case_id": "see-explanation-ordinary",
+      "order": "swapped"
+    },
+    "f3771af70e9054f7": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "see-exact-profile-proper-name-regression",
+      "order": "forward"
+    },
+    "f4d534f110e7d1cc": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "see-explanation-quote-punctuation",
+      "order": "forward"
+    },
+    "f5459bd3a432d09d": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 2,
+      "case_id": "see-descriptive-fact-regression",
+      "order": "swapped"
+    },
+    "f589814d88760238": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "see-evidence-limitation-not-ambiguity-regression",
+      "order": "forward"
+    },
+    "f61cd76c00fb7521": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 2,
+      "case_id": "see-exact-profile-proper-name-regression",
+      "order": "swapped"
+    },
+    "f6f6a6c8134a44c9": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 3,
+      "case_id": "see-procedure-noop",
+      "order": "forward"
+    },
+    "f72d7b98f60f59de": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 2,
+      "case_id": "see-explanation-ordinary",
+      "order": "swapped"
+    },
+    "fd69f1e6f1a53b49": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 3,
+      "case_id": "see-authorization-scope-regression",
+      "order": "forward"
+    }
+  },
+  "schema_version": 4
+}

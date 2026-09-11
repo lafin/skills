@@ -1,0 +1,29 @@
+{
+  "all_passed": true,
+  "artifacts": 10,
+  "condition": "treatment",
+  "critical_passed": 10,
+  "deterministic_grades": "grades.jsonl",
+  "efficacy_claim": null,
+  "input_binding": {
+    "artifacts": {
+      "artifacts/see-authorization-scope-regression/1.json": "16eb3c0ccf022e9217b3c691c0889a3fa717b1873a81488c284f91bc60b3e560",
+      "artifacts/see-descriptive-fact-regression/1.json": "7cef359b62ea085aedfc4e03524e0499ed386377829f0a742ed6505f18a485aa",
+      "artifacts/see-error-ordinary/1.json": "466c25182c979595d5f6b23a559f2b0cb054c68349743b6ea083d0e711e5f8ae",
+      "artifacts/see-explanation-ordinary/1.json": "225a2ca08bbf9a938a567e6660438298bb91b6e09d41f894c5be5c1cf71c32ce",
+      "artifacts/see-explanation-quote-punctuation/1.json": "ebb7aed3a7664c33d3a5ae83e34b49eea6a22c0a0186631373eedd5a42ffee01",
+      "artifacts/see-local-antecedent-regression/1.json": "002a70395a42413e1950850950ba07025e5ea3f0e79b8dd0830d8f14befb307e",
+      "artifacts/see-procedure-noop/1.json": "534029dd3d486a2bb3ce6b91d87d059f415a705679e505f91d5547f87e7e3fbe",
+      "artifacts/see-procedure-ordinary/1.json": "840e607dca57aeef6157211d8a16b0ccfaba2a3ae57218cd482b0efce019bfd4",
+      "artifacts/see-requirement-noop/1.json": "cb50fb493ad12e7fe1b622edee34234ed3840139ef60181e3d4d98ffdd465ec8",
+      "artifacts/see-requirement-ordinary/1.json": "c8037f59201ececd64e107bd3e9debb1a77a3abf048dc3ba6fe18be635491e90"
+    },
+    "case_snapshot_sha256": "e856b5c1466d17bda75a4cb4e5112f168579852846adec60139e77f6040d7e9f",
+    "grader_sha256": "b194f75962c5cfdc798773c3ddb3394522fe72fefef9baaa02c17f9dcd50cb9e",
+    "manifest_sha256": "906b1a3544bba99b3eaa6b4b0cb68e0cc612d9abc346e73314c48a528d73694f"
+  },
+  "passed": 10,
+  "reason": "A single condition cannot support an efficacy claim; pair it with the other condition.",
+  "run_id": "remediation-v4-development-smoke-treatment",
+  "schema_version": 4
+}

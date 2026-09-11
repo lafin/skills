@@ -1,0 +1,28 @@
+{
+  "frozen_at": "2026-09-11T14:03:39Z",
+  "supersedes": "remediation-freeze-v4.json",
+  "reason": "V4 development capture found one repeated exact-quotation boundary regression and one opened-case predicate false positive. V5 adds a character-by-character quotation comparison instruction and corrects the development predicate. The v4 holdout was never executed and was removed before inspection beyond its deletion tail; a fresh independent v5 holdout is required.",
+  "development_smoke": {
+    "run": "remediation-v5-development-smoke-treatment",
+    "attempts_per_case": 3,
+    "quoted_span_passed": 3,
+    "quoted_span_total": 3,
+    "candidate_critical_regressions_passed": 9,
+    "candidate_critical_regressions_total": 9,
+    "recorded_deterministic_passes": 29,
+    "recorded_artifacts": 30,
+    "opened_case_contract_false_positive": "see-local-antecedent-regression:2 pressure_relation",
+    "case_contract_corrected_before_freeze": true
+  },
+  "sha256": {
+    "evals/run.py": "be310d7d73869c11412724d66d66105850b22cd3210e4c753f1cbc4aa443cca0",
+    "evals/grade.py": "b194f75962c5cfdc798773c3ddb3394522fe72fefef9baaa02c17f9dcd50cb9e",
+    "tests/test_evaluation_harness.py": "55eef0a38de52768f000b72ef0f30747b2b4a39273d776ae7ede3e91b055d855",
+    "simplified-engineering-english/SKILL.md": "f0de48ca9c9b9fb9c1f4bf161ef8484456daed8868ddf769a38ee5eeae7b9b4a",
+    "simplified-engineering-english/references/rules.md": "2de228a5eeda69b1bba6c5d6ec7a0b5343747d662a6f0b1776803a88ef5e5a79",
+    "simplified-engineering-english/references/dictionary.md": "93ca70b1fc419005ab110c4f6e52270a3b2dabe44fb46ec086c37af245aecdc0",
+    "evals/see-rubric.json": "e11626411fa94b26dfaafdd8d207bf3038ec8692f748d167527d03fe5f708e0e",
+    "evals/cases/see-behavior-development.jsonl": "0a58c02cf6e9caec710a2c532d33bba6e18b36cf9b15bfca770216a950be426c",
+    "evals/cases/see-routing-development.jsonl": "7aec2346a04c2363f73230e7308332bc663d148390925ea8cf3ffc0f0820ada7"
+  }
+}

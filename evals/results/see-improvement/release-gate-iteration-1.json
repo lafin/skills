@@ -1,0 +1,78 @@
+{
+  "case_kind": "behavior",
+  "correctness_benefit": "Development deterministic passes increased from 11/18 to 18/18; holdout passes increased from 8/18 to 11/18; routing holdout remained 24/24.",
+  "criteria": {
+    "cost_metrics_known": true,
+    "development_improved": true,
+    "holdout_preserved": false,
+    "increased_cost_has_correctness_benefit": true,
+    "no_critical_regressions": false,
+    "routing_holdout_all_passed": true
+  },
+  "decision": "fail",
+  "development": {
+    "baseline_metrics": {
+      "questions": 0,
+      "tokens": 10322,
+      "tool_events": 0
+    },
+    "baseline_passed": 11,
+    "critical_regressions": [],
+    "regressions": [],
+    "total": 18,
+    "treatment_metrics": {
+      "questions": 0,
+      "tokens": 93614,
+      "tool_events": 0
+    },
+    "treatment_passed": 18
+  },
+  "efficacy_claim": null,
+  "holdout": {
+    "baseline_metrics": {
+      "questions": 0,
+      "tokens": 12290,
+      "tool_events": 0
+    },
+    "baseline_passed": 8,
+    "critical_regressions": [
+      "see-procedure-adversarial:1",
+      "see-error-adversarial:2"
+    ],
+    "regressions": [
+      "see-procedure-adversarial:1",
+      "see-error-adversarial:2"
+    ],
+    "total": 18,
+    "treatment_metrics": {
+      "questions": 0,
+      "tokens": 99599,
+      "tool_events": 0
+    },
+    "treatment_passed": 11
+  },
+  "increased_metrics": [
+    "development:tokens",
+    "holdout:tokens"
+  ],
+  "paired_evidence": true,
+  "routing_holdout": {
+    "baseline_metrics": {
+      "questions": 0,
+      "tokens": 61473,
+      "tool_events": 0
+    },
+    "baseline_passed": 24,
+    "critical_regressions": [],
+    "regressions": [],
+    "total": 24,
+    "treatment_metrics": {
+      "questions": 0,
+      "tokens": 61473,
+      "tool_events": 0
+    },
+    "treatment_passed": 24
+  },
+  "schema_version": 3,
+  "unknown_metrics": []
+}

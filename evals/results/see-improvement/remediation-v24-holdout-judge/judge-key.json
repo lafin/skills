@@ -1,0 +1,509 @@
+{
+  "pairs": {
+    "010ad2a5e093f50d": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 2,
+      "case_id": "sib21-explanation-ordinary-boreal",
+      "order": "forward"
+    },
+    "0a6b4f314e6cfed9": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "sib21-explanation-noop-topaz",
+      "order": "forward"
+    },
+    "0d005bfa2dfa1c40": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 2,
+      "case_id": "sib21-procedure-noop-juniper",
+      "order": "swapped"
+    },
+    "0ee5f43bd02baee5": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 1,
+      "case_id": "sib21-incident-adversarial-saffron",
+      "order": "swapped"
+    },
+    "1021b915526a9ab1": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 3,
+      "case_id": "sib21-explanation-noop-topaz",
+      "order": "swapped"
+    },
+    "12190420b17c15b8": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 3,
+      "case_id": "sib21-procedure-noop-juniper",
+      "order": "swapped"
+    },
+    "16479f3bb1d53d31": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 3,
+      "case_id": "sib21-procedure-ordinary-aster",
+      "order": "forward"
+    },
+    "17e30dbb7fcdc80e": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "sib21-explanation-ordinary-boreal",
+      "order": "forward"
+    },
+    "17e51ea0dc9ad2ad": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 2,
+      "case_id": "sib21-requirement-noop-maple",
+      "order": "swapped"
+    },
+    "1a260f2e05f17179": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 2,
+      "case_id": "sib21-requirement-adversarial-quartz",
+      "order": "forward"
+    },
+    "1a537e028f0c6343": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "sib21-requirement-noop-maple",
+      "order": "forward"
+    },
+    "1bfa7586c4761ab0": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 2,
+      "case_id": "sib21-incident-ordinary-rowan",
+      "order": "swapped"
+    },
+    "205f91d0b92da6d2": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 3,
+      "case_id": "sib21-requirement-noop-maple",
+      "order": "swapped"
+    },
+    "28ecbe9912cf8221": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 2,
+      "case_id": "sib21-incident-noop-violet",
+      "order": "swapped"
+    },
+    "2ce92ca5a28c1ce1": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 2,
+      "case_id": "sib21-requirement-ordinary-lumen",
+      "order": "swapped"
+    },
+    "2fab71828aa3c1c6": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 3,
+      "case_id": "sib21-incident-ordinary-rowan",
+      "order": "forward"
+    },
+    "305ce0044576006f": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 3,
+      "case_id": "sib21-explanation-adversarial-helix",
+      "order": "forward"
+    },
+    "3a8dfdceb02a003c": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 1,
+      "case_id": "sib21-procedure-ordinary-aster",
+      "order": "swapped"
+    },
+    "3c595057825b2799": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "sib21-explanation-adversarial-helix",
+      "order": "forward"
+    },
+    "3cfb9c63dcd1175f": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 2,
+      "case_id": "sib21-procedure-ordinary-aster",
+      "order": "swapped"
+    },
+    "3f7c69846316d81b": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 3,
+      "case_id": "sib21-procedure-ordinary-aster",
+      "order": "swapped"
+    },
+    "405bd289581c2e6b": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 2,
+      "case_id": "sib21-incident-ordinary-rowan",
+      "order": "forward"
+    },
+    "43abfe18369d0e72": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 2,
+      "case_id": "sib21-procedure-adversarial-bramble",
+      "order": "forward"
+    },
+    "58e19588aa878335": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 3,
+      "case_id": "sib21-procedure-adversarial-bramble",
+      "order": "forward"
+    },
+    "5d1b3d878801fb0d": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 2,
+      "case_id": "sib21-procedure-noop-juniper",
+      "order": "forward"
+    },
+    "69467abb502e9413": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 3,
+      "case_id": "sib21-requirement-adversarial-quartz",
+      "order": "swapped"
+    },
+    "6cab5f1f9e1df512": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 3,
+      "case_id": "sib21-explanation-noop-topaz",
+      "order": "forward"
+    },
+    "6d3c47301454b5e7": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 3,
+      "case_id": "sib21-explanation-adversarial-helix",
+      "order": "swapped"
+    },
+    "7a67e78bb95ee563": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 2,
+      "case_id": "sib21-incident-adversarial-saffron",
+      "order": "swapped"
+    },
+    "7baa0a0f4b2a1552": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 2,
+      "case_id": "sib21-procedure-ordinary-aster",
+      "order": "forward"
+    },
+    "7f0bae754a35d685": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 3,
+      "case_id": "sib21-requirement-ordinary-lumen",
+      "order": "swapped"
+    },
+    "810fb3145c633253": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "sib21-requirement-adversarial-quartz",
+      "order": "forward"
+    },
+    "889c4d3cd485efa9": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 2,
+      "case_id": "sib21-explanation-ordinary-boreal",
+      "order": "swapped"
+    },
+    "893ea9f28295852b": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 3,
+      "case_id": "sib21-explanation-ordinary-boreal",
+      "order": "swapped"
+    },
+    "89f5a53aa8987127": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 3,
+      "case_id": "sib21-incident-noop-violet",
+      "order": "swapped"
+    },
+    "8bcc94728c2ccd37": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 3,
+      "case_id": "sib21-explanation-ordinary-boreal",
+      "order": "forward"
+    },
+    "8c2f3b1fa1e8d060": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 1,
+      "case_id": "sib21-explanation-adversarial-helix",
+      "order": "swapped"
+    },
+    "9012b55099ba8588": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "sib21-procedure-adversarial-bramble",
+      "order": "forward"
+    },
+    "901463643d18fe7f": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 3,
+      "case_id": "sib21-incident-ordinary-rowan",
+      "order": "swapped"
+    },
+    "9282a333732f6779": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "sib21-incident-noop-violet",
+      "order": "forward"
+    },
+    "99c42617e6e8194e": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 1,
+      "case_id": "sib21-explanation-ordinary-boreal",
+      "order": "swapped"
+    },
+    "9e3386e184ce7e0e": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 1,
+      "case_id": "sib21-explanation-noop-topaz",
+      "order": "swapped"
+    },
+    "9f2089fbd6ef34ec": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "sib21-incident-ordinary-rowan",
+      "order": "forward"
+    },
+    "a212144fe3172d97": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "sib21-procedure-ordinary-aster",
+      "order": "forward"
+    },
+    "a30a7b01acdc22ed": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 2,
+      "case_id": "sib21-explanation-adversarial-helix",
+      "order": "swapped"
+    },
+    "a9fb733f46a8bb17": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 1,
+      "case_id": "sib21-incident-noop-violet",
+      "order": "swapped"
+    },
+    "af5a11df997ca442": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 3,
+      "case_id": "sib21-incident-adversarial-saffron",
+      "order": "swapped"
+    },
+    "b134e8f4c04c6f9c": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 1,
+      "case_id": "sib21-requirement-ordinary-lumen",
+      "order": "swapped"
+    },
+    "b185a3a59c72e7cd": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 1,
+      "case_id": "sib21-requirement-noop-maple",
+      "order": "swapped"
+    },
+    "b26e2712e12fc318": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 3,
+      "case_id": "sib21-requirement-noop-maple",
+      "order": "forward"
+    },
+    "ba24d2126851da84": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 1,
+      "case_id": "sib21-procedure-adversarial-bramble",
+      "order": "swapped"
+    },
+    "bc54aa5c9fe509c5": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 2,
+      "case_id": "sib21-requirement-noop-maple",
+      "order": "forward"
+    },
+    "bdff19cc9465d8e4": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 1,
+      "case_id": "sib21-requirement-adversarial-quartz",
+      "order": "swapped"
+    },
+    "bf7dab53f81d1804": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 2,
+      "case_id": "sib21-requirement-ordinary-lumen",
+      "order": "forward"
+    },
+    "c0bb02ea674a4ba9": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 3,
+      "case_id": "sib21-incident-noop-violet",
+      "order": "forward"
+    },
+    "c1499b421cdac9d7": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 3,
+      "case_id": "sib21-requirement-ordinary-lumen",
+      "order": "forward"
+    },
+    "c3a4f05cb612604d": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 2,
+      "case_id": "sib21-explanation-noop-topaz",
+      "order": "forward"
+    },
+    "c6e3c0a5dd06fb76": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "sib21-requirement-ordinary-lumen",
+      "order": "forward"
+    },
+    "c80b9fefa1428b2a": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 3,
+      "case_id": "sib21-procedure-noop-juniper",
+      "order": "forward"
+    },
+    "ca13a1411f87b571": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 2,
+      "case_id": "sib21-explanation-noop-topaz",
+      "order": "swapped"
+    },
+    "d15aa779ace83f57": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 1,
+      "case_id": "sib21-procedure-noop-juniper",
+      "order": "swapped"
+    },
+    "d45a19883ebca4fb": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 3,
+      "case_id": "sib21-procedure-adversarial-bramble",
+      "order": "swapped"
+    },
+    "db9c08e4ea2c4d2d": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 1,
+      "case_id": "sib21-incident-ordinary-rowan",
+      "order": "swapped"
+    },
+    "dc369eb1650343c5": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 2,
+      "case_id": "sib21-procedure-adversarial-bramble",
+      "order": "swapped"
+    },
+    "dc9d7df7a7ddc8ed": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 3,
+      "case_id": "sib21-requirement-adversarial-quartz",
+      "order": "forward"
+    },
+    "e33b6c9c68733389": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 2,
+      "case_id": "sib21-incident-noop-violet",
+      "order": "forward"
+    },
+    "e392f179bd65981e": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 2,
+      "case_id": "sib21-incident-adversarial-saffron",
+      "order": "forward"
+    },
+    "e99457c5c157f604": {
+      "A": "treatment",
+      "B": "baseline",
+      "attempt": 2,
+      "case_id": "sib21-requirement-adversarial-quartz",
+      "order": "swapped"
+    },
+    "e9a1140a8d414a73": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 2,
+      "case_id": "sib21-explanation-adversarial-helix",
+      "order": "forward"
+    },
+    "f56e5f9d80e45af4": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "sib21-incident-adversarial-saffron",
+      "order": "forward"
+    },
+    "f8d90ab8473eb7d6": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 3,
+      "case_id": "sib21-incident-adversarial-saffron",
+      "order": "forward"
+    },
+    "fbd498a4ed5a8015": {
+      "A": "baseline",
+      "B": "treatment",
+      "attempt": 1,
+      "case_id": "sib21-procedure-noop-juniper",
+      "order": "forward"
+    }
+  },
+  "schema_version": 4
+}

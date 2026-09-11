@@ -1,0 +1,27 @@
+{
+  "frozen_at": "2026-09-11T15:00:28Z",
+  "supersedes": "remediation-freeze-v8.json",
+  "prior_freeze_sha256": "6ab68a23f6f40a8fd752e33f370f87ad99af2b3c2fab875f0d3b6fffee60f4dd",
+  "reason": "V8 development capture found one deterministic case-contract false positive: the candidate reported the missing rollback or recovery step in REWRITE, but the hidden predicate accepted it only in AMBIGUITIES. V9 broadens that reporting predicate to the full response and updates the hidden manifest wording. Candidate and evaluator source are unchanged.",
+  "rejected_v8_development_capture": {
+    "baseline": "remediation-v7-development-behavior-baseline",
+    "treatment": "remediation-v8-development-behavior-treatment",
+    "baseline_passed": 17,
+    "treatment_passed": 32,
+    "artifacts": 33,
+    "failed_treatment_artifact": "see-exact-profile-proper-name-regression:3",
+    "classification": "deterministic false positive",
+    "evidence": "The response states that the source provides no rollback or recovery step in REWRITE. The former safety_gap predicate searched only fields.AMBIGUITIES."
+  },
+  "sha256": {
+    "evals/run.py": "be310d7d73869c11412724d66d66105850b22cd3210e4c753f1cbc4aa443cca0",
+    "evals/grade.py": "b194f75962c5cfdc798773c3ddb3394522fe72fefef9baaa02c17f9dcd50cb9e",
+    "tests/test_evaluation_harness.py": "6d111db5e8731f4b51b052aed05aceffbbc476d9c80b5bd01d8284c2c2804e73",
+    "simplified-engineering-english/SKILL.md": "d48e8f7f4f2dc2e542e190e7f0fdcc244fe76f9bba71d6f5d162c44400025bc2",
+    "simplified-engineering-english/references/rules.md": "ab5507b57bf31a600ca94e11f472f4603ccecb1955b182db3c8604f6ee793447",
+    "simplified-engineering-english/references/dictionary.md": "93ca70b1fc419005ab110c4f6e52270a3b2dabe44fb46ec086c37af245aecdc0",
+    "evals/see-rubric.json": "e11626411fa94b26dfaafdd8d207bf3038ec8692f748d167527d03fe5f708e0e",
+    "evals/cases/see-behavior-development.jsonl": "762eb2f47a986191aa8975390c028d3e59121967eb01542c2b83173e79eb9d7f",
+    "evals/cases/see-routing-development.jsonl": "7aec2346a04c2363f73230e7308332bc663d148390925ea8cf3ffc0f0820ada7"
+  }
+}

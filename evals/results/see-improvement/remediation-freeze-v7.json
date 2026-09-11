@@ -1,0 +1,36 @@
+{
+  "frozen_at": "2026-09-11T14:43:44Z",
+  "supersedes": "remediation-freeze-v6.json",
+  "reason": "The sealed V6 holdout found two treatment failures in one destructive procedure: one omitted a protected product name and one appended punctuation to an explicitly exact profile token. V7 adds general preservation guidance for named-term capitalization and exact output tokens, and promotes both failures to a development regression. A fresh independent holdout is required.",
+  "rejected_v6_holdout": {
+    "baseline": "remediation-v6-independent-behavior-baseline",
+    "treatment": "remediation-v6-independent-behavior-treatment",
+    "baseline_passed": 31,
+    "treatment_passed": 34,
+    "artifacts": 36,
+    "failed_treatment_artifacts": [
+      "see-v6-procedure-adversarial-orbinex-purge:1",
+      "see-v6-procedure-adversarial-orbinex-purge:3"
+    ],
+    "candidate_defects": [
+      "Omitted the protected product name Orbinex.",
+      "Returned PROFILE: strict. instead of the exact token strict."
+    ]
+  },
+  "development_regression_smoke": {
+    "run": "remediation-v7-regression-smoke-treatment",
+    "passed": 3,
+    "artifacts": 3
+  },
+  "sha256": {
+    "evals/run.py": "be310d7d73869c11412724d66d66105850b22cd3210e4c753f1cbc4aa443cca0",
+    "evals/grade.py": "b194f75962c5cfdc798773c3ddb3394522fe72fefef9baaa02c17f9dcd50cb9e",
+    "tests/test_evaluation_harness.py": "6d111db5e8731f4b51b052aed05aceffbbc476d9c80b5bd01d8284c2c2804e73",
+    "simplified-engineering-english/SKILL.md": "0e8010a9c55b40bc6b8934e943a6a03103e4ce3b831c6b71600acae0bc426c4c",
+    "simplified-engineering-english/references/rules.md": "ab5507b57bf31a600ca94e11f472f4603ccecb1955b182db3c8604f6ee793447",
+    "simplified-engineering-english/references/dictionary.md": "93ca70b1fc419005ab110c4f6e52270a3b2dabe44fb46ec086c37af245aecdc0",
+    "evals/see-rubric.json": "e11626411fa94b26dfaafdd8d207bf3038ec8692f748d167527d03fe5f708e0e",
+    "evals/cases/see-behavior-development.jsonl": "635d78df4f4552e19c36e0f53026318c3707186b03560aada104f1a41df4d998",
+    "evals/cases/see-routing-development.jsonl": "7aec2346a04c2363f73230e7308332bc663d148390925ea8cf3ffc0f0820ada7"
+  }
+}

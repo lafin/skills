@@ -1,0 +1,44 @@
+{
+  "frozen_at": "2026-09-11T17:11:43Z",
+  "candidate_freeze": {
+    "path": "evals/results/see-improvement/remediation-freeze-v17.json",
+    "sha256": "06f49f37c3b97c39ac376a829e569c5da588194ec47217e68fe04e2b32c1ffcd"
+  },
+  "holdout": {
+    "path": "evals/cases/see-behavior-independent-holdout-v17.jsonl",
+    "sha256": "d9c307c5f4102ea0424e04ac0a4273b85f41f15779b1a5de089e694d609cd6e3",
+    "records": 12,
+    "families": {
+      "procedure/runbook": 3,
+      "requirement/contract": 3,
+      "explanation/reference": 3,
+      "error/incident": 3
+    },
+    "variants": {
+      "ordinary": 4,
+      "adversarial": 4,
+      "noop": 4
+    }
+  },
+  "response_blind_audit": {
+    "mechanical_validation": "pass",
+    "independent_author": "IndependentBehaviorHoldoutV17",
+    "independent_auditor": "HoldoutV17ScoutAudit",
+    "candidate_or_prior_evidence_visible_to_author_or_auditor": false,
+    "declared_checks": 55,
+    "generated_exact_preservation_checks": 55,
+    "corrections_before_freeze": [
+      "Added the QuarrayPulse command to protected spans.",
+      "Made the Atlas ordering check tolerate unrelated inline-code spans while requiring risk, verification, and recovery before the purge command.",
+      "Strengthened the ledger-key and BrambleKite ambiguity anchors.",
+      "Required all three BrambleKite quotations named by the manifest."
+    ],
+    "final_recheck": "The current holdout passed schema validation and targeted boundary and ordering probes. The response-blind auditor recommended freeze.",
+    "semantic_only_disposition": "Actor relationships, obligation equivalence, causality, uncertainty, and ambiguity meaning remain in judge_criteria."
+  },
+  "evaluator": {
+    "evals/run.py": "be310d7d73869c11412724d66d66105850b22cd3210e4c753f1cbc4aa443cca0",
+    "evals/grade.py": "dd04a7a7d85d129245f1885bac5ff3845b3f3adb292b90394570f08b5827fe72"
+  },
+  "candidate_skill_sha256": "5a9e04a1d2eae3c3c8577c3f42076ea4aa3f98f8a3c1cda2c8a87414dd07d98b"
+}

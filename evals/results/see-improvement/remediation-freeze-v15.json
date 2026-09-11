@@ -1,0 +1,37 @@
+{
+  "frozen_at": "2026-09-11T16:25:23Z",
+  "supersedes": "remediation-freeze-v14.json",
+  "prior_freeze_sha256": "24647ff491c468756fe6419360a244077df395299dd5bc560716eded5a461196",
+  "reason": "The response-blind V14 holdout audit found generic exact-span boundary defects and unsound lexical obligation-force checks. V15 rejects technical-token extensions and delegates obligation-force equivalence to semantic review. The audit also corrected two unsupported holdout ambiguity contracts before freeze.",
+  "rejected_v14_automated_evidence": {
+    "reason": "The capture predates the hardened grader and the holdout had not been frozen or executed.",
+    "candidate_changed_after_capture": false,
+    "grader_changed_after_capture": true
+  },
+  "response_blind_holdout_audit": {
+    "independent_author": "IndependentBehaviorHoldoutV14",
+    "independent_auditor": "HoldoutV14ScoutAudit",
+    "candidate_or_prior_evidence_visible_to_author_or_auditor": false,
+    "corrections_before_freeze": [
+      "Bound the supported pronoun `it` to Nimbus API v7.4 and kept only `them` and `their` unresolved.",
+      "Preserved the explicit target relation `reduced retries to 4/min` and removed an unsupported `by 4/min` reading.",
+      "Removed generated lexical checks for semantically equivalent obligation force.",
+      "Rejected exact-span matches embedded in technical token extensions such as R3-standby, 65%0, v7.4.5, and colon-extended hashes."
+    ],
+    "final_recheck": "All 12 schemas, field contracts, source spans, no-op anchors, and 1,424 prefix/suffix probes passed. No deterministic blocker remained.",
+    "semantic_only_disposition": "Obligation equivalence, typed relationships, causality, ambiguity, and safety meaning remain in judge_criteria."
+  },
+  "sha256": {
+    "evals/run.py": "be310d7d73869c11412724d66d66105850b22cd3210e4c753f1cbc4aa443cca0",
+    "evals/grade.py": "dd04a7a7d85d129245f1885bac5ff3845b3f3adb292b90394570f08b5827fe72",
+    "tests/test_evaluation_harness.py": "52b8028e972ed34ec2d3d2ff78390ce13cfe65ca41c756423acd270aaf4b6680",
+    "simplified-engineering-english/SKILL.md": "ffc23001ce96c3bb05eab684b00f440e622aea608442c936e24c0c6bee6efb50",
+    "simplified-engineering-english/references/rules.md": "bebe88700dded668c6610ec26c4c0cebdf3b56f47c3364455ec80466ca00ea7d",
+    "simplified-engineering-english/references/dictionary.md": "93ca70b1fc419005ab110c4f6e52270a3b2dabe44fb46ec086c37af245aecdc0",
+    "evals/see-rubric.json": "e11626411fa94b26dfaafdd8d207bf3038ec8692f748d167527d03fe5f708e0e",
+    "evals/cases/see-behavior-development.jsonl": "547d03790fd31f4f55c7dc57d0ce7abb242f82bb34b5ae0e9bb83155eaf9fd90",
+    "evals/cases/see-behavior-independent-holdout-v14.jsonl": "37d42b38ef7f9f1cd780ea3d677500b5aa03f32af6d718c9f91cdecd42527389",
+    "evals/cases/see-routing-development.jsonl": "7aec2346a04c2363f73230e7308332bc663d148390925ea8cf3ffc0f0820ada7",
+    "evals/cases/see-routing-independent-holdout.jsonl": "19b95bfc5f067ea8e71bd8f1106aef96a837993a271621589fc23da063906437f"
+  }
+}

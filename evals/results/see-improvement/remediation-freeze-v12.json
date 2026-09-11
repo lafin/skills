@@ -1,0 +1,39 @@
+{
+  "frozen_at": "2026-09-11T15:44:53Z",
+  "supersedes": "remediation-freeze-v11.json",
+  "prior_freeze_sha256": "596205df50677a62a357f668f2a8158daf725a8e9e065f02b5b999e0b770aa4a",
+  "reason": "The V11 development capture exposed two deterministic oracle defects: an ambiguity predicate required unrelated missing-details terms, and a baseline-evidence check contradicted the ambiguity decision gate by requiring an evidence limitation in AMBIGUITIES. V12 corrects those development checks without changing the candidate, grader, or sealed V11 holdout.",
+  "rejected_v11_development": {
+    "baseline": "remediation-v11-development-behavior-baseline",
+    "treatment": "remediation-v11-development-behavior-treatment",
+    "baseline_passed": 29,
+    "treatment_passed": 38,
+    "artifacts": 42,
+    "classification": {
+      "oracle_false_positive_artifacts": 4,
+      "oracle_defects": 2,
+      "candidate_defects": 0
+    },
+    "oracle_defects": [
+      "The error-case predicate required both an operation-like term and a cause-like term in AMBIGUITIES even when the rewrite reported the unknown cause and AMBIGUITIES precisely identified the unresolved item referent.",
+      "The explanation-case predicate required a missing comparison baseline in AMBIGUITIES although the source provides one interpretation and the candidate correctly preserved the missing baseline as an evidence limitation in REWRITE."
+    ]
+  },
+  "sealed_holdout": {
+    "freeze": "remediation-holdout-freeze-v11.json",
+    "note": "The candidate, run harness, grader, rubric, and holdout cases are unchanged. Only development-oracle metadata and predicates changed after the sealed holdout capture."
+  },
+  "sha256": {
+    "evals/run.py": "be310d7d73869c11412724d66d66105850b22cd3210e4c753f1cbc4aa443cca0",
+    "evals/grade.py": "f19fdfd06d88ba78ed911eb3059205e95025fd9258b5ddc8f6b447476ae424f8",
+    "tests/test_evaluation_harness.py": "72922a04b8bf66fc55e31e223874fb7e79d0ae6dcc093d38ab2d443e385ec5e0",
+    "simplified-engineering-english/SKILL.md": "9c84e922a9f808a3c0447128c491a0437257135b4a1f03ade6036ce7a245949a",
+    "simplified-engineering-english/references/rules.md": "bebe88700dded668c6610ec26c4c0cebdf3b56f47c3364455ec80466ca00ea7d",
+    "simplified-engineering-english/references/dictionary.md": "93ca70b1fc419005ab110c4f6e52270a3b2dabe44fb46ec086c37af245aecdc0",
+    "evals/see-rubric.json": "e11626411fa94b26dfaafdd8d207bf3038ec8692f748d167527d03fe5f708e0e",
+    "evals/cases/see-behavior-development.jsonl": "d5c17fe832d5ccdfb8d6c2c512a083fbae879e5739de077f8d776456c8e6470d",
+    "evals/cases/see-behavior-independent-holdout-v11.jsonl": "da9a649a496a4163614eea3302a98ab3102bf31dec499ec95f65e32ffa96ff7f",
+    "evals/cases/see-routing-development.jsonl": "7aec2346a04c2363f73230e7308332bc663d148390925ea8cf3ffc0f0820ada7",
+    "evals/cases/see-routing-independent-holdout.jsonl": "19b95bfc5f067ea8e71bd8f1106aef96a837993a271621589fc23da063906437f"
+  }
+}

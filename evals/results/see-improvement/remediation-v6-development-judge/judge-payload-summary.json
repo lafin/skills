@@ -1,0 +1,10 @@
+{
+  "deterministic_grade_summaries": [
+    "evals/results/see-improvement/remediation-v6-development-behavior-baseline/grade-summary.json",
+    "evals/results/see-improvement/remediation-v6-development-behavior-treatment/grade-summary.json"
+  ],
+  "efficacy_claim": null,
+  "payloads": 60,
+  "schema_version": 4,
+  "swapped_pairs": 30
+}

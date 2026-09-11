@@ -1,0 +1,43 @@
+{
+  "all_passed": false,
+  "artifacts": 24,
+  "condition": "baseline",
+  "critical_passed": 22,
+  "deterministic_grades": "grades.jsonl",
+  "efficacy_claim": null,
+  "input_binding": {
+    "artifacts": {
+      "artifacts/see-routing-development-see--evaluation-negative/1.json": "735760374833a379306142355a9f9ac0125adb8adf198ff70ea879efefc48a5c",
+      "artifacts/see-routing-development-see--evaluation-negative/2.json": "48b582364c1e9168ae174b8e3a71300b064b64ffc59dcd1770b78da86c7cf51c",
+      "artifacts/see-routing-development-see--evaluation-negative/3.json": "567e43c6b790e8be9a664ace7ce54f17804d94e438736897600e2d572515ab9a",
+      "artifacts/see-routing-development-see--evaluation-positive/1.json": "c4c54c3cc9cbac823239fd7cd697ec35974dbec77ccf2ccf57167b363ddd524b",
+      "artifacts/see-routing-development-see--evaluation-positive/2.json": "df68f441c3c5860efdd1cad6d79d736b72f82f8c72136b332fd19f06f7962959",
+      "artifacts/see-routing-development-see--evaluation-positive/3.json": "27286ea39fe117d7daa648929e31aedd76acc5d25564b2ffe04928808bb5f031",
+      "artifacts/see-routing-development-see--leancode-negative/1.json": "a0cbc3f091dff4659e6c27e3c69a1e0394e239a998e993bd660811cd46793afc",
+      "artifacts/see-routing-development-see--leancode-negative/2.json": "daf603950a18a584328d2931be8d4d2f2ab942f7e3ff654833ff2882436248bd",
+      "artifacts/see-routing-development-see--leancode-negative/3.json": "91e640684a640f37c3755ae3b870102d93bf6f0415fb3771ce82e20d9af25b90",
+      "artifacts/see-routing-development-see--leancode-positive/1.json": "c5508e9c5c518c36c9b8f5d30fc8f27424d8dc63c75b8cf6923633434f20c255",
+      "artifacts/see-routing-development-see--leancode-positive/2.json": "d9e4de1016822d67bd8a3e639acbeb44257ea7dcf235ebf1759d0fdbd706fa55",
+      "artifacts/see-routing-development-see--leancode-positive/3.json": "be093d48b2f0ba2d9f7f55ee066a6e91963a322b3d642ebe95ec213d7f3a6a8e",
+      "artifacts/see-routing-development-see--lossless-negative/1.json": "04ec5416a19d7dbec500a8823e495a5d9005f2c303ae7db9c812dbc280c6c567",
+      "artifacts/see-routing-development-see--lossless-negative/2.json": "d63d2039bc522d3b29a3a0e5bbdf6f3468483e4b2280f9bc435f733e84f749a7",
+      "artifacts/see-routing-development-see--lossless-negative/3.json": "630f3d998cda9e8cd7c9b5dee85c6762d0c0b12cde50b6e347a98acecd675cdd",
+      "artifacts/see-routing-development-see--lossless-positive/1.json": "4e11f21354d3c072c5645373d2bee4073ea345d3801014ddcf1a16698a740dfa",
+      "artifacts/see-routing-development-see--lossless-positive/2.json": "7b2376850e5eaa76b9c09099820a67dc47574aa607ea26b8e316e04807becb56",
+      "artifacts/see-routing-development-see--lossless-positive/3.json": "5c3ffd41999d31c96271e301d708629679b070a37c1e5284425686a131c5149f",
+      "artifacts/see-routing-development-see--tool-design-negative/1.json": "63949526dbcc9b6a08af68d758830ae661938a68402e6f042669151125b5ab39",
+      "artifacts/see-routing-development-see--tool-design-negative/2.json": "0a69f767412758402e2980cafa3764d4fbf09164616fb33afdd72c5e74958feb",
+      "artifacts/see-routing-development-see--tool-design-negative/3.json": "34181240dd144cb7f5bd33f556deac90681030c3cecb71a704f1f9835aea98c6",
+      "artifacts/see-routing-development-see--tool-design-positive/1.json": "eafcc340e265c21bafa90ac016e080cd164116998a44b930595e5a5a837bc690",
+      "artifacts/see-routing-development-see--tool-design-positive/2.json": "c5d28b788800101f3c5c307ec3197e4575527935c13806b72134eb8424b44a7d",
+      "artifacts/see-routing-development-see--tool-design-positive/3.json": "b302dbfe34ef5e1c68760fd056736141923fd5984fe38c8304f4c6b5c08ef6bb"
+    },
+    "case_snapshot_sha256": "129ac70575c31a7ba6714c927d187432a9d4d768970570a86599f772cdbd05bc",
+    "grader_sha256": "3fdfc89e015a0e2cf61bf921c3b82958dae02d9f2c29bd20a8cc109c6b7f536f",
+    "manifest_sha256": "b85ace49d0e859dd6c3bf053473fef79215d6f59dd9fc207b12f83c40ac469d8"
+  },
+  "passed": 22,
+  "reason": "A single condition cannot support an efficacy claim; pair it with the other condition.",
+  "run_id": "release-routing-development-baseline",
+  "schema_version": 3
+}

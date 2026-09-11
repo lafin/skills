@@ -1,0 +1,75 @@
+{
+  "schema_version": 1,
+  "name": "simplified-engineering-english",
+  "dimensions": {
+    "technical_fidelity": {
+      "0": "Changes or invents a critical fact, typed technical role or relation, condition, qualifier, value, identifier, quotation, obligation, uncertainty, or supported cause.",
+      "1": "Preserves the topic but changes consequential technical meaning.",
+      "2": "Preserves most meaning but loses or obscures a material qualification.",
+      "3": "Preserves all consequential meaning with only a minor noncritical defect.",
+      "4": "Preserves every consequential property and reports source ambiguity instead of resolving it."
+    },
+    "residual_consequential_ambiguity": {
+      "0": "Introduces ambiguity or silently selects an unsupported interpretation.",
+      "1": "Leaves several consequential actors, references, conditions, or terms unresolved.",
+      "2": "Reduces ambiguity but leaves one material issue unclear.",
+      "3": "Leaves no material ambiguity that the source permits the rewrite to resolve.",
+      "4": "Resolves every supported ambiguity and explicitly reports every unsupported resolution."
+    },
+    "actionability_or_verifiability": {
+      "0": "Cannot guide action or pass-fail review and hides the limitation.",
+      "1": "Names an action or claim but omits critical inputs, outcomes, or evidence.",
+      "2": "Is partly actionable or verifiable but has one material gap.",
+      "3": "Supports safe action or objective pass-fail evidence, or clearly reports missing source data.",
+      "4": "Provides complete safe action or objective evidence without inventing source data."
+    },
+    "readability_and_scanability": {
+      "0": "Structure obscures the task or technical relationships.",
+      "1": "Readers must reread to recover important scope or sequence.",
+      "2": "Understandable with a minor structural or density problem.",
+      "3": "Clear order, direct sentences, and usable structure.",
+      "4": "Immediately scannable while preserving every logical relationship."
+    },
+    "selected_profile_compliance": {
+      "0": "Violates a profile error or applies the wrong profile.",
+      "1": "Violates multiple declared profile controls.",
+      "2": "Meets semantic safeguards but misses one material profile control.",
+      "3": "Meets all profile errors with at most a noncritical warning.",
+      "4": "Meets every applicable profile and artifact-card control."
+    },
+    "unnecessary_edit_rate": {
+      "0": "Rewrites compliant text broadly or creates new defects.",
+      "1": "Makes several changes unrelated to an identified defect.",
+      "2": "Includes one material unnecessary edit.",
+      "3": "Changes only defect-bearing spans with minor harmless churn.",
+      "4": "Makes the minimum supported edits and leaves no-op text unchanged."
+    },
+    "source_traceability": {
+      "0": "Findings or changes have no identifiable source support.",
+      "1": "Most changes cannot be traced to source spans or declared rules.",
+      "2": "Core changes are traceable but one material finding lacks evidence.",
+      "3": "Every material change or ambiguity cites a source fact or rule.",
+      "4": "Every finding is precisely traceable, including exceptions and non-changes."
+    }
+  },
+  "critical_floors": {
+    "technical_fidelity": 3,
+    "residual_consequential_ambiguity": 3,
+    "readability_and_scanability": 2,
+    "selected_profile_compliance": 3
+  },
+  "critical_mutations": [
+    "Changed a fact, typed technical role or relation, condition, modal, temporal, or provenance qualifier, number, unit, version, status code, identifier, command, or quotation without authorized redaction.",
+    "Changed obligation force, uncertainty, or supported causal status.",
+    "Invented actor, cause, date, measurement, recovery, exception, or requirement.",
+    "Disclosed a secret or unauthorized internal detail.",
+    "Placed risk information after the governed destructive action.",
+    "Changed a no-op case without an identified consequential defect."
+  ],
+  "review_contract": {
+    "semantic_reviewer": "Scores all seven dimensions, cites response evidence, and marks confidence. Deterministic failures override the score.",
+    "technical_reviewer": "A named qualified authority confirms correctness, safety, security, completeness, operational validity, and product terminology before publication.",
+    "calibration": "Use independently reviewed examples from every artifact family. Record agreement and disposition every disagreement. Escalate safety-sensitive or low-confidence results.",
+    "minimum_confidence": 0.75
+  }
+}

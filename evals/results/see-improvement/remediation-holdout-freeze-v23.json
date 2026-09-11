@@ -1,0 +1,44 @@
+{
+  "frozen_at": "2026-09-11T18:43:56Z",
+  "candidate_freeze": {
+    "path": "evals/results/see-improvement/remediation-freeze-v23.json",
+    "sha256": "79156ac020cd39d05bebe9b33877b00538092e76a5de5d9dc21e1295969dfcc2"
+  },
+  "holdout": {
+    "path": "evals/cases/see-behavior-independent-holdout-v21.jsonl",
+    "sha256": "c69cf79fc08fe1e97cad6fa35f5759ea8df53362b0e2eb83ea3cc6f001907842",
+    "records": 12,
+    "families": {
+      "procedure/runbook": 3,
+      "requirement/contract": 3,
+      "explanation/reference": 3,
+      "error/incident": 3
+    },
+    "variants": {
+      "ordinary": 4,
+      "adversarial": 4,
+      "noop": 4
+    },
+    "profiles": {
+      "strict": 6,
+      "engineering-default": 6
+    }
+  },
+  "response_blind_audit": {
+    "mechanical_validation": "pass",
+    "independent_author": "IndependentV21Author",
+    "independent_auditor": "V21OracleAuditor",
+    "candidate_or_prior_evidence_visible_to_author_or_auditor": false,
+    "declared_checks": 40,
+    "generated_exact_preservation_checks": 61,
+    "final_audit": "GO",
+    "release_blockers": [],
+    "final_recheck": "All five initially over-narrow semantic-status regexes accept the named faithful paraphrases. The final holdout keeps exact prose checks only where the prompt declares exact text or no-op equality.",
+    "semantic_only_disposition": "Semantic fidelity, obligation meaning, causal status, typed relations, arbitrary paraphrases, and ambiguity meaning remain in judge_criteria."
+  },
+  "evaluator": {
+    "evals/run.py": "be310d7d73869c11412724d66d66105850b22cd3210e4c753f1cbc4aa443cca0",
+    "evals/grade.py": "21f818a084b4aecf52a6980f15558b2424bcedc640fb6b59647804d3a5fb0cc8"
+  },
+  "candidate_skill_sha256": "256976f959ac379e0080835f7b6f5201908b722dbab4384d0e32cc12e31e20a8"
+}

@@ -1,0 +1,21 @@
+{
+  "frozen_at": "2026-09-11T12:34:15Z",
+  "supersedes": [
+    "remediation-freeze.json",
+    "remediation-holdout-freeze.json"
+  ],
+  "reason": "Development treatment showed one typed parameter/argument relation loss. The candidate added one explicit preservation example. A development check was corrected to accept an explicit unknown cause in either response field. No independent holdout response was inspected. The frozen holdout cases are unchanged and remain sealed for the v2 treatment.",
+  "sha256": {
+    "evals/run.py": "be310d7d73869c11412724d66d66105850b22cd3210e4c753f1cbc4aa443cca0",
+    "evals/grade.py": "7266d3fa594dbc640bec9fdad0612e7ec15a662cb265987bae84e3d4044c13ec",
+    "tests/test_evaluation_harness.py": "f6f0b6ea1ba5a84de8a55ec085b8cbb2c29dcc84f20fe87b1875aef72af86cf4",
+    "simplified-engineering-english/SKILL.md": "427bd73ff09e90e50ba7916eeb658d0befaabd29e110e48913927492b93409c4",
+    "simplified-engineering-english/references/rules.md": "11cf7bfe8221382885830bf0a892b48aa81a0d8b6977e7373a68f171bbc31c88",
+    "simplified-engineering-english/references/dictionary.md": "93ca70b1fc419005ab110c4f6e52270a3b2dabe44fb46ec086c37af245aecdc0",
+    "evals/see-rubric.json": "e11626411fa94b26dfaafdd8d207bf3038ec8692f748d167527d03fe5f708e0e",
+    "evals/cases/see-behavior-development.jsonl": "a65210c8c67c24e568b96c72bd1fa1eaa7842f66bf9af5c44038c09956259139",
+    "evals/cases/see-routing-development.jsonl": "7aec2346a04c2363f73230e7308332bc663d148390925ea8cf3ffc0f0820ada7",
+    "evals/cases/see-behavior-independent-holdout.jsonl": "15e20ec5f4cc44b41ede4334cc672eef5c29448dd639a5ce40055531b2666ee9",
+    "evals/cases/see-routing-independent-holdout.jsonl": "19b95bfc5f067ea8e71bd8f1106aef96a837993a271621589fc23da063906437"
+  }
+}

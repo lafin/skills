@@ -1,0 +1,10 @@
+{
+  "deterministic_grade_summaries": [
+    "/Users/sergei/pets/skills/evals/results/see-improvement/remediation-v24-development-behavior-baseline/grade-summary.json",
+    "/Users/sergei/pets/skills/evals/results/see-improvement/remediation-v24b-development-behavior-treatment/grade-summary.json"
+  ],
+  "efficacy_claim": null,
+  "payloads": 84,
+  "schema_version": 4,
+  "swapped_pairs": 42
+}

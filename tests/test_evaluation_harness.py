@@ -35,6 +35,7 @@ def routing_case() -> dict:
         "split": "development",
         "target_skill": "evaluation",
         "available_skills": ["evaluation", "advanced-evaluation"],
+        "evaluated_skills": ["evaluation"],
         "prompt": "Choose one",
         "observable_success": ["Selects evaluation"],
         "prohibited_outcomes": ["Selects another skill"],
@@ -86,7 +87,7 @@ def captured_artifact(path: Path) -> tuple[dict, dict, dict]:
     ]
     summary = RUN.summarize_events(events)
     artifact = {
-        "schema_version": 3,
+        "schema_version": 4,
         "case_id": case["id"],
         "kind": case["kind"],
         "split": case["split"],
@@ -94,9 +95,10 @@ def captured_artifact(path: Path) -> tuple[dict, dict, dict]:
         "attempt": 1,
         "prompt": case["prompt"],
         "skill_scope": {
-            "mode": "repository-catalog",
-            "skills": ["advanced-evaluation", "evaluation"],
+            "mode": "confusable-pair",
+            "skills": ["evaluation", "advanced-evaluation"],
             "confusable_pair": case["available_skills"],
+            "evaluated_skills": case["evaluated_skills"],
         },
         "command": [
             "omp",
@@ -108,6 +110,7 @@ def captured_artifact(path: Path) -> tuple[dict, dict, dict]:
             "--model=provider/model",
             "--thinking=off",
             "--max-time=1m",
+            f"--system-prompt={RUN.ROUTING_SYSTEM_PROMPT}",
             "--profile=isolated",
             "--no-tools",
             "--skills=advanced-evaluation,evaluation",
@@ -145,6 +148,9 @@ def captured_artifact(path: Path) -> tuple[dict, dict, dict]:
             "max_time": "1m",
             "config_files": [],
             "cwd": str(ROOT),
+            "behavior_system_prompt": RUN.BEHAVIOR_SYSTEM_PROMPT,
+            "routing_system_prompt": RUN.ROUTING_SYSTEM_PROMPT,
+            "repository_system_prompt": None,
         },
         "skill_files": {
             name: {"description": description}
@@ -224,6 +230,14 @@ class EvaluationHarnessTest(unittest.TestCase):
         self.assertEqual("<redacted>", redacted["nested"]["Cookie"]["value"])
         self.assertEqual([str(ROOT)], redacted["skills.customDirectories"]["value"])
         GRADE.validate_redacted_config(redacted)
+        GRADE.validate_redacted_config(
+            {
+                "auth.broker.token": {
+                    "description": "<redacted>",
+                    "type": "<redacted>",
+                }
+            }
+        )
         with self.assertRaisesRegex(ValueError, "unredacted"):
             GRADE.validate_redacted_config(config)
 
@@ -264,12 +278,12 @@ class EvaluationHarnessTest(unittest.TestCase):
                 for item in RUN.build_command(args, case, ["leancode"])
             )
         )
-        self.assertFalse(
-            any(
-                item.startswith("--system-prompt=")
-                for item in RUN.build_command(args, routing_case(), ["evaluation"])
-            )
+        routing_command = RUN.build_command(args, routing_case(), ["evaluation"])
+        self.assertIn(
+            f"--system-prompt={RUN.ROUTING_SYSTEM_PROMPT}",
+            routing_command,
         )
+        self.assertIn("--skills=advanced-evaluation,evaluation", routing_command)
         self.assertIn(
             "- evaluation: Evaluation suite",
             RUN.case_prompt(
@@ -288,9 +302,122 @@ class EvaluationHarnessTest(unittest.TestCase):
     def test_full_case_schema_is_required(self) -> None:
         case = routing_case()
         RUN.validate_case(case, "case")
-        malformed = {**case, "checks": [{**case["checks"][0], "critical": "yes"}]}
-        with self.assertRaisesRegex(ValueError, "critical"):
+        for malformed in (
+            {**case, "checks": [{**case["checks"][0], "critical": "yes"}]},
+            {key: value for key, value in case.items() if key != "evaluated_skills"},
+        ):
+            with self.assertRaises(ValueError):
+                RUN.validate_case(malformed, "case")
+    def test_see_case_manifest_and_exact_preservation_checks(self) -> None:
+        case = {
+            "id": "see-preservation",
+            "kind": "behavior",
+            "split": "development",
+            "target_skill": "simplified-engineering-english",
+            "prompt": "Rewrite",
+            "response_fields": ["PROFILE", "REWRITE", "AMBIGUITIES"],
+            "case_manifest": {
+                "artifact_family": "requirement and contract",
+                "selected_profile": "strict",
+                "source_facts": ["The client has one obligation."],
+                "protected_spans": ["`legacyFlag`"],
+                "quoted_spans": ["\"and/or\""],
+                "conditions_and_exceptions": ["unless recovery is complete"],
+                "numbers_units_versions_status_codes": ["20 ms", "HTTP 409"],
+                "expected_obligation_force": ["MUST NOT"],
+                "permitted_rewrites": ["Split the sentence."],
+                "required_structure": ["One atomic obligation."],
+                "ambiguity_traps": ["Do not weaken the prohibition."],
+                "prohibited_inventions": ["A retry count."],
+            },
+            "observable_success": ["Preserves exact technical values"],
+            "prohibited_outcomes": ["Changes obligation force"],
+            "checks": [
+                {
+                    "name": "profile",
+                    "field": "fields.PROFILE",
+                    "op": "equals",
+                    "value": "strict",
+                    "critical": True,
+                }
+            ],
+        }
+        RUN.validate_case(case, "case")
+        GRADE.validate_case(case, "case")
+        rewrite = (
+            "The client MUST NOT set `legacyFlag` unless recovery is complete. "
+            "The response is HTTP 409 after 20 ms. Preserve \"and/or\" verbatim. "
+            "The identifier `legacyFlag` can appear again."
+        )
+        checks = GRADE.manifest_preservation_checks(case, rewrite)
+        self.assertTrue(checks)
+        self.assertTrue(all(check["passed"] for check in checks))
+        self.assertFalse(
+            any(
+                check["name"].startswith("manifest_expected_obligation_force_")
+                for check in checks
+            )
+        )
+        self.assertFalse(
+            any(
+                check["name"].startswith("manifest_conditions_and_exceptions_")
+                for check in checks
+            )
+        )
+        mutations = {
+            "protected_spans": ("`legacyFlag`", "`renamedFlag`"),
+            "quoted_spans": ("\"and/or\"", "\"or\""),
+            "numbers_units_versions_status_codes": ("20 ms", "25 ms"),
+        }
+        for field, (original, replacement) in mutations.items():
+            missing = GRADE.manifest_preservation_checks(
+                case, rewrite.replace(original, replacement)
+            )
+            self.assertFalse(
+                next(
+                    check
+                    for check in missing
+                    if check["name"] == f"manifest_{field}_1"
+                )["passed"],
+                field,
+            )
+        exempt = {
+            **case,
+            "case_manifest": {
+                **case["case_manifest"],
+                **{field: [] for field in GRADE.EXACT_PRESERVATION_FIELDS},
+            },
+        }
+        self.assertEqual([], GRADE.manifest_preservation_checks(exempt, "Plain text."))
+        malformed = {
+            **case,
+            "case_manifest": {
+                key: value
+                for key, value in case["case_manifest"].items()
+                if key != "source_facts"
+            },
+        }
+        with self.assertRaisesRegex(ValueError, "case_manifest"):
             RUN.validate_case(malformed, "case")
+        contradictory = {
+            **case,
+            "checks": [
+                *case["checks"],
+                {
+                    "name": "redact",
+                    "field": "fields.REWRITE",
+                    "op": "not_contains",
+                    "value": "/private/781/debug.log",
+                    "critical": True,
+                },
+            ],
+            "case_manifest": {
+                **case["case_manifest"],
+                "numbers_units_versions_status_codes": ["781"],
+            },
+        }
+        with self.assertRaisesRegex(ValueError, "conflicts with prohibited rewrite"):
+            RUN.validate_case(contradictory, "case")
 
     def test_raw_events_bind_response_terminal_model_and_policy(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
@@ -328,7 +455,7 @@ class EvaluationHarnessTest(unittest.TestCase):
             ],
         }
         artifact = {
-            "schema_version": 3,
+            "schema_version": 4,
             "condition": "baseline",
             "attempt": 1,
             "exit_code": 0,
@@ -368,8 +495,192 @@ class EvaluationHarnessTest(unittest.TestCase):
         self.assertTrue(
             GRADE.apply_check(
                 {"field": "fields.QUESTION", "op": "equals", "value": "no"},
+                {"fields": {"QUESTION": "no"}},
+            )[0]
+        )
+        self.assertFalse(
+            GRADE.apply_check(
+                {"field": "fields.QUESTION", "op": "equals", "value": "no"},
                 {"fields": {"QUESTION": "no;"}},
             )[0]
+        )
+
+    def test_field_contract_rejects_blank_physical_lines(self) -> None:
+        names = ["DECISION", "FILES_TO_CHANGE"]
+        self.assertIsNone(
+            GRADE.parse_response_fields(
+                "\nDECISION: Change tax math.\nFILES_TO_CHANGE: src/tax.py",
+                names,
+            )
+        )
+        self.assertIsNone(
+            GRADE.parse_response_fields(
+                "DECISION: Change tax math.\n\nFILES_TO_CHANGE: src/tax.py",
+                names,
+            )
+        )
+        self.assertIsNone(
+            GRADE.parse_response_fields(
+                "DECISION:  Change tax math.\nFILES_TO_CHANGE: src/tax.py",
+                names,
+            )
+        )
+        self.assertIsNone(
+            GRADE.parse_response_fields(
+                "DECISION: Change tax math. \nFILES_TO_CHANGE: src/tax.py",
+                names,
+            )
+        )
+
+    def test_manifest_exact_spans_reject_embedded_tokens(self) -> None:
+        self.assertTrue(GRADE.exact_span_present("Version 5.4.2.", "5.4.2"))
+        self.assertTrue(GRADE.exact_span_present("Code 71; node NX-31.", "71"))
+        self.assertTrue(GRADE.exact_span_present("Node R3. Status sealed.", "R3"))
+        self.assertFalse(GRADE.exact_span_present("Code 171.", "71"))
+        self.assertFalse(GRADE.exact_span_present("Node NX-310.", "NX-31"))
+        self.assertFalse(GRADE.exact_span_present("Version 15.4.2.", "5.4.2"))
+        self.assertFalse(GRADE.exact_span_present("Replica R3-standby.", "R3"))
+        self.assertFalse(GRADE.exact_span_present("Progress 65%0.", "65%"))
+
+    def test_see_semantic_regression_checks_reject_known_omissions(self) -> None:
+        cases = {
+            case["id"]: case
+            for case in map(
+                json.loads,
+                (ROOT / "evals/cases/see-behavior-development.jsonl")
+                .read_text()
+                .splitlines(),
+            )
+        }
+        relation = next(
+            check
+            for check in cases["see-explanation-ordinary"]["checks"]
+            if check["name"] == "timeout_argument_relation"
+        )
+        cause = next(
+            check
+            for check in cases["see-error-ordinary"]["checks"]
+            if check["name"] == "reports_unknown_cause"
+        )
+        retry = next(
+            check
+            for check in cases["see-error-ordinary"]["checks"]
+            if check["name"] == "keeps_retry"
+        )
+        self.assertTrue(
+            GRADE.apply_check(
+                relation,
+                {"fields": {"REWRITE": "The `timeout` parameter receives the `30s` argument."}},
+            )[0]
+        )
+        self.assertFalse(
+            GRADE.apply_check(
+                relation,
+                {"fields": {"REWRITE": "The `timeout` parameter is set to `30s`."}},
+            )[0]
+        )
+        self.assertTrue(
+            GRADE.apply_check(
+                cause,
+                {"response": "The operation and input are unspecified; the cause is unknown."},
+            )[0]
+        )
+        self.assertFalse(
+            GRADE.apply_check(
+                cause,
+                {"response": "The operation and input are unspecified."},
+            )[0]
+        )
+        self.assertTrue(
+            GRADE.apply_check(
+                retry,
+                {
+                    "fields": {
+                        "REWRITE": "Check the unspecified item, then try the unspecified operation again."
+                    }
+                },
+            )[0]
+        )
+        self.assertFalse(
+            GRADE.apply_check(
+                retry,
+                {"fields": {"REWRITE": "Check the unspecified item."}},
+            )[0]
+        )
+        no_invented_ambiguity = next(
+            check
+            for check in cases["see-local-antecedent-regression"]["checks"]
+            if check["name"] == "no_invented_ambiguity"
+        )
+        pressure_relation = next(
+            check
+            for check in cases["see-local-antecedent-regression"]["checks"]
+            if check["name"] == "pressure_relation"
+        )
+        descriptive_copy = next(
+            check
+            for check in cases["see-descriptive-fact-regression"]["checks"]
+            if check["name"] == "descriptive_copy_fact"
+        )
+        self.assertFalse(
+            GRADE.apply_check(
+                no_invented_ambiguity,
+                {"fields": {"AMBIGUITIES": "The pressure could mean another pressure."}},
+            )[0]
+        )
+        self.assertTrue(
+            GRADE.apply_check(
+                pressure_relation,
+                {
+                    "fields": {
+                        "REWRITE": "Record the manifold pressure. When the manifold "
+                        "pressure reaches 40 kPa, close valve V-19."
+                    }
+                },
+            )[0]
+        )
+        self.assertTrue(
+            GRADE.apply_check(
+                descriptive_copy,
+                {
+                    "fields": {
+                        "REWRITE": "The gateway copies that nonce into response header X-Orin-Nonce."
+                    }
+                },
+            )[0]
+        )
+        self.assertFalse(
+            GRADE.apply_check(
+                descriptive_copy,
+                {
+                    "fields": {
+                        "REWRITE": "The gateway SHALL copy that nonce into response header X-Orin-Nonce."
+                    }
+                },
+            )[0]
+        )
+        authorization_case = cases["see-authorization-scope-regression"]
+        preserved_authorization = {
+            check["name"]: check
+            for check in GRADE.manifest_preservation_checks(
+                authorization_case,
+                "Security authorizes replacing only the header value with "
+                "[REDACTED-AUTHORIZED].",
+            )
+        }
+        changed_authorization = {
+            check["name"]: check
+            for check in GRADE.manifest_preservation_checks(
+                authorization_case,
+                "Security authorized replacing the header value with "
+                "[REDACTED-AUTHORIZED].",
+            )
+        }
+        self.assertTrue(
+            preserved_authorization["manifest_protected_spans_4"]["passed"]
+        )
+        self.assertFalse(
+            changed_authorization["manifest_protected_spans_4"]["passed"]
         )
 
     def test_behavior_checks_accept_observed_equivalent_wording(self) -> None:
@@ -459,7 +770,7 @@ class EvaluationHarnessTest(unittest.TestCase):
             "checks": [],
         }
         artifact = {
-            "schema_version": 3,
+            "schema_version": 4,
             "condition": "baseline",
             "attempt": 1,
             "exit_code": 0,
@@ -577,7 +888,7 @@ class EvaluationHarnessTest(unittest.TestCase):
 
     def test_judge_results_reject_missing_and_duplicate_ids(self) -> None:
         key = {
-            "schema_version": 3,
+            "schema_version": 4,
             "pairs": {
                 "forward": {
                     "case_id": "case",
@@ -615,6 +926,89 @@ class EvaluationHarnessTest(unittest.TestCase):
             )
             with self.assertRaisesRegex(ValueError, "duplicate judge result"):
                 GRADE.score_judges(key_path, results_path, root / "duplicate.json")
+
+    def test_routing_pair_rejects_unchanged_evaluated_skill(self) -> None:
+        case = routing_case()
+        cases = {case["id"]: case}
+        manifest = {
+            "condition": "baseline",
+            "skill_files": {
+                "evaluation": {"sha256": "same"},
+                "advanced-evaluation": {"sha256": "same"},
+            },
+        }
+        artifact = {
+            "prompt": case["prompt"],
+            "provider": "provider",
+            "model": "model",
+        }
+        computed = (
+            manifest,
+            cases,
+            {(case["id"], 1): artifact},
+            {},
+            {},
+        )
+        treatment = (
+            {**manifest, "condition": "treatment"},
+            cases,
+            {(case["id"], 1): artifact},
+            {},
+            {},
+        )
+        with (
+            mock.patch.object(GRADE, "compute_grades", side_effect=[computed, treatment]),
+            mock.patch.object(GRADE, "comparison_signature", return_value=("same",)),
+            self.assertRaisesRegex(ValueError, "evaluated routing skills are unchanged"),
+        ):
+            GRADE.paired_runs(Path("baseline"), Path("treatment"))
+
+    def test_routing_pair_accepts_candidate_description_change(self) -> None:
+        case = routing_case()
+        cases = {case["id"]: case}
+        baseline_manifest = {
+            "condition": "baseline",
+            "skill_files": {
+                "evaluation": {"sha256": "old"},
+                "advanced-evaluation": {"sha256": "same"},
+            },
+        }
+        treatment_manifest = {
+            "condition": "treatment",
+            "skill_files": {
+                "evaluation": {"sha256": "new"},
+                "advanced-evaluation": {"sha256": "same"},
+            },
+        }
+        baseline_artifact = {
+            "prompt": "baseline candidate descriptions",
+            "provider": "provider",
+            "model": "model",
+        }
+        treatment_artifact = {
+            "prompt": "treatment candidate descriptions",
+            "provider": "provider",
+            "model": "model",
+        }
+        baseline = (
+            baseline_manifest,
+            cases,
+            {(case["id"], 1): baseline_artifact},
+            {},
+            {},
+        )
+        treatment = (
+            treatment_manifest,
+            cases,
+            {(case["id"], 1): treatment_artifact},
+            {},
+            {},
+        )
+        with (
+            mock.patch.object(GRADE, "compute_grades", side_effect=[baseline, treatment]),
+            mock.patch.object(GRADE, "comparison_signature", return_value=("same",)),
+        ):
+            GRADE.paired_runs(Path("baseline"), Path("treatment"))
 
     def test_unknown_token_metrics_are_not_zero_filled(self) -> None:
         grades = {
@@ -684,7 +1078,7 @@ class EvaluationHarnessTest(unittest.TestCase):
 
     def test_judge_summary_retains_critical_flags_and_rationales(self) -> None:
         key = {
-            "schema_version": 3,
+            "schema_version": 4,
             "pairs": {
                 "forward": {
                     "case_id": "case",
@@ -774,6 +1168,43 @@ class EvaluationHarnessTest(unittest.TestCase):
         self.assertEqual("fail", report["decision"])
         self.assertFalse(report["criteria"]["holdout_preserved"])
         self.assertFalse(report["criteria"]["routing_holdout_all_passed"])
+    def test_behavior_gate_requires_every_treatment_case_to_pass(self) -> None:
+        def counts(baseline_passed: int, treatment_passed: int, total: int) -> dict:
+            return {
+                "baseline_passed": baseline_passed,
+                "treatment_passed": treatment_passed,
+                "total": total,
+                "critical_regressions": [],
+                "regressions": [],
+                "baseline_metrics": {"tokens": 10, "tool_events": 0, "questions": 0},
+                "treatment_metrics": {"tokens": 10, "tool_events": 0, "questions": 0},
+            }
+
+        with tempfile.TemporaryDirectory() as directory:
+            args = argparse.Namespace(
+                case_kind="behavior",
+                development_baseline=Path("development-baseline"),
+                development_treatment=Path("development-treatment"),
+                holdout_baseline=Path("holdout-baseline"),
+                holdout_treatment=Path("holdout-treatment"),
+                routing_holdout_baseline=Path("routing-baseline"),
+                routing_holdout_treatment=Path("routing-treatment"),
+                correctness_benefit=None,
+                output=Path(directory) / "gate.json",
+            )
+            results = [
+                counts(1, 2, 3),
+                counts(1, 2, 3),
+                counts(3, 3, 3),
+            ]
+            with mock.patch.object(GRADE, "paired_grade_counts", side_effect=results):
+                report = GRADE.merge_gate(args)
+
+        self.assertEqual("behavior", report["case_kind"])
+        self.assertEqual("fail", report["decision"])
+        self.assertFalse(report["criteria"]["development_improved"])
+        self.assertFalse(report["criteria"]["holdout_preserved"])
+
 
 if __name__ == "__main__":
     unittest.main()

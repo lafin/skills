@@ -1,0 +1,26 @@
+{
+  "frozen_at": "2026-09-11T18:54:50Z",
+  "supersedes": "remediation-holdout-freeze-v23.json",
+  "prior_holdout_freeze_sha256": "c61de5729bdf857341cd0d30ac8a2beecb5990dc649626e9a6cac0dd4c04c41c",
+  "candidate_freeze": {
+    "path": "evals/results/see-improvement/remediation-freeze-v24.json",
+    "sha256": "32f711920cc13d0bd66581df783e3e5d4faee7383daaab5d2d2df641cb066f05"
+  },
+  "holdout": {
+    "path": "evals/cases/see-behavior-independent-holdout-v21.jsonl",
+    "sha256": "c69cf79fc08fe1e97cad6fa35f5759ea8df53362b0e2eb83ea3cc6f001907842",
+    "records": 12,
+    "status": "unchanged since response-blind GO audit"
+  },
+  "response_blind_audit": {
+    "independent_author": "IndependentV21Author",
+    "independent_auditor": "V21OracleAuditor",
+    "candidate_or_prior_evidence_visible_to_author_or_auditor": false,
+    "final_audit": "GO"
+  },
+  "evaluator": {
+    "evals/run.py": "be310d7d73869c11412724d66d66105850b22cd3210e4c753f1cbc4aa443cca0",
+    "evals/grade.py": "21f818a084b4aecf52a6980f15558b2424bcedc640fb6b59647804d3a5fb0cc8"
+  },
+  "candidate_skill_sha256": "256976f959ac379e0080835f7b6f5201908b722dbab4384d0e32cc12e31e20a8"
+}

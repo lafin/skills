@@ -1,294 +1,221 @@
-# SEE Part 2 — Dictionary
+# SEE Dictionary
 
-The controlled vocabulary for Simplified Engineering English. Three bounded sets, plus the policy for project-local terms.
+This reference controls only material terminology, lexical defaults, project glossary governance, and rewrite exemptions. It is not a closed word list.
 
-Unlike ASD-STE100, this dictionary is **not a closed word list**. Software prose is dominated by identifiers and domain terms that no central list can track. SEE controls the terms that teams actually conflate, and the words that reliably destroy precision.
+## Precedence
 
----
+Use terminology in this order:
 
-## 1. Confusable Pairs
+1. An authoritative language, protocol, platform, product, safety, security, legal, or regulatory source.
+2. The project glossary and artifact contract.
+3. SEE material distinctions and lexical defaults.
 
-Each term has one approved sense. Using one for the other is a Rule 1.3 violation. These are the distinctions software teams lose most often.
+A project glossary overrides an SEE default when the project term is authoritative and unambiguous. An override does not permit one term to mean two concepts in the same scope.
 
-### Failure vocabulary
+## Material Cross-Domain Distinctions
 
-| Term | Approved sense |
-|---|---|
-| `fault` | The defect in the code or configuration. The static cause. |
-| `error` | The incorrect internal state produced when the fault is executed. |
-| `failure` | The externally observable deviation from the specification. |
+These distinctions are errors in both profiles when conflation changes technical meaning.
+
+### Failure
+
+| Term | Meaning |
+| --- | --- |
+| `fault` | A defect in code or configuration: the static cause. |
+| `error` | An incorrect internal state produced when a fault is activated. |
+| `failure` | An externally observable deviation from the applicable specification. |
 | `outage` | A failure that removes availability for users. |
-| `incident` | The tracked event and its response process, not the technical failure. |
-| `bug` | Informal synonym for `fault`. Acceptable in issue titles, not in analysis. |
-| `regression` | A failure in behavior that previously worked. Requires a named prior version. |
+| `incident` | A tracked event and its response process. |
+| `regression` | A failure in behavior that worked in a named prior version. |
 
-A fault causes an error; an error may surface as a failure. Do not write "the error caused the bug."
+A fault can produce an error. An error can result in a failure. Use `bug` only when the artifact permits the informal synonym for `fault`.
 
 ### Identity and access
 
-| Term | Approved sense |
-|---|---|
-| `authentication` | Establishing who the principal is. |
-| `authorization` | Establishing what the principal may do. |
-| `identity` | The principal itself. |
-| `credential` | The secret or token that proves identity. |
-| `session` | Server-recognized state following authentication. |
-| `permission` | A single granted capability. |
+| Term | Meaning |
+| --- | --- |
+| `authentication`; `authenticate` | Establish who a principal is. |
+| `authorization`; `authorize` | Establish what a principal may do. |
+| `identity` | The principal. |
+| `credential` | A secret or token that proves identity. |
+| `session` | Server-recognized state after authentication. |
+| `permission` | One granted capability. |
 | `role` | A named set of permissions. |
-| `principal` | Any authenticatable actor: user, service, or agent. |
+| `principal` | An actor that can authenticate, such as a user or service. |
 
-Never abbreviate either to `auth` in prose. `auth` is permitted only inside a protected span such as `` `authMiddleware` ``.
-
-### Code organization
-
-| Term | Approved sense |
-|---|---|
-| `module` | A unit of code with a defined interface, in the host language's sense. |
-| `package` | A distributable, versioned artifact. |
-| `library` | A dependency called by your code. |
-| `framework` | A dependency that calls your code. |
-| `service` | An independently deployed process with a network interface. |
-| `component` | A logical part of a system. Use only when the boundary is stated. |
-| `repository` | A version-control repository. Never a storage abstraction unless the project defines it so. |
-
-### Interfaces
-
-| Term | Approved sense |
-|---|---|
-| `API` | The whole contract a system exposes. |
-| `endpoint` | One addressable operation within an API. |
-| `route` | The path pattern that reaches an endpoint. |
-| `interface` | A language-level type contract. |
-| `contract` | The full behavioral agreement, including error and timing behavior. |
-| `schema` | The structural definition of data. |
-| `protocol` | The wire-level rules of exchange. |
+Do not replace authentication with authorization, or the reverse. Use bare `auth` only when an authoritative project term defines it or when it is a protected identifier.
 
 ### Parameters and configuration
 
-| Term | Approved sense |
-|---|---|
-| `parameter` | The declared name in a signature. |
-| `argument` | The value passed at a call site. |
-| `option` | A user-settable choice with a default. |
-| `flag` | A boolean option, or a command-line switch. |
+| Term | Meaning |
+| --- | --- |
+| `parameter` | A declared name in a signature. |
+| `argument` | A value passed at a call site. |
+| `option` | A user-settable choice, possibly with a default. |
+| `flag` | A Boolean option or command-line switch. |
 | `setting` | A persisted configuration value. |
 | `variable` | A named binding in code. |
-| `field` | A member of a struct, object, or record. |
+| `field` | A member of a structure, object, or record. |
 | `property` | A member with accessor semantics. |
 
 ### Concurrency
 
-| Term | Approved sense |
-|---|---|
-| `process` | An OS process with its own address space. |
-| `thread` | An OS thread within a process. |
+| Term | Meaning |
+| --- | --- |
+| `process` | An operating-system process with its own address space. |
+| `thread` | An operating-system thread in a process. |
 | `task` | A unit of asynchronous work managed by a runtime. |
-| `job` | A unit of scheduled or queued work with a lifecycle. |
+| `job` | A scheduled or queued unit of work with a lifecycle. |
 | `worker` | A long-lived executor that consumes tasks or jobs. |
-| `concurrent` | Overlapping in time. |
-| `parallel` | Executing simultaneously on separate cores. |
-| `asynchronous` | Not blocking the caller. Says nothing about parallelism. |
+| `concurrent`; `concurrency` | Work whose execution intervals overlap. |
+| `parallel`; `parallelism` | Work that executes simultaneously on separate processing resources. |
+| `asynchronous`; `asynchrony` | A relationship in which the caller does not wait for completion. It does not assert parallel execution. |
 
-`concurrent` and `parallel` are not synonyms and must not be swapped.
+### Lifecycle
 
-### Performance
+| Term | Meaning |
+| --- | --- |
+| `deprecated` | Still available but discouraged. The record names the replacement and removal plan. |
+| `removed` | No longer available in the named version. |
+| `breaking change` | A change that requires a consumer to change code or configuration. |
+| `release` | A published versioned artifact. |
+| `deploy` | Put a release into an environment. |
+| `rollout` | Progressively deploy a release. |
+| `rollback` | Return an environment to a prior release. |
+| `revert` | Undo a version-control change. |
 
-| Term | Approved sense |
-|---|---|
-| `latency` | Time for one operation, always with a percentile. |
-| `throughput` | Operations completed per unit of time. |
-| `response time` | Latency measured at the client, including network. |
-| `utilization` | Fraction of a resource's capacity in use. |
-| `saturation` | The point at which queueing begins. |
-| `capacity` | The maximum sustainable load, with its conditions. |
+## Override-Aware Software Defaults
 
-State a percentile with every latency figure. A mean latency is not a claim.
+The following senses are SEE defaults, not universal definitions. Use an authoritative ecosystem or project sense when it differs.
 
-### Data and state
-
-| Term | Approved sense |
-|---|---|
-| `persist` | Write to durable storage. |
-| `cache` | Store a copy for speed, with a defined invalidation rule. |
-| `store` | Write, without a durability claim. |
-| `record` | One row or document. |
+| Term | SEE default sense |
+| --- | --- |
+| `module` | A code unit with an interface in the host language. |
+| `package` | A distributable or language-defined collection. |
+| `library` | A dependency that application code calls. |
+| `framework` | A dependency that controls application flow and calls application code. |
+| `service` | An independently operated capability, often exposed through a network interface. |
+| `component` | A stated logical or deployment boundary. Name the boundary. |
+| `repository` | A version-control repository. State another authoritative sense when needed. |
+| `API` | A system's exposed contract. |
+| `endpoint` | One addressable operation in an API. |
+| `route` | A path or dispatch pattern that reaches an endpoint. |
+| `interface` | A language or system boundary contract. |
+| `contract` | A behavioral agreement, including applicable error and timing behavior. |
+| `schema` | A structural data definition. |
+| `protocol` | Rules for an exchange. |
+| `latency` | Time for an operation. State the statistic and measurement point needed for the decision. |
+| `response time` | Latency measured at a stated boundary, often the client. |
+| `throughput` | Completed operations per unit of time under stated conditions. |
+| `capacity` | Maximum sustainable load under stated conditions. |
+| `cache` | A copy retained to reduce access cost, with an applicable invalidation rule. |
+| `store` | Write data without an implied durability level. |
+| `persist` | Write data to storage that meets a stated durability guarantee. |
+| `record` | One row, document, event, or ecosystem-defined data unit. |
 | `entity` | A domain object with identity. |
-| `stale` | Correct at an earlier time, not now. |
-| `inconsistent` | Two views disagree at the same time. |
-| `corrupt` | Structurally invalid. |
+| `stale` | Correct for an earlier state or time but not for the declared reference state or time. |
+| `inconsistent` | Two applicable views disagree for the same reference state. |
+| `corrupt` | Invalid under a named structural or integrity rule. |
 
-### Change and lifecycle
+A mean latency is a measurement claim. State whether the decision needs a mean, percentile, distribution, or another statistic. Give the workload, sample or interval, and measurement point required to interpret the claim.
 
-| Term | Approved sense |
-|---|---|
-| `deprecated` | Still works. Discouraged. Removal version stated. |
-| `removed` | No longer present. Names the version that removed it. |
-| `breaking change` | Requires a consumer to change code or configuration. |
-| `release` | A published, versioned artifact. |
-| `deploy` | Move a release into an environment. |
-| `rollout` | A progressive deploy. |
-| `rollback` | Return to a prior release. |
-| `revert` | Undo a commit in version control. |
-| `patch` | A change set, or a semantic-version patch increment. State which. |
+## Lexical Defaults
 
-`deprecated` never means `removed`. Rule 9.3 requires all four deprecation facts.
+Apply these replacements only to surrounding prose, not protected or quoted text. A replacement must preserve technical meaning.
 
----
-
-## 2. Rewrite Pairs
-
-Replace the left with the right. Enforceable as a `substitution` rule.
-
-### Verbosity
-
-| Unapproved | Approved |
-|---|---|
-| utilize, leverage, employ | use |
+| Avoid | Replace with |
+| --- | --- |
+| utilize, leverage, employ | use, when `use` preserves the relationship |
 | commence, initiate, kick off | start |
-| terminate, cease | stop, end |
-| facilitate, enable (as filler) | name the actual action |
+| terminate, cease | stop or end, according to the lifecycle |
+| facilitate, enable, support as filler | name the concrete behavior |
 | in order to | to |
 | due to the fact that, owing to the fact that | because |
-| at this point in time | now, or delete |
-| for the purpose of | to, for |
+| at this point in time | `now` only for an immediate unambiguous observation or procedure; otherwise use a date or version, or delete |
+| for the purpose of | to or for |
 | in the event that | if |
 | prior to, subsequent to | before, after |
-| a number of, a variety of | state the number |
-| is able to, has the ability to | can |
+| a number of, a variety of, some, several, many, most | state the number, fraction, or rule that defines the set |
+| is able to, has the ability to | can, when capability is intended |
 | perform a validation of | validate |
 | make a determination | decide |
-| provide support for | supports, or name the behavior |
-| it should be noted that | delete |
-| please note that | delete |
-
-### Vagueness
-
-| Unapproved | Approved |
-|---|---|
-| simply, just, easily, merely | delete |
-| basically, essentially, actually | delete |
-| very, quite, fairly, rather | delete, or quantify |
-| robust, scalable, performant | state the measured property |
-| lightweight, seamless, elegant | delete, or state the measurement |
-| best practice | state the practice and why |
-| etc., and so on, and more | complete the list |
-| and/or | state which, or use `or` with the inclusive case named |
-| some, several, many, most | state the number or fraction |
-| soon, shortly, in future | state the version or date |
-| significantly, dramatically | state the magnitude |
-
-### Idiom
-
-| Unapproved | Approved |
-|---|---|
-| under the hood | internally |
-| out of the box | by default |
+| it should be noted that, please note that | delete |
+| simply, just, easily, merely, basically, essentially, actually | delete unless technically required |
+| very, quite, fairly, rather, significantly, dramatically | quantify or delete |
+| robust, scalable, performant, lightweight, seamless, elegant | state the measured property or delete |
+| best practice | state the practice and reason |
+| etc., and so on, and more | complete the set or name its rule |
+| and/or | state the combinations or use inclusive `or` with scope made clear |
+| soon, shortly, in future | state a date, version, event, or remove the claim |
+| under the hood | internally, or name the mechanism |
+| out of the box | by default, when a default is defined |
 | plumbing, glue, magic | name the mechanism |
-| gotcha | limitation, or known issue |
-| nuke, blow away | delete, remove |
-| spin up, stand up | start, create, deploy |
-| reach out | contact, ask |
+| gotcha | limitation or known issue |
+| nuke, blow away | delete or remove, according to scope |
+| spin up, stand up | start, create, or deploy, according to the lifecycle |
+| reach out | contact or ask |
 | deep dive | detailed explanation |
-| low-hanging fruit | state the change and its cost |
-| sanity check | verification, validation |
+| low-hanging fruit | state the change and cost |
+| sanity check | validation or verification, according to purpose |
+| dummy value | placeholder or sample |
+| master/slave | the authoritative project relationship, such as primary/replica or leader/follower |
+| whitelist/blacklist | the authoritative project terms, such as allowlist/denylist |
+| crazy, insane, dumb | state the property |
+| grandfathered | state the exact exemption and its effective scope |
+| obviously, clearly, of course | delete or provide evidence |
 
-### False obligation
+Do not convert ordinary English into a BCP 14 obligation. `MUST`, `SHOULD`, `NOT RECOMMENDED`, and related keywords apply only under a declared obligation convention. In a procedure, use an imperative when it expresses the intended instruction.
 
-| Unapproved | Approved |
-|---|---|
-| you should probably | SHOULD, with the exception condition |
-| it is recommended | RECOMMENDED, with the obligated party |
-| ideally, preferably | SHOULD, or delete |
-| make sure to, be sure to | MUST, or an imperative step |
-| try to | MUST or SHOULD. `try` is not an obligation. |
-| consider doing | MAY, with the criterion for choosing |
+## Part-of-Speech Defaults
 
-### Ableist or exclusionary
+| Term | Approved role | Avoid |
+| --- | --- | --- |
+| `request` | noun | Use as a verb only when an authoritative API or project usage requires it. |
+| `impact` | noun | Prefer a precise verb such as increases, delays, or removes. |
+| `architect` | noun | Use `design` as the verb. |
+| `default` | noun, adjective, and intransitive verb in `defaults to` | Do not write `default the value`; write `set the default value`. |
+| `error` | noun | Write `returned an error`, not `errored`, unless the ecosystem defines the verb. |
+| `action` | noun | Use a precise verb such as process. |
+| `surface` | noun | Use `display`, `return`, or `result in` as the verb. |
+| `onboard` | verb | Use `onboarding` for the process. |
+| `ask`, `spend`, `learning` | verbs | Use request, cost, or what was learned as the noun. |
 
-| Unapproved | Approved |
-|---|---|
-| sanity check | validation, verification |
-| dummy value | placeholder, sample |
-| master/slave | primary/replica, leader/follower |
-| whitelist/blacklist | allowlist/denylist |
-| crazy, insane, dumb | state the actual property |
-| grandfathered | legacy-exempt |
-| obviously, clearly, of course | delete |
+## Procedural Verbs
 
-`obviously` is prohibited because it is never true for the reader who needs the sentence.
+Prefer direct verbs such as `add`, `apply`, `build`, `check`, `close`, `configure`, `connect`, `copy`, `create`, `delete`, `deploy`, `disable`, `download`, `edit`, `enable`, `enter`, `export`, `import`, `install`, `merge`, `move`, `open`, `press`, `read`, `rename`, `replace`, `restart`, `run`, `save`, `select`, `send`, `set`, `start`, `stop`, `uninstall`, `update`, `upgrade`, `verify`, `wait`, and `write`.
 
----
+Use `select` for a device-neutral UI choice. Use `enter` for text input. Use `run` for a command. Use `verify` for a reader check and state the expected observation.
 
-## 3. Part-of-Speech Locks
+## Project Glossary Contract
 
-These terms have one approved grammatical role. Converting them is a Rule 1.4 violation.
-
-| Term | Approved as | Prohibited |
-|---|---|---|
-| `request` | noun | as a verb: "request the endpoint" → "send a request to the endpoint" |
-| `impact` | noun | as a verb: "impacts latency" → "increases latency" |
-| `architect` | noun | as a verb: "architect a solution" → "design a solution" |
-| `access` | noun, verb | fine as both; state the actor when used as a verb |
-| `default` | noun, adjective | as a verb: "defaults to" is permitted; "default the value" is not |
-| `error` | noun | as a verb: "the call errored" → "the call returned an error" |
-| `action` | noun | as a verb: "action the request" → "process the request" |
-| `surface` | noun | as a verb: "surface the error" → "display the error" or "return the error" |
-| `onboard` | verb | as a noun: "the onboard" → "the onboarding process" |
-| `ask`, `spend`, `learning` | verb, verb, verb | as nouns: "the ask" → "the request"; "the spend" → "the cost"; "the learnings" → "what we learned" |
-
----
-
-## 4. Approved Procedural Verbs
-
-Prefer these in procedural steps. They are unambiguous and translate cleanly.
-
-`add`, `apply`, `build`, `check`, `clone`, `close`, `configure`, `connect`, `copy`, `create`, `delete`, `deploy`, `disable`, `download`, `edit`, `enable`, `enter`, `export`, `import`, `install`, `merge`, `move`, `open`, `press`, `pull`, `push`, `read`, `rename`, `replace`, `restart`, `run`, `save`, `select`, `send`, `set`, `start`, `stop`, `uninstall`, `update`, `upgrade`, `verify`, `wait`, `write`
-
-Notes:
-
-- Use `select` for UI choices, not `click`, `tap`, or `choose`. `select` is device-neutral.
-- Use `enter` for typed input, not `type` or `input`.
-- Use `run` for commands, not `execute`, `invoke`, `fire`, or `issue`.
-- Use `verify` for a check the reader performs, and state the expected observation.
-
----
-
-## 5. Project Technical Terms
-
-Each project maintains its own glossary. This is SEE's equivalent of STE's Technical Nouns and Technical Verbs: the escape hatch that lets domain vocabulary in under control.
-
-Record each entry with these fields:
+Record each term with these fields:
 
 ```yaml
 term: idempotency key
-definition: >
-  A client-supplied identifier that makes a repeated request return the
-  original result instead of performing the operation again.
+definition: A client value that makes a repeated request return the original result.
 part_of_speech: noun
-short_form: idem key        # optional, defined at first use
-replaces: [dedup token, request id]   # terms this supersedes
-status: approved            # approved | deprecated | proposed
+domain: payments-api
+source: contracts/payments.yaml
+approved_variants: []
+rejected_alternatives: [dedup token, request id]
+replacement: null
+status: approved
 owner: platform-team
 since: v3.1
 ```
 
-Rules for the glossary:
+`status` is `proposed`, `approved`, or `deprecated`. A deprecated term names `replacement`. Keep old entries so historical text remains interpretable. Coordinate accepted terminology changes in the same reviewed change set or release. Classify the consumer effect as editorial, search or discoverability, user-interface terminology, API or schema, or migration-requiring.
 
-1. Add a term only when an existing approved term cannot express the concept.
-2. One term per concept. Adding a term requires deprecating every synonym it replaces.
-3. State the part of speech and honor it (Rule 1.4).
-4. Keep the glossary in version control next to the code.
-5. Feed the glossary to the checker as a vocabulary file, so that its terms stop being flagged and its deprecated synonyms start being flagged.
-6. A deprecated term stays in the glossary with its replacement, so older documents remain interpretable.
+A Vale vocabulary or similar lexical checker can enforce approved spelling, casing, and rejected alternatives. It cannot prove a definition, word sense, part of speech in context, technical correctness, or publication approval.
 
----
+## Exemption and Redaction Precedence
 
-## 6. Exemptions
+Apply these exceptions in order:
 
-The following are never flagged by SEE rules:
+1. Authorized security, privacy, legal, or regulatory redaction can replace sensitive text.
+2. External quotations remain verbatim unless the task requests quotation editing.
+3. Tool output and logs remain verbatim, with authorized secret redaction.
+4. Code spans, identifiers, paths, commands, flags, environment variables, methods, status codes, versions, and literal values remain verbatim.
+5. Product, company, protocol, and standard names remain verbatim.
+6. Surrounding prose follows the selected SEE profile.
 
-- Any protected span under Rule 2.1: identifiers, paths, commands, flags, URLs, versions, literals.
-- Quoted output from a tool, log, or error.
-- Quoted text from a third-party specification or standard.
-- Legally reviewed license, security, or compliance text.
-- The literal name of a product, company, protocol, or standard, even when it violates a rewrite pair.
+An exemption from rewriting does not make the exempt content technically correct or safe to publish.

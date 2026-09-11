@@ -1,0 +1,43 @@
+{
+  "all_passed": false,
+  "artifacts": 24,
+  "condition": "baseline",
+  "critical_passed": 19,
+  "deterministic_grades": "grades.jsonl",
+  "efficacy_claim": null,
+  "input_binding": {
+    "artifacts": {
+      "artifacts/see-routing-holdout-see--context-compression-negative/1.json": "4c4c6ee7ce3d6281beab6363c823e7f21f57ce4c21893925a2f5d26795d680c8",
+      "artifacts/see-routing-holdout-see--context-compression-negative/2.json": "776e6ce81ce09c291f908b559c997c7cbcd31728f0b5b90d94addeb41488f16f",
+      "artifacts/see-routing-holdout-see--context-compression-negative/3.json": "b0b6988920cfa54c9604ecc76874450f750d9bda6ec318e93096f1624d0dec87",
+      "artifacts/see-routing-holdout-see--context-compression-positive/1.json": "d121372338b32c04fe677db17150b5ff622fff1d944621697b2819a300b3996c",
+      "artifacts/see-routing-holdout-see--context-compression-positive/2.json": "3b336852343012c2329209d030c34e59e1eb866e97b23355648c6be500a3441f",
+      "artifacts/see-routing-holdout-see--context-compression-positive/3.json": "283ffbc446e23daf510058658837468615080fb76d5e6a132bc92bd031e42f19",
+      "artifacts/see-routing-holdout-see--leancode-review-negative/1.json": "c533c865ac7b20e41e326f3eb67a02b913a0084fd123f35a04fabb04e2d6ac4e",
+      "artifacts/see-routing-holdout-see--leancode-review-negative/2.json": "f518b314a15eefd0e76cfdb43f26119f59ff5ccf7f7cba454af219ff86ea12bb",
+      "artifacts/see-routing-holdout-see--leancode-review-negative/3.json": "e1b17b26faf66e6fd77601f7ec6ed51ecd99c52b7e4ac4e16f20574e1058d8c2",
+      "artifacts/see-routing-holdout-see--leancode-review-positive/1.json": "31c40437e5536e0b47b4bb40edcba801ab3be52cc1f2637edb9c771a398835e8",
+      "artifacts/see-routing-holdout-see--leancode-review-positive/2.json": "a117423e917c3d9ac312610f1e93b30e1203846d7e610a6606b905cd2486b8c9",
+      "artifacts/see-routing-holdout-see--leancode-review-positive/3.json": "13833b522b2f14b7165a0b8a2a25003393c3545e5d653b7c743ecb7479def0a0",
+      "artifacts/see-routing-holdout-see--ml-review-negative/1.json": "da5ff58bc6b7f2ccf14e29d8896437089ba6ff775526af7a8306dd1b94164e1f",
+      "artifacts/see-routing-holdout-see--ml-review-negative/2.json": "952eefa2b93d5e74c788826325c92d17918af9e1f858a92b93181342e2bc7f25",
+      "artifacts/see-routing-holdout-see--ml-review-negative/3.json": "4473f88a9b03d695a4983c6544a5c8f23b761f5af6a9b348e819f34fcf7d64d0",
+      "artifacts/see-routing-holdout-see--ml-review-positive/1.json": "4bc95785d645ce37ff591fe8ffca2311d3324633f02f3a01acfcba116fce95e2",
+      "artifacts/see-routing-holdout-see--ml-review-positive/2.json": "88afc55fa0af5845d2a58205bfee37f6c1ebf91d7f6117d8f42534b68065444f",
+      "artifacts/see-routing-holdout-see--ml-review-positive/3.json": "e2559d5487a62117ee7a5373400b215cb1b6a6ea0c2402cf5ba5bc5e803f1473",
+      "artifacts/see-routing-holdout-see--project-development-negative/1.json": "b8b83b8db525c890206e5deb34299fde991056e5fd573674ff97f87973f50503",
+      "artifacts/see-routing-holdout-see--project-development-negative/2.json": "ba39e2146cf9a770cfcad5124d5f65feba70f06e4e87e6d4c6ee8be89e5a187e",
+      "artifacts/see-routing-holdout-see--project-development-negative/3.json": "ee9ab953b5823bff33fd9930fdc6e9cc0d41ebca1455ee30d5ba5b77abe9b9cc",
+      "artifacts/see-routing-holdout-see--project-development-positive/1.json": "a957ed432f36f4b8ea8ba844c448185ddc918136e6d68591f9179e986880fa01",
+      "artifacts/see-routing-holdout-see--project-development-positive/2.json": "29497edd631513f5d323559931196f6613d8383a02ac4585b8fbcfc6b8173d6b",
+      "artifacts/see-routing-holdout-see--project-development-positive/3.json": "40e32e384893e735daa9029bbeb64011e4a0392748aa0ec89289f55de9a4abdb"
+    },
+    "case_snapshot_sha256": "148e301608a69c9561f883fd658696cf1afcda24f9bfecd544fc4a83b60b8cc6",
+    "grader_sha256": "5883e79e7ef2179ffd6ccbfd7a096105f4f0b0b3cb55327e5fe92b3211bdb5f7",
+    "manifest_sha256": "75676e8bd358d9d9d2c9243b7c00c70099b4bf96f5ebd033d75b6fa832e89418"
+  },
+  "passed": 19,
+  "reason": "A single condition cannot support an efficacy claim; pair it with the other condition.",
+  "run_id": "routing-holdout-baseline",
+  "schema_version": 3
+}

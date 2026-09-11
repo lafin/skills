@@ -1,0 +1,20 @@
+{
+  "schema_version": 4,
+  "status": "blocked",
+  "results_used": false,
+  "model_requested": "anthropic/claude-sonnet-4-6",
+  "provider_observed": "anthropic",
+  "model_observed": "claude-sonnet-4-6",
+  "attempts": [
+    {
+      "profile": "skill-eval-isolated",
+      "outcome": "No API key found for anthropic"
+    },
+    {
+      "profile": "default",
+      "outcome": "HTTP 403 permission_error: OAuth authentication is not allowed for the organization"
+    }
+  ],
+  "reason": "No usable Anthropic credential is available. The prior authenticated attempts are retained at remediation-v3-development-judge/model-capture-blocked.json; credentials were not changed, so the blocked external call was not repeated.",
+  "effect": "No model-judge result is included in the release decision."
+}

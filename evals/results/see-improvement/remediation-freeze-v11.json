@@ -1,0 +1,47 @@
+{
+  "frozen_at": "2026-09-11T15:31:32Z",
+  "supersedes": "remediation-freeze-v10.json",
+  "prior_freeze_sha256": "7f6b54bb608ff4fe2efa0ecc9e72cd7ca8597d13cfbc8ebaa035d971ff2cfb6e",
+  "reason": "The sealed V10 holdout exposed seven deterministic oracle false positives and three candidate defects. V11 strengthens the ambiguity decision gate, puts unspecified recovery information before consequential destructive actions, promotes the three candidate regressions to development, enforces exact field whitespace, and prevents embedded-token matches for exact manifest spans.",
+  "rejected_v10_holdout": {
+    "baseline": "remediation-v10-independent-behavior-baseline",
+    "treatment": "remediation-v10-independent-behavior-treatment",
+    "baseline_passed": 24,
+    "treatment_passed": 26,
+    "artifacts": 36,
+    "classification": {
+      "oracle_false_positive": 7,
+      "candidate_defect": 3,
+      "both": 0,
+      "uncertain": 0
+    },
+    "candidate_defects": [
+      "Invented a second gauge referent where the source established one compatible referent.",
+      "Labeled an explicit missing measurement as ambiguity instead of preserving it as an evidence limitation.",
+      "Placed unknown recovery information after a destructive action instead of before it."
+    ],
+    "oracle_defects": [
+      "A lexical safety predicate rejected a valid verify-before-action gate.",
+      "A hidden no-ambiguity predicate contradicted a retention source and manifest with consequential missing details.",
+      "A retry synonym predicate rejected the explicit instruction to upload again."
+    ]
+  },
+  "development_smoke": {
+    "run": "remediation-v11-regression-smoke-treatment",
+    "passed": 9,
+    "artifacts": 9,
+    "note": "Supporting pre-freeze smoke only; final development runs bind the frozen evaluator."
+  },
+  "sha256": {
+    "evals/run.py": "be310d7d73869c11412724d66d66105850b22cd3210e4c753f1cbc4aa443cca0",
+    "evals/grade.py": "f19fdfd06d88ba78ed911eb3059205e95025fd9258b5ddc8f6b447476ae424f8",
+    "tests/test_evaluation_harness.py": "72922a04b8bf66fc55e31e223874fb7e79d0ae6dcc093d38ab2d443e385ec5e0",
+    "simplified-engineering-english/SKILL.md": "9c84e922a9f808a3c0447128c491a0437257135b4a1f03ade6036ce7a245949a",
+    "simplified-engineering-english/references/rules.md": "bebe88700dded668c6610ec26c4c0cebdf3b56f47c3364455ec80466ca00ea7d",
+    "simplified-engineering-english/references/dictionary.md": "93ca70b1fc419005ab110c4f6e52270a3b2dabe44fb46ec086c37af245aecdc0",
+    "evals/see-rubric.json": "e11626411fa94b26dfaafdd8d207bf3038ec8692f748d167527d03fe5f708e0e",
+    "evals/cases/see-behavior-development.jsonl": "e6b3a9dc1771b6a73a6470e12bcebd3b0fe196973331c0bfff8385836415f3b3",
+    "evals/cases/see-routing-development.jsonl": "7aec2346a04c2363f73230e7308332bc663d148390925ea8cf3ffc0f0820ada7",
+    "evals/cases/see-routing-independent-holdout.jsonl": "19b95bfc5f067ea8e71bd8f1106aef96a837993a271621589fc23da063906437f"
+  }
+}
