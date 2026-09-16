@@ -218,7 +218,14 @@ Internal reference:
 - [Degradation Patterns Reference](skill://context-degradation/references/patterns.md) - Read when: debugging a specific degradation pattern and needing implementation-level detection code (attention analysis, poisoning tracking, relevance scoring, recovery procedures)
 
 Runnable script:
-- [degradation_detector.py](skill://context-degradation/scripts/degradation_detector.py) - Status: Example; Boundary: simulates attention and uses heuristics for tokens, poisoning, and hallucination signals instead of model measurements - Attention-distribution measurement, lost-in-middle detection, `PoisoningDetector`, `ContextHealthAnalyzer` - Run when: diagnosing a live context against the patterns in this skill
+
+### `degradation_detector.py`
+
+- **Status:** Example.
+- **Boundary:** Simulates attention and uses heuristics for token counts, poisoning, and hallucination signals. It does not measure a model, so its risk labels do not prove live degradation.
+- **Run:** From the repository root, run `python context-degradation/scripts/degradation_detector.py`. The demo accepts no arguments or credentials and uses synthetic context.
+- **Output:** Writes human-readable structure, simulated-attention, lost-in-middle, poisoning, and composite-health reports to standard output. `analyze_agent_context` returns the composite report as a dictionary.
+- **Failure:** The demo exits non-zero only on an uncaught Python error. Repair the reported import or input-type error; a risky or degraded report remains a successful process result.
 
 Related skills in this collection:
 - context-fundamentals - Read when: lacking foundational understanding of context windows, token budgets, or placement mechanics

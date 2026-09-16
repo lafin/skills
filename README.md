@@ -32,15 +32,18 @@ repository as the working directory; elsewhere, pass it with
 ```sh
 python3 -m pip install -r requirements-validation.txt -r requirements-examples.txt
 python3 scripts/validate_skills.py
+python3 evals/validate.py
 python3 -m unittest discover -s tests
 bun test tests/leancode_hook.test.ts
 ```
 
-The validator checks skill metadata, provenance, links, license notices, and
-Python dependencies. The focused tests exercise validator defects, script
-contracts, stable example output, and the evaluation harness.
-See [evals/README.md](evals/README.md) for the OMP behavior and routing
-evaluation framework, artifact contract, and reproduction commands.
+The validators check skill metadata, provenance, links, license notices, Python
+dependencies, and evaluation-suite structure. The focused tests exercise
+validator defects, script contracts, stable example output, and the evaluation
+harness. See [CONTRIBUTING.md](CONTRIBUTING.md) for the contribution process,
+[Skill anatomy](docs/skill-anatomy.md) for the flexible content contract, and
+[evals/README.md](evals/README.md) for the OMP behavior and routing evaluation
+framework, artifact contract, and reproduction commands.
 
 ## Leancode
 
@@ -67,6 +70,7 @@ evaluation framework, artifact contract, and reproduction commands.
 - `ml-system-design-review` — review ML/AI system designs and implementation evidence.
 - `ai-stage-gate` — make evidence-based Go / Conditional / Kill decisions for AI initiatives.
 
+
 ## Credentials
 
 - The Context Engineering skills are derived from [Agent Skills for Context Engineering](https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering) at commit `c578e85e40fe2bda7c1fec91ff64cf5285434934`, © 2025 Context Engineering Agent Skills Contributors, under the MIT License. See [ATTRIBUTION.md](ATTRIBUTION.md) and [LICENSE-context-engineering](LICENSE-context-engineering).
@@ -74,3 +78,12 @@ evaluation framework, artifact contract, and reproduction commands.
 - `lossless-doc-compress`, `ml-system-design-review`, and `ai-stage-gate` contain imported or adapted material from [MLSystemDesign](https://github.com/ML-SystemDesign/MLSystemDesign). See [ATTRIBUTION.md](ATTRIBUTION.md) for exact commits and scopes and [LICENSE-ml-system-design](LICENSE-ml-system-design) for the required notice.
 - The `leancode` lineage is recorded against the observed external comparison commit without inferring copying direction. See [ATTRIBUTION.md](ATTRIBUTION.md).
 - The root [LICENSE](LICENSE) covers repository-original material only; upstream notices continue to apply to imported material.
+
+## Staged evaluation proposals
+
+`source-driven-development`, `api-and-interface-design`, and
+`deprecation-and-migration` are non-active candidates under `proposals/`.
+They are excluded from root skill discovery until their frozen routing and
+behavior admission gates pass. See [ATTRIBUTION.md](ATTRIBUTION.md) and
+[LICENSE-addy-agent-skills](LICENSE-addy-agent-skills) for their pinned source
+and license.

@@ -27,6 +27,9 @@ MARKDOWN_LINK_RE = re.compile(r"(?<!!)\[[^\]]+\]\(([^)]+)\)")
 CODE_SPAN_RE = re.compile(r"(?<!`)`([^`\n]+)`(?!`)")
 HEADING_RE = re.compile(r"^#{1,6}\s+(.+?)\s*#*\s*$")
 IMPORT_REPLACEMENTS = {"pyyaml": {"yaml"}}
+SKILL_NAME_RE = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*")
+MAX_DESCRIPTION_LENGTH = 1_024
+MAX_SKILL_LINES = 500
 
 
 @dataclass(frozen=True, order=True)
@@ -36,10 +39,12 @@ class Issue:
     rule: str
     observed: str
     correction: str
+    warning: bool = False
 
     def render(self) -> str:
+        prefix = "warning: " if self.warning else ""
         return (
-            f"{self.path}:{self.line}: [{self.rule}] observed={self.observed!r}; "
+            f"{prefix}{self.path}:{self.line}: [{self.rule}] observed={self.observed!r}; "
             f"correction={self.correction}"
         )
 
@@ -68,8 +73,10 @@ def add(
     rule: str,
     observed: object,
     correction: str,
+    *,
+    warning: bool = False,
 ) -> None:
-    issues.append(Issue(relative(path, root), line, rule, str(observed), correction))
+    issues.append(Issue(relative(path, root), line, rule, str(observed), correction, warning))
 
 
 def markdown_files(root: Path, skill_files: list[Path]) -> list[Path]:
@@ -108,16 +115,41 @@ def parse_frontmatter(path: Path, root: Path, issues: list[Issue]) -> tuple[dict
 
 def validate_metadata(path: Path, root: Path, issues: list[Issue]) -> None:
     metadata, text = parse_frontmatter(path, root, issues)
+    if len(text.splitlines()) > MAX_SKILL_LINES:
+        add(
+            issues,
+            root,
+            path,
+            MAX_SKILL_LINES + 1,
+            "skill-length",
+            f"{len(text.splitlines())} lines",
+            "Review progressive disclosure; keep core decisions and safety boundaries in SKILL.md.",
+            warning=True,
+        )
     if metadata is None:
         return
     expected_name = path.parent.name
     name = metadata.get("name")
+    if not isinstance(name, str) or not SKILL_NAME_RE.fullmatch(name):
+        add(issues, root, path, key_line(text, "name"), "metadata-name-format", name, "Use a lower-case kebab-case frontmatter name." )
     if name != expected_name:
-        add(issues, root, path, key_line(text, "name"), "skill-name", name, f"Set name: {expected_name} to match the skill directory." )
-    for field in ("description", "license"):
-        value = metadata.get(field)
-        if not isinstance(value, str) or not value.strip():
-            add(issues, root, path, key_line(text, field), f"metadata-{field}", value, f"Add a non-empty {field} field to the YAML frontmatter." )
+        add(issues, root, path, key_line(text, "name"), "skill-name", name, f"Set name: {expected_name} to match the skill directory exactly." )
+    description = metadata.get("description")
+    if not isinstance(description, str) or not description.strip():
+        add(issues, root, path, key_line(text, "description"), "metadata-description", description, "Add a non-empty description field to the YAML frontmatter." )
+    elif len(description) > MAX_DESCRIPTION_LENGTH:
+        add(
+            issues,
+            root,
+            path,
+            key_line(text, "description"),
+            "metadata-description-length",
+            f"{len(description)} characters",
+            f"Shorten description to at most {MAX_DESCRIPTION_LENGTH:,} characters.",
+        )
+    license_value = metadata.get("license")
+    if not isinstance(license_value, str) or not license_value.strip():
+        add(issues, root, path, key_line(text, "license"), "metadata-license", license_value, "Add a non-empty license field to the YAML frontmatter." )
 
     provenance = metadata.get("metadata")
     if not isinstance(provenance, dict):
@@ -225,6 +257,24 @@ def validate_skill_uri(source: Path, uri: str, line: int, root: Path, issues: li
     skill_name = unquote(parsed.netloc)
     asset = unquote(parsed.path.lstrip("/"))
     target = root / skill_name / (asset or "SKILL.md")
+    try:
+        source_parts = source.relative_to(root).parts
+    except ValueError:
+        source_parts = ()
+    owner = source_parts[0] if len(source_parts) > 1 and (root / source_parts[0] / "SKILL.md").is_file() else None
+    if asset and owner:
+        try:
+            target.resolve().relative_to((root / owner).resolve())
+        except ValueError:
+            add(
+                issues,
+                root,
+                source,
+                line,
+                "cross-skill-asset",
+                uri,
+                f"Copy the needed asset into {owner}, remove the asset path, or reference bare skill://{skill_name}.",
+            )
     check_target(source=source, target=target, fragment=parsed.fragment, root=root, line=line, rule="skill-target", observed=uri, issues=issues)
 
 
@@ -341,6 +391,9 @@ def validate(root: Path) -> list[Issue]:
     skill_names = {path.parent.name for path in skill_files}
     readme_inventory(root, skill_names, issues)
     for path in skill_files:
+        directory_name = path.parent.name
+        if not SKILL_NAME_RE.fullmatch(directory_name):
+            add(issues, root, path, 1, "skill-directory-name", directory_name, "Rename the skill directory using lower-case kebab case." )
         validate_metadata(path, root, issues)
     validate_references(root, skill_files, skill_names, issues)
     validate_python(root, issues)
@@ -357,8 +410,9 @@ def main(argv: list[str] | None = None) -> int:
     issues = validate(args.root)
     for issue in issues:
         print(issue.render())
-    if issues:
-        print(f"validation failed: {len(issues)} issue(s)")
+    errors = [issue for issue in issues if not issue.warning]
+    if errors:
+        print(f"validation failed: {len(errors)} issue(s)")
         return EXIT_INVALID
     print("validation passed")
     return EXIT_OK

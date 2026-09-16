@@ -2,7 +2,7 @@
 
 This document provides implementation patterns for reducing a specialized tool set to a smaller set of general-purpose capabilities.
 
-The production example that motivates this pattern is documented once in the [dated Vercel d0 evidence](skill://project-development/references/case-studies.md#evidence-vercel-d0-architectural-reduction-december-2025). That section states the source, evaluation scope, reported results, and limits of the comparison.
+The production example that motivates this pattern is documented in the [dated Vercel d0 evidence](skill://tool-design/references/d0-evidence.md#evidence-vercel-d0-architectural-reduction-december-2025). That section states the source, evaluation scope, reported results, and limits of the comparison.
 
 ## Implementation Pattern
 

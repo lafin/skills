@@ -1,15 +1,15 @@
 {
-  "schema_version": 2,
-  "decision": "no-go",
+  "schema_version": 3,
+  "decision": "inconclusive",
   "automated_gate_decision": "pass",
   "efficacy_claim": null,
   "decision_report": {
     "path": "evals/results/see-improvement/release-report.md",
-    "sha256": "d2bb5a2e374c907fd923d04c6d627532f4959cfd3ae52e421feecc74fbd4c27d"
+    "sha256": "1810bf39bfd5389680d4c24229b31af87713a89a6881937d7e817eaf18ba14cc"
   },
   "release_gate": {
     "path": "evals/results/see-improvement/release-gate-final.json",
-    "sha256": "1fffda7fca3530aec5bdd9e775736ce955ea336f067ba1e7c56b96562bccd77e"
+    "sha256": "5e0d6804cb351b6d12309517ecba8ea85866b9d81112e01fb42b99506ef0cfc2"
   },
   "automated_gate": {
     "path": "evals/results/see-improvement/remediation-v24-gate.json",
@@ -22,8 +22,51 @@
     "thinking": "off",
     "attempts_per_case": 3,
     "tools": [],
-    "behavior_max_time": "10m",
-    "routing_max_time": "2m"
+    "behavior_timeouts": {
+      "baseline": {
+        "effective_per_attempt_seconds": 600,
+        "effective_overall_seconds": null
+      },
+      "treatment": {
+        "effective_per_attempt_seconds": 600,
+        "effective_overall_seconds": null
+      },
+      "equality": "unverified"
+    },
+    "routing_timeouts": {
+      "baseline": {
+        "effective_per_attempt_seconds": 120,
+        "effective_overall_seconds": null
+      },
+      "treatment": {
+        "effective_per_attempt_seconds": 120,
+        "effective_overall_seconds": null
+      },
+      "equality": "unverified"
+    },
+    "comparison_contract": {
+      "path": null,
+      "sha256": null,
+      "status": "unavailable_for_accepted_comparison"
+    }
+  },
+  "evaluation_identity": {
+    "skill_revision_sha256": "256976f959ac379e0080835f7b6f5201908b722dbab4384d0e32cc12e31e20a8",
+    "case_source_revision": null,
+    "case_manifest": {
+      "path": null,
+      "sha256": null,
+      "status": "unavailable_for_accepted_comparison"
+    },
+    "baseline": {
+      "catalog_revision": null,
+      "resolved_root": null
+    },
+    "treatment": {
+      "catalog_revision": null,
+      "resolved_root": null
+    },
+    "holdout_status": "locally_complete_not_release_eligible"
   },
   "evaluated_sources": {
     "evals/run.py": "be310d7d73869c11412724d66d66105850b22cd3210e4c753f1cbc4aa443cca0",
@@ -117,7 +160,7 @@
     },
     "technical_attestation": {
       "path": "evals/results/see-improvement/remediation-v24-technical-attestation.json",
-      "sha256": "0a6836c13b6fcabf9b75c493b5a41f2e4bdf25295b9461654219f50f2bf64df8",
+      "sha256": "c64a9014dbf14a8ac8ff5fb40283448ef459a164198d932c5bfc06bd2f5ca3a0",
       "status": "awaiting_named_qualified_technical_authority"
     },
     "model_judge_analysis": {
@@ -158,15 +201,43 @@
       "results_used_as_supporting_evidence": true
     }
   },
+  "review_status": {
+    "human": "awaiting_qualified_human_review",
+    "technical": "awaiting_named_qualified_technical_authority"
+  },
   "raw_evidence": {
-    "retention": "local_gitignored_only",
+    "baseline": {
+      "immutable_uri": null,
+      "sha256": null
+    },
+    "treatment": {
+      "immutable_uri": null,
+      "sha256": null
+    },
+    "access_policy": null,
+    "retention_period": null,
+    "responsible_owner": null,
+    "local_retention": "gitignored_only",
     "durable_external_storage": false,
     "publication_ready": false
   },
+  "deterministic_failures": [],
+  "failed_gates": [],
+  "incomplete_gates": [
+    "immutable_evaluated_catalogs",
+    "frozen_comparison_contract",
+    "timeout_equality",
+    "human_calibration_and_adjudication",
+    "technical_attestation",
+    "durable_external_storage"
+  ],
   "release_blockers": [
+    "immutable baseline and treatment evaluated catalog revisions and resolved roots unavailable",
+    "pre-registered comparison-contract path and hash unavailable",
+    "effective overall timeout values and explicit baseline/treatment timeout equality unavailable",
     "qualified human calibration and model-judge adjudication incomplete",
     "named qualified technical attestation incomplete",
-    "durable external artifact storage not configured"
+    "immutable baseline and treatment artifact URIs and hashes, access policy, retention period, and responsible owner unavailable"
   ],
   "prior_rollback_inputs": {
     "repository_commit": "a2384f71dc317446706c66799d26e15e6b18836a",
@@ -174,5 +245,5 @@
     "dictionary_sha256": "965dd00aacb08ee95dd63a9a59a1ccdd4f8aed68c11c98ae3ab4dc5a54345fed",
     "method": "Restore the prior skill and dictionary together; do not retain partial aliases."
   },
-  "manifest_note": "This file intentionally does not hash itself. V1-V23 rejected or audit-only evidence and the incomplete remediation-v24-development-behavior-treatment capture are excluded from accepted runs."
+  "manifest_note": "This file intentionally does not hash itself. Accepted runs support the local automated observation only and are not release evidence without the incomplete immutable-root, comparison-contract, timeout, review, and durable-storage inputs. V1-V23 rejected or audit-only evidence and the incomplete remediation-v24-development-behavior-treatment capture are excluded from accepted runs."
 }

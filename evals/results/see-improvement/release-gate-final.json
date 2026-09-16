@@ -1,12 +1,44 @@
 {
-  "schema_version": 2,
-  "decision": "no-go",
+  "schema_version": 3,
+  "decision": "inconclusive",
+  "decision_basis": "Required release evidence is missing. Under the evidence policy, favorable automated results cannot produce GO or NO-GO until the comparison is reproducible from immutable evaluated roots and durable artifacts and the required reviews are complete.",
   "efficacy_claim": null,
   "automated_evaluated_configuration_gate": {
     "decision": "pass",
     "path": "evals/results/see-improvement/remediation-v24-gate.json",
     "claim": "Treatment improved deterministic development results, preserved every passing holdout result, passed routing holdout, and introduced no undocumented critical or cost regression.",
-    "scope": "openai-codex/gpt-5.6-sol with OMP omp/18.1.17, profile skill-eval-isolated, thinking off, three attempts per case, and no tools"
+    "scope": "openai-codex/gpt-5.6-sol with OMP omp/18.1.17, profile skill-eval-isolated, thinking off, three attempts per case, and no tools",
+    "release_effect": "supporting evidence only; it does not satisfy the incomplete release gates"
+  },
+  "evidence_completeness": {
+    "evaluated_baseline_catalog_revision": null,
+    "evaluated_baseline_catalog_root": null,
+    "evaluated_treatment_catalog_revision": null,
+    "evaluated_treatment_catalog_root": null,
+    "comparison_contract_path": null,
+    "comparison_contract_sha256": null,
+    "timeout_equality": "unverified",
+    "baseline_artifact_immutable_uri": null,
+    "baseline_artifact_sha256": null,
+    "treatment_artifact_immutable_uri": null,
+    "treatment_artifact_sha256": null,
+    "artifact_access_policy": null,
+    "artifact_retention": null,
+    "artifact_owner": null
+  },
+  "human_review": {
+    "status": "awaiting_qualified_human_review",
+    "reviewer": null,
+    "qualifications": null,
+    "scores": null,
+    "adjudications": null
+  },
+  "technical_review": {
+    "status": "awaiting_named_qualified_technical_authority",
+    "reviewer": null,
+    "qualifications": null,
+    "assessments": null,
+    "signature": null
   },
   "independent_model_judge": {
     "status": "complete_uncalibrated",
@@ -21,27 +53,54 @@
     "analysis": "evals/results/see-improvement/remediation-v24-model-judge-analysis.json",
     "effect": "supporting evidence only; human calibration and adjudication remain required"
   },
+  "failed_gates": [],
+  "incomplete_gates": [
+    "immutable_evaluated_catalogs",
+    "frozen_comparison_contract",
+    "timeout_equality",
+    "human_calibration_and_adjudication",
+    "technical_attestation",
+    "durable_external_storage"
+  ],
   "release_blockers": [
     {
+      "id": "immutable_evaluated_catalogs",
+      "status": "incomplete",
+      "evidence": null,
+      "reason": "The accepted results do not record immutable baseline and treatment catalog revisions and resolved roots."
+    },
+    {
+      "id": "frozen_comparison_contract",
+      "status": "incomplete",
+      "evidence": null,
+      "reason": "No pre-registered comparison-contract path and content hash are recorded for the accepted comparison."
+    },
+    {
+      "id": "timeout_equality",
+      "status": "incomplete",
+      "evidence": null,
+      "reason": "The legacy manifests record per-attempt max_time values, but not effective overall timeout values or an explicit baseline/treatment equality result."
+    },
+    {
       "id": "human_calibration_and_adjudication",
-      "status": "blocked",
+      "status": "incomplete",
       "evidence": "evals/results/see-improvement/remediation-v24-human-calibration-packet.json",
       "reason": "No qualified human reviewer has scored and locked the 26 calibration pairs or adjudicated the model judge's 30 position-sensitive and 6 critical-flagged pairs."
     },
     {
       "id": "technical_attestation",
-      "status": "blocked",
+      "status": "incomplete",
       "evidence": "evals/results/see-improvement/remediation-v24-technical-attestation.json",
       "reason": "No named qualified technical authority has attested correctness, safety, security, completeness, operational validity, and product terminology."
     },
     {
       "id": "durable_external_storage",
-      "status": "blocked",
+      "status": "incomplete",
       "evidence": null,
-      "reason": "Raw artifacts exist only in local Git-ignored directories; no durable external artifact store is configured."
+      "reason": "Raw artifacts exist only in local Git-ignored directories; immutable baseline and treatment artifact URIs and hashes, access policy, retention period, and responsible owner are unavailable."
     }
   ],
-  "supported_automated_claim": "For the evaluated configuration only, deterministic behavior improved from 29/42 to 42/42 on development and from 24/36 to 36/36 on the independently frozen holdout; routing remained 30/30 on development and 36/36 on holdout.",
+  "supported_automated_claim": "For the locally captured evaluated configuration only, deterministic behavior improved from 29/42 to 42/42 on development and from 24/36 to 36/36 on the independently frozen holdout; routing remained 30/30 on development and 36/36 on holdout. This observation is not release evidence until the incomplete gates are resolved.",
   "unsupported_release_claims": [
     "release readiness",
     "SEE conformance",

@@ -3,6 +3,7 @@ import json
 import os
 from pathlib import Path
 import subprocess
+import re
 import sys
 import tempfile
 import unittest
@@ -85,6 +86,32 @@ class ScriptContractTests(unittest.TestCase):
             with self.subTest(script=relative_path):
                 doc = import_script(ROOT / relative_path).__doc__ or ""
                 self.assertIn("Replacement points:", doc)
+
+    def test_skill_docs_publish_actionable_script_contracts(self) -> None:
+        for path in SCRIPT_PATHS:
+            relative_path = path.relative_to(ROOT)
+            with self.subTest(script=relative_path):
+                skill_doc = path.parent.parent / "SKILL.md"
+                text = skill_doc.read_text()
+                match = re.search(
+                    rf"^### `{re.escape(path.name)}`\n(?P<body>.*?)(?=^##+ |\Z)",
+                    text,
+                    flags=re.MULTILINE | re.DOTALL,
+                )
+                self.assertIsNotNone(
+                    match,
+                    f"{skill_doc.relative_to(ROOT)} must document {path.name}",
+                )
+                body = match.group("body")
+                for field in ("Status", "Boundary", "Run", "Output", "Failure"):
+                    self.assertIn(f"**{field}:**", body)
+                self.assertIn(
+                    f"`python {relative_path.as_posix()}",
+                    body,
+                    "Run must give a repository-root command",
+                )
+                if relative_path in TEMPLATE_PATHS:
+                    self.assertIn("**Replacement points:**", body)
 
     def test_example_demos_run_without_credentials(self) -> None:
         env = os.environ.copy()

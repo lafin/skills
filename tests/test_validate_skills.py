@@ -64,6 +64,84 @@ class ValidateSkillsTest(unittest.TestCase):
         self.assertIn("[skill-name]", result.stdout)
         self.assertIn("Set name: alpha", result.stdout)
 
+    def test_rejects_invalid_directory_name(self) -> None:
+        invalid = self.root / "Alpha_Skill"
+        (self.root / "alpha").rename(invalid)
+        result = self.run_validator()
+        self.assertEqual(1, result.returncode)
+        self.assertIn("[skill-directory-name]", result.stdout)
+        self.assertIn("lower-case kebab case", result.stdout)
+
+    def test_rejects_invalid_frontmatter_name(self) -> None:
+        self.rewrite_skill("name: alpha", "name: Alpha")
+        result = self.run_validator()
+        self.assertEqual(1, result.returncode)
+        self.assertIn("[metadata-name-format]", result.stdout)
+        self.assertIn("lower-case kebab-case", result.stdout)
+
+    def test_accepts_description_at_1024_characters(self) -> None:
+        self.rewrite_skill("Fixture skill.", "x" * 1_024)
+        result = self.run_validator()
+        self.assertEqual(0, result.returncode, result.stdout)
+
+    def test_rejects_description_over_1024_characters(self) -> None:
+        self.rewrite_skill("Fixture skill.", "x" * 1_025)
+        result = self.run_validator()
+        self.assertEqual(1, result.returncode)
+        self.assertIn("[metadata-description-length]", result.stdout)
+        self.assertIn("1,024 characters", result.stdout)
+
+    def test_warns_without_failure_when_skill_exceeds_500_lines(self) -> None:
+        path = self.root / "alpha" / "SKILL.md"
+        path.write_text(
+            path.read_text(encoding="utf-8") + "".join(f"Body line {line}\n" for line in range(501)),
+            encoding="utf-8",
+        )
+        result = self.run_validator()
+        self.assertEqual(0, result.returncode, result.stdout)
+        self.assertIn("warning: alpha/SKILL.md:501: [skill-length]", result.stdout)
+        self.assertTrue(result.stdout.endswith("validation passed\n"))
+
+    def test_rejects_cross_skill_asset_but_allows_local_asset_and_bare_owner(self) -> None:
+        beta = self.root / "beta"
+        (beta / "references").mkdir(parents=True)
+        (beta / "references" / "evidence.md").write_text("# Evidence\n", encoding="utf-8")
+        (beta / "SKILL.md").write_text(
+            "---\n"
+            "name: beta\n"
+            "description: Adjacent fixture skill.\n"
+            "license: MIT\n"
+            "metadata:\n"
+            "  provenance: repository-original\n"
+            "---\n\n"
+            "# Beta\n",
+            encoding="utf-8",
+        )
+        readme = self.root / "README.md"
+        readme.write_text(
+            readme.read_text(encoding="utf-8").replace(
+                "- `alpha` — fixture.",
+                "- `alpha` — fixture.\n- `beta` — adjacent fixture.",
+            ),
+            encoding="utf-8",
+        )
+        self.rewrite_skill(
+            "# Alpha",
+            "# Alpha\n\n"
+            "See skill://alpha/references/evidence.md and bare skill://beta.",
+        )
+        allowed = self.run_validator()
+        self.assertEqual(0, allowed.returncode, allowed.stdout)
+
+        self.rewrite_skill(
+            "bare skill://beta.",
+            "bare skill://beta and skill://beta/references/evidence.md.",
+        )
+        rejected = self.run_validator()
+        self.assertEqual(1, rejected.returncode)
+        self.assertEqual(1, rejected.stdout.count("[cross-skill-asset]"))
+        self.assertIn("reference bare skill://beta", rejected.stdout)
+
     def test_rejects_missing_internal_path(self) -> None:
         self.rewrite_skill("# Alpha", "# Alpha\n\nSee `researcher/missing.md`.")
         result = self.run_validator()

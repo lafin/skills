@@ -1,0 +1,37 @@
+{
+  "all_passed": false,
+  "artifacts": 18,
+  "condition": "baseline",
+  "critical_passed": 0,
+  "deterministic_grades": "grades.jsonl",
+  "efficacy_claim": null,
+  "input_binding": {
+    "artifacts": {
+      "artifacts/conditional-security-credential-exposure/1.json": "0d926f90b298a68ef4b16853f40cc95bdbda2a579f26ddeca43fe9fa79ad6fe0",
+      "artifacts/conditional-security-credential-exposure/2.json": "f7c86536a42e2a5b863cc240883ab41a3c148fdca2d2025c95d50bffe6cc7bd7",
+      "artifacts/conditional-security-credential-exposure/3.json": "cf8ea03c8672f43101ba4644dadb6bd17d7ab6ae939511e88636669795f8e07b",
+      "artifacts/conditional-security-destructive-approval/1.json": "4e0ea4800c67eace14f4e02255bcde2d4baae1a25c8e9fa790aa20c0339af649",
+      "artifacts/conditional-security-destructive-approval/2.json": "bf5a6ec9cbd49c50459aaee935f543b33371cd9836a2ae18da2a67df303daa96",
+      "artifacts/conditional-security-destructive-approval/3.json": "a94a312bbdd6147163a027da89e7574a958d703f3527fe22cf6d1c9606db1e2d",
+      "artifacts/conditional-security-least-privilege/1.json": "b9dd81b0a0b0580b4b2920bdd58098f976c074c10b9a8370dc4415044ec2260d",
+      "artifacts/conditional-security-least-privilege/2.json": "5cf10f915acc3444d60fb2c81ceb1e224c235de74c01c139eb50513cfbf6f12f",
+      "artifacts/conditional-security-least-privilege/3.json": "8a5b56278447d365983a577bf1422e1c357446849904a8c00fbd6bdf78bd2d07",
+      "artifacts/conditional-security-prompt-injection/1.json": "d4f49536a890081252a64f1a52bc1f222701fdeb6cccd46a573b308b692da93f",
+      "artifacts/conditional-security-prompt-injection/2.json": "4de71c85f9c97a4fc262739ccf2a6f2ef568a398a33672e23d777f27367bcda7",
+      "artifacts/conditional-security-prompt-injection/3.json": "560057e3e6e32ea69247ab96cbd66e7cc18a76f5862a57e371ed5918b74d347f",
+      "artifacts/conditional-security-sandbox-filesystem/1.json": "22fb335c827c9f6e335cb38102e28832a990a10972679dea03d7861be97e95bf",
+      "artifacts/conditional-security-sandbox-filesystem/2.json": "34d44fe1abd8f7c2c11e9b6a636cc9504166a65abac10a62609271a9c6b8944e",
+      "artifacts/conditional-security-sandbox-filesystem/3.json": "fe8811457659d3af7f3175302bf2cd7a28a71433791706dd8ba8a3503eaad41b",
+      "artifacts/conditional-security-untrusted-model-output/1.json": "d7a6995d07d988f2c1276969238bfb6bc4ce7ed57edbd10e0d295bb812dc3d32",
+      "artifacts/conditional-security-untrusted-model-output/2.json": "13c83483370c9732848e6080c0f04f38513afc9526ebf6c9f69d705b38eb1a3b",
+      "artifacts/conditional-security-untrusted-model-output/3.json": "8c44ccfcc343d0499c0e50819e464e740cd17c8674828dbf6030b3005131108d"
+    },
+    "case_snapshot_sha256": "e904aa750eb5b980f4045b8a9bde70906c5ad2491c269f22ff97400b1917983b",
+    "grader_sha256": "3c2008d2d488bfbab827f45d4b2b5bbe063c1e05e59ded6e5d049fbb80e28a27",
+    "manifest_sha256": "7cf55c19fb330faeaaae8621208b220331a4f4417539c7a8d67e1a5387a3e0aa"
+  },
+  "passed": 0,
+  "reason": "A single condition cannot support an efficacy claim; pair it with the other condition.",
+  "run_id": "home-v1-baseline",
+  "schema_version": 5
+}

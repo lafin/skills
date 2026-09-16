@@ -288,7 +288,15 @@ Internal reference:
 - [Infrastructure Patterns](skill://hosted-agents/references/infrastructure-patterns.md) - Read when: implementing sandbox lifecycle, image builds, or warm pool logic for the first time
 
 Runnable script:
-- [sandbox_manager.py](skill://hosted-agents/scripts/sandbox_manager.py) - Status: Template; Replacement points: implement sandbox I/O, snapshots, image creation, provider lifecycle operations, and the GitHub token provider - `SandboxManager`, `ImageBuilder`, `WarmPoolManager`, `AgentSession` - Use when: adapting sandbox lifecycle, image-build, or warm-pool patterns
+
+### `sandbox_manager.py`
+
+- **Status:** Template.
+- **Boundary:** Demonstrates hosted-sandbox lifecycle structure with placeholder identities and credentials. Provider I/O, snapshots, image creation, restore, timeout enforcement, and token-backed authorization are not implemented, so it does not create a real sandbox or establish production isolation, persistence, authorization, or availability.
+- **Replacement points:** Implement sandbox I/O and snapshots, image creation and restore, provider lifecycle and timeout operations, synchronization signaling, and the GitHub token provider for the selected infrastructure before production use. A caller that writes through `AgentSession` must call `mark_sync_complete()` after repository synchronization or replace that manual signal with provider state.
+- **Run:** From the repository root, run `python hosted-agents/scripts/sandbox_manager.py`. The bundled demonstration accepts no arguments or real credentials and uses placeholder repositories and tokens.
+- **Output:** Writes human-readable simulated image/session lifecycle messages and a placeholder snapshot value to standard output. After replacement, library methods must return the `Sandbox`, `RepositoryImage`, session, command-result, file-content, and snapshot values documented by their type annotations.
+- **Failure:** The demo exits non-zero on an uncaught Python or asynchronous lifecycle error; `start_session` can also raise `ValueError` when no image exists. The background build loop instead prints provider failures and continues. Repair the named provider replacement point, ensure an image is available, and connect repository synchronization to `mark_sync_complete()` before retrying queued writes.
 
 Related skills in this collection:
 - multi-agent-patterns - Read when: designing self-spawning or supervisor coordination patterns

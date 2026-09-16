@@ -1,4 +1,16 @@
 {
+  "schema_version": 2,
+  "status": "awaiting_named_qualified_technical_authority",
+  "required_authority": {
+    "name": null,
+    "qualification_basis": null
+  },
+  "reviewer": {
+    "name": null,
+    "organization": null,
+    "qualification_basis": null,
+    "role": null
+  },
   "assessments": {
     "completeness": null,
     "correctness": null,
@@ -8,15 +20,8 @@
     "security": null
   },
   "critical_findings": null,
-  "decision": null,
   "evidence": null,
-  "reviewer": {
-    "name": null,
-    "organization": null,
-    "qualification_basis": null,
-    "role": null
-  },
-  "schema_version": 1,
-  "signed_at": null,
-  "status": "awaiting_named_qualified_technical_authority"
+  "decision": null,
+  "signature": null,
+  "signed_at": null
 }

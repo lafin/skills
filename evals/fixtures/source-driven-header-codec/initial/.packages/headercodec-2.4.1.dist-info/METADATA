@@ -1,0 +1,4 @@
+Metadata-Version: 2.3
+Name: headercodec
+Version: 2.4.1
+Summary: Deterministic header component encoding

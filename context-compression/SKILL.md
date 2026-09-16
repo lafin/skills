@@ -261,7 +261,14 @@ Internal reference:
 - [Evaluation Framework Reference](skill://context-compression/references/evaluation-framework.md) - Read when: building or calibrating a probe-based evaluation pipeline, or when needing scoring rubrics and LLM judge configuration for compression quality assessment
 
 Runnable script:
-- [compression_evaluator.py](skill://context-compression/scripts/compression_evaluator.py) - Status: Example; Boundary: uses a heuristic judge stub and mock responses without calling a model API - `ProbeGenerator`, `CompressionEvaluator`, `StructuredSummarizer` - Run when: measuring whether a compaction preserved decisions, files, risks, and next actions; `skill://context-compression/tests/test_compression_evaluator.py` is its check
+
+### `compression_evaluator.py`
+
+- **Status:** Example.
+- **Boundary:** Uses a deterministic heuristic judge, mock responses, simplified token estimates, and pattern-based fact extraction. It calls no model API and does not prove semantic preservation.
+- **Run:** From the repository root, run `python context-compression/scripts/compression_evaluator.py`. The demo accepts no arguments or credentials and uses built-in history and compressed context.
+- **Output:** Writes a human-readable evaluation count, average score, dimension averages, strongest and weakest dimensions, and recommendations to standard output. `evaluate_compression_quality` returns the same summary as a dictionary.
+- **Failure:** The demo exits non-zero only on an uncaught Python error. Repair the reported import or input-shape error; low scores and recommendations are report data, not process failures.
 
 Related skills in this collection:
 - context-degradation - Read when: diagnosing why agent performance drops over long sessions, before applying compression as a mitigation

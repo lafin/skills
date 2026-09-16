@@ -1,0 +1,4 @@
+compatibility_window=open
+legacy_consumers=mobile-7.4,kiosk-3.2
+removal_authorized=no
+rollback=replacement_percent=0

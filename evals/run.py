@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import difflib
 import hashlib
+import importlib.util
 import json
 import os
 import re
@@ -14,6 +15,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import tarfile
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -21,7 +23,7 @@ from typing import Any
 
 import yaml
 
-SCHEMA_VERSION = 4
+SCHEMA_VERSION = 5
 CHECK_OPS = {"contains", "not_contains", "equals", "regex", "not_regex"}
 SENSITIVE_CONFIG_KEY = re.compile(
     r"(?:auth(?:orization)?|bearer|cookie|token|secret|password|api.?key|access.?key|private.?key|credential)",
@@ -728,11 +730,25 @@ def effective_config(args: argparse.Namespace) -> dict[str, Any]:
     if not isinstance(parsed, dict):
         raise ValueError(f"cannot read effective OMP profile configuration: {stderr.strip()}")
     custom_directories = (parsed.get("skills.customDirectories") or {}).get("value")
-    if not isinstance(custom_directories, list) or str(args.cwd) not in {
-        str(Path(path).resolve()) for path in custom_directories if isinstance(path, str)
-    }:
+    if not isinstance(custom_directories, list):
         raise ValueError(
-            f"profile {args.profile!r} must register {args.cwd} in skills.customDirectories"
+            f"profile {args.profile!r} must configure skills.customDirectories as an array"
+        )
+    catalog_root = getattr(args, "catalog_root", args.cwd)
+    configured_roots = [
+        str(Path(path).resolve())
+        for path in custom_directories or []
+        if isinstance(path, str)
+    ]
+    if str(catalog_root) not in configured_roots:
+        raise ValueError(
+            f"profile {args.profile!r} must register evaluated catalog root "
+            f"{catalog_root} in skills.customDirectories"
+        )
+    if catalog_root != args.cwd and configured_roots != [str(catalog_root)]:
+        raise ValueError(
+            "effective skills.customDirectories must contain only the isolated "
+            f"catalog root {catalog_root}; remove working-tree and extra roots"
         )
     path_command = [args.omp, "--profile", args.profile, "config", "path"]
     path_code, path_stdout, path_stderr = run_text(path_command, args.cwd)
@@ -767,10 +783,179 @@ def safe_name(case_id: str) -> str:
         raise ValueError(f"case id contains unsupported characters: {case_id}")
     return case_id
 
+def evaluation_selector():
+    path = Path(__file__).with_name("validate.py")
+    spec = importlib.util.spec_from_file_location("skill_eval_validate_runtime", path)
+    if spec is None or spec.loader is None:
+        raise ValueError(f"{path}: cannot load evaluation lifecycle validator")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.select_case_files
+
+
+def sha256_json(value: Any) -> str:
+    encoded = json.dumps(value, sort_keys=True, separators=(",", ":")).encode()
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def frozen_git_file(repo_root: Path, path: Path, field: str) -> dict[str, str]:
+    relative = path.relative_to(repo_root).as_posix()
+    head_blob = git_value(repo_root, "rev-parse", f"HEAD:{relative}")
+    current_blob = git_value(repo_root, "hash-object", str(path))
+    revision = git_value(
+        repo_root, "log", "-1", "--format=%H", "--", relative
+    )
+    if not head_blob or not current_blob or not revision:
+        raise ValueError(
+            f"{path}: {field} is not committed; commit the reviewed file before "
+            "protected execution"
+        )
+    if current_blob != head_blob:
+        raise ValueError(
+            f"{path}: {field} differs from committed revision {revision}; restore "
+            "the locked file or commit and review a new comparison"
+        )
+    return {"source_revision": revision, "git_blob": head_blob}
+
+
+def materialize_catalog(repo_root: Path, revision: str, role: str) -> tuple[tempfile.TemporaryDirectory, dict[str, str]]:
+    if not isinstance(revision, str) or not revision:
+        raise ValueError(
+            f"evals/suites.json: {role}_catalog_revision is missing; "
+            f"record the immutable {role} catalog commit"
+        )
+    code, stdout, stderr = run_text(
+        ["git", "rev-parse", "--verify", f"{revision}^{{commit}}"], repo_root
+    )
+    resolved = stdout.strip()
+    if code or not resolved:
+        raise ValueError(
+            f"evals/suites.json: {role}_catalog_revision {revision!r} is not resolvable: "
+            f"{stderr.strip() or 'record a reachable full commit hash'}"
+        )
+    if revision != resolved:
+        raise ValueError(
+            f"evals/suites.json: {role}_catalog_revision must be the immutable full "
+            f"commit hash {resolved}, not {revision!r}"
+        )
+    temporary = tempfile.TemporaryDirectory(prefix=f"omp-eval-{role}-catalog-")
+    temporary_root = Path(temporary.name)
+    archive = temporary_root / "catalog.tar"
+    catalog_root = temporary_root / "root"
+    catalog_root.mkdir()
+    archive_code, _, archive_stderr = run_text(
+        ["git", "archive", "--format=tar", f"--output={archive}", resolved], repo_root
+    )
+    if archive_code:
+        temporary.cleanup()
+        raise ValueError(
+            f"evals/suites.json: cannot materialize {role}_catalog_revision "
+            f"{resolved}: {archive_stderr.strip()}"
+        )
+    try:
+        with tarfile.open(archive) as handle:
+            handle.extractall(catalog_root, filter="data")
+    except (OSError, tarfile.TarError) as error:
+        temporary.cleanup()
+        raise ValueError(
+            f"evals/suites.json: cannot extract {role}_catalog_revision {resolved}: {error}"
+        ) from error
+    archive.unlink()
+    tree = git_value(repo_root, "rev-parse", f"{resolved}^{{tree}}")
+    return temporary, {
+        "role": role,
+        "revision": resolved,
+        "root": str(catalog_root),
+        "tree": tree or "",
+    }
+
+
+def catalog_config(root: Path) -> Path:
+    path = root.parent / "catalog-root.yaml"
+    path.write_text(
+        yaml.safe_dump({"skills": {"customDirectories": [str(root)]}}, sort_keys=True),
+        encoding="utf-8",
+    )
+    return path
+
+
+def effective_system_prompt_hash(args: argparse.Namespace) -> str | None:
+    return (
+        hashlib.sha256(args.system_prompt.encode()).hexdigest()
+        if args.system_prompt is not None
+        else None
+    )
+
+
+def verify_locked_contract(
+    contract: dict[str, Any],
+    args: argparse.Namespace,
+    cases: list[dict[str, Any]],
+    allowed_tools: list[str],
+) -> dict[str, Any]:
+    execution = contract.get("execution_config")
+    if not isinstance(execution, dict):
+        raise ValueError(
+            "evals/suites.json: comparison contract field execution_config is missing; "
+            "freeze model, profile, tools, thinking, attempt_count, and system prompt hash"
+        )
+    actual = {
+        "model": args.model,
+        "profile": args.profile,
+        "tools": allowed_tools,
+        "thinking": args.thinking,
+        "attempt_count": args.attempts,
+        "system_prompt_sha256": effective_system_prompt_hash(args),
+    }
+    for field, value in actual.items():
+        if execution.get(field) != value:
+            raise ValueError(
+                f"evals/suites.json: comparison contract execution_config.{field} is "
+                f"{execution.get(field)!r}, but the requested value is {value!r}; "
+                "use the frozen value or register and review a new contract"
+            )
+    timeout_policy = contract.get("timeout_policy")
+    if not isinstance(timeout_policy, dict):
+        raise ValueError(
+            "evals/suites.json: comparison contract field timeout_policy is missing; "
+            "freeze the OMP, grace, per-attempt, and overall timeout policy"
+        )
+    omp_seconds = seconds(args.max_time)
+    per_attempt = omp_seconds + 30
+    expected = {
+        "omp_max_time_seconds": omp_seconds,
+        "rpc_grace_seconds": 30,
+        "per_attempt_seconds": per_attempt,
+    }
+    for field, value in expected.items():
+        if timeout_policy.get(field) != value:
+            raise ValueError(
+                f"evals/suites.json: comparison contract timeout_policy.{field} is "
+                f"{timeout_policy.get(field)!r}, but the effective value is {value!r}; "
+                "use the frozen timeout or register and review a new contract"
+            )
+    return {
+        "omp_max_time_seconds": omp_seconds,
+        "rpc_grace_seconds": 30,
+        "per_attempt_seconds": per_attempt,
+        "overall_seconds": per_attempt * args.attempts * len(cases),
+        "policy": timeout_policy.get("overall"),
+    }
+
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Run JSONL evaluation cases through OMP RPC.")
-    parser.add_argument("--cases", type=Path, action="append", required=True, help="JSONL case file; repeat to combine suites")
+    selectors = parser.add_mutually_exclusive_group(required=True)
+    selectors.add_argument("--cases", type=Path, action="append", help="Registered JSONL case file; repeat to combine development files")
+    selectors.add_argument("--suite", help="Suite name registered in evals/suites.json")
+    selectors.add_argument("--proposal-baseline", type=Path, help="Frozen proposal development file to run at its pinned baseline revision")
+    parser.add_argument(
+        "--mode",
+        choices=("development", "holdout", "independent-holdout", "release"),
+        default="development",
+    )
+    parser.add_argument("--allow-historical", action="store_true")
+    parser.add_argument("--historical-catalog", choices=("baseline", "treatment"))
     parser.add_argument("--condition", choices=("baseline", "treatment"), required=True)
     parser.add_argument("--model", required=True, help="Exact provider/model selection used for every case")
     parser.add_argument("--output", type=Path, required=True, help="New immutable artifact directory for one condition")
@@ -790,20 +975,114 @@ def main() -> int:
     args = parser.parse_args()
 
     args.cwd = args.cwd.resolve()
-    args.cases = [path.resolve() for path in args.cases]
+    explicit_cases = [path.resolve() for path in args.cases or []]
+    proposal_baseline = args.proposal_baseline.resolve() if args.proposal_baseline else None
     args.config = [path.resolve() for path in args.config]
     if args.attempts < 1:
         parser.error("--attempts must be at least 1")
     if args.output.exists():
         parser.error("--output must not exist; run directories are immutable")
+    if proposal_baseline is not None and args.mode != "development":
+        parser.error("--proposal-baseline is a development-only selector; omit --mode")
+    if args.mode in {"independent-holdout", "release"} and args.suite is None:
+        parser.error(f"--mode {args.mode} requires --suite to preserve complete selection")
+    catalog_temporaries: list[tempfile.TemporaryDirectory] = []
     try:
+        suite_manifest_path = args.cwd / "evals" / "suites.json"
+        suite_manifest = json.loads(suite_manifest_path.read_text(encoding="utf-8"))
+        selector_mode = (
+            "proposal-baseline"
+            if proposal_baseline is not None
+            else "normal"
+            if args.mode == "development"
+            else args.mode
+        )
+        select = evaluation_selector()
+        if selector_mode == "normal" and len(explicit_cases) > 1:
+            parts = [
+                select(
+                    suite_manifest,
+                    args.cwd,
+                    mode="normal",
+                    case_paths=[path],
+                    allow_historical=args.allow_historical,
+                    historical_catalog=args.historical_catalog,
+                    condition=args.condition,
+                )
+                for path in explicit_cases
+            ]
+            if any(
+                entry["status"] != "canonical"
+                for part in parts
+                for entry in part["entries"]
+            ):
+                raise ValueError(
+                    "evals/suites.json: multi-file --cases is limited to canonical "
+                    "development files; reproduce historical files one at a time"
+                )
+            selection = {
+                "entries": [
+                    entry for part in parts for entry in part["entries"]
+                ],
+                "comparison_contract": None,
+                "baseline_catalog_revision": None,
+                "treatment_catalog_revision": None,
+                "evaluated_catalog_revision": None,
+                "guarded_holdout": False,
+            }
+        else:
+            selection = select(
+                suite_manifest,
+                args.cwd,
+                mode=selector_mode,
+                suite=args.suite,
+                case_paths=explicit_cases or None,
+                allow_historical=args.allow_historical,
+                historical_catalog=args.historical_catalog,
+                proposal_baseline=proposal_baseline,
+                condition=args.condition,
+            )
+        selected_entries = selection["entries"]
+        args.cases = [(args.cwd / entry["path"]).resolve() for entry in selected_entries]
+        protected_selection = bool(
+            selection.get("guarded_holdout")
+            or proposal_baseline is not None
+            or any(entry["status"] == "historical" for entry in selected_entries)
+        )
+        manifest_git = (
+            frozen_git_file(args.cwd, suite_manifest_path, "comparison manifest")
+            if protected_selection
+            else {
+                "source_revision": git_value(
+                    args.cwd,
+                    "log",
+                    "-1",
+                    "--format=%H",
+                    "--",
+                    "evals/suites.json",
+                ),
+                "git_blob": git_value(
+                    args.cwd, "hash-object", str(suite_manifest_path)
+                ),
+            }
+        )
+        for entry, path in zip(selected_entries, args.cases):
+            if protected_selection:
+                frozen_git_file(args.cwd, path, "frozen case file")
+            frozen_hash = entry.get("frozen_sha256")
+            if protected_selection and (
+                not isinstance(frozen_hash, str) or sha256_file(path) != frozen_hash
+            ):
+                raise ValueError(
+                    f"{entry['path']}: frozen_sha256 does not match the selected file; "
+                    "restore the reviewed case content or register a new frozen hash"
+                )
         cases = load_cases(args.cases)
         repository_cases = [case for case in cases if case["kind"] == "repository"]
         if repository_cases and args.tools is None:
             raise ValueError("--tools must be explicitly provided for repository cases")
         args.tools = "read" if args.tools is None else args.tools
         timeout = seconds(args.max_time) + 30
-        catalog = repository_catalog(args.cwd)
         tool_parts = [] if args.tools == "" else args.tools.split(",")
         if (
             any(not tool for tool in tool_parts)
@@ -817,6 +1096,81 @@ def main() -> int:
             raise ValueError("--tools must contain at least one tool for repository cases")
         if args.verifier_timeout <= 0:
             raise ValueError("--verifier-timeout must be positive")
+
+        contract_names = sorted(
+            {entry["comparison_contract"] for entry in selected_entries}
+        )
+        contract_records = []
+        for name in contract_names:
+            contract = suite_manifest["comparison_contracts"][name]
+            contract_records.append(
+                {
+                    "name": name,
+                    "path": f"evals/suites.json#/comparison_contracts/{name}",
+                    "sha256": sha256_json(contract),
+                }
+            )
+        effective_timeouts = {
+            "omp_max_time_seconds": seconds(args.max_time),
+            "rpc_grace_seconds": 30,
+            "per_attempt_seconds": timeout,
+            "overall_seconds": timeout * args.attempts * len(cases),
+            "policy": None,
+        }
+        if selection.get("guarded_holdout"):
+            if len(contract_names) != 1:
+                raise ValueError(
+                    "evals/suites.json: guarded holdout selection must use exactly one "
+                    "comparison contract; select one suite at a time"
+                )
+            effective_timeouts = verify_locked_contract(
+                suite_manifest["comparison_contracts"][contract_names[0]],
+                args,
+                cases,
+                allowed_tools,
+            )
+
+        catalog_records: list[dict[str, str]] = []
+        if selection.get("guarded_holdout"):
+            for role in ("baseline", "treatment"):
+                revision = selection[f"{role}_catalog_revision"]
+                temporary, record = materialize_catalog(args.cwd, revision, role)
+                catalog_temporaries.append(temporary)
+                catalog_records.append(record)
+            evaluated_catalog = next(
+                record for record in catalog_records if record["role"] == args.condition
+            )
+            holdout_catalogs = {
+                record["role"]: record for record in catalog_records
+            }
+        elif proposal_baseline is not None or any(
+            entry["status"] == "historical" for entry in selected_entries
+        ):
+            role = (
+                f"historical-{args.historical_catalog}"
+                if args.historical_catalog
+                else "proposal-baseline"
+            )
+            temporary, evaluated_catalog = materialize_catalog(
+                args.cwd, selection["evaluated_catalog_revision"], role
+            )
+            catalog_temporaries.append(temporary)
+            catalog_records.append(evaluated_catalog)
+            holdout_catalogs = None
+        else:
+            commit = git_value(args.cwd, "rev-parse", "HEAD")
+            evaluated_catalog = {
+                "role": "working-tree",
+                "revision": commit or "",
+                "root": str(args.cwd),
+                "tree": git_value(args.cwd, "rev-parse", "HEAD^{tree}") or "",
+            }
+            catalog_records.append(evaluated_catalog)
+            holdout_catalogs = None
+        args.catalog_root = Path(evaluated_catalog["root"])
+        if args.catalog_root != args.cwd:
+            args.config.append(catalog_config(args.catalog_root))
+        catalog = repository_catalog(args.catalog_root)
         fixtures = {
             case["fixture"]: fixture_record(args.cwd, case["fixture"])
             for case in repository_cases
@@ -830,7 +1184,7 @@ def main() -> int:
             raise ValueError(f"cannot execute OMP: {version_stderr.strip()}")
         executable_hash = sha256_file(executable)
         profile_config = effective_config(args)
-    except (OSError, ValueError, json.JSONDecodeError) as error:
+    except (OSError, ValueError, KeyError, TypeError, json.JSONDecodeError) as error:
         parser.error(str(error))
 
     args.output.mkdir(parents=True)
@@ -838,27 +1192,73 @@ def main() -> int:
     artifact_dir.mkdir()
     commit = git_value(args.cwd, "rev-parse", "HEAD")
     dirty = git_value(args.cwd, "status", "--porcelain")
-    case_files = [{"path": str(path), "sha256": sha256_file(path)} for path in args.cases]
+    case_files = []
+    for entry, path in zip(selected_entries, args.cases):
+        source_revision = git_value(
+            args.cwd, "log", "-1", "--format=%H", "--", entry["path"]
+        )
+        case_files.append(
+            {
+                "path": entry["path"],
+                "sha256": sha256_file(path),
+                "frozen_sha256": entry.get("frozen_sha256"),
+                "source_revision": source_revision,
+                "status": entry["status"],
+                "split": entry["split"],
+                "suite": entry["suite"],
+                "comparison_contract": entry["comparison_contract"],
+            }
+        )
+    source_revisions = sorted(
+        {record["source_revision"] for record in case_files if record["source_revision"]}
+    )
     config_files = [{"path": str(path), "sha256": sha256_file(path)} for path in args.config]
     skill_names = {
         skill
         for case in cases
         for skill in skill_scope(case, args.condition, catalog).get("skills", [])
+        if (args.catalog_root / skill / "SKILL.md").is_file()
     }
     skill_files = {
         skill: {
             "canonical_path": f"{skill}/SKILL.md",
-            "canonical_sha256": sha256_file(args.cwd / skill / "SKILL.md"),
-            "commit": git_value(args.cwd, "log", "-1", "--format=%H", "--", f"{skill}/SKILL.md"),
-            "description": skill_description(args.cwd / skill / "SKILL.md"),
+            "canonical_sha256": sha256_file(args.catalog_root / skill / "SKILL.md"),
+            "commit": evaluated_catalog["revision"],
+            "description": skill_description(args.catalog_root / skill / "SKILL.md"),
         }
         for skill in sorted(skill_names)
     }
+    selected_suites = sorted({entry["suite"] for entry in selected_entries})
     manifest = {
         "schema_version": SCHEMA_VERSION,
         "run_id": args.output.name,
         "created_at": datetime.now(timezone.utc).isoformat(),
         "condition": args.condition,
+        "suite": selected_suites[0] if len(selected_suites) == 1 else None,
+        "suites": selected_suites,
+        "mode": "proposal-baseline" if proposal_baseline is not None else args.mode,
+        "selector": (
+            "proposal-baseline"
+            if proposal_baseline is not None
+            else "suite"
+            if args.suite is not None
+            else "cases"
+        ),
+        "suite_manifest": {
+            "path": "evals/suites.json",
+            "schema_version": suite_manifest["schema_version"],
+            "sha256": sha256_file(suite_manifest_path),
+            **manifest_git,
+        },
+        "comparison_contracts": contract_records,
+        "comparison_contract": contract_records[0] if len(contract_records) == 1 else None,
+        "case_source_revision": source_revisions[0] if len(source_revisions) == 1 else None,
+        "case_source_revisions": source_revisions,
+        "evaluated_catalog": evaluated_catalog,
+        "evaluated_catalogs": [evaluated_catalog],
+        "resolved_catalogs": catalog_records,
+        "holdout_catalogs": holdout_catalogs,
+        "effective_timeouts": effective_timeouts,
         "adapter": {
             "name": "omp-rpc-jsonl",
             "protocol_version": 1,
@@ -888,11 +1288,13 @@ def main() -> int:
             "routing_system_prompt": args.system_prompt or ROUTING_SYSTEM_PROMPT,
             "repository_system_prompt": args.system_prompt,
             "max_time": args.max_time,
+            "effective_per_attempt_timeout_seconds": effective_timeouts["per_attempt_seconds"],
+            "effective_overall_timeout_seconds": effective_timeouts["overall_seconds"],
             "verifier_timeout": args.verifier_timeout,
             "extensions": "disabled",
             "rules": "disabled",
             "sessions": "disabled",
-            "canonical_skill_root": ".",
+            "canonical_skill_root": str(args.catalog_root),
             "effective_omp_config": profile_config,
         },
         "attempts": args.attempts,
@@ -915,7 +1317,7 @@ def main() -> int:
         case_dir.mkdir()
         for attempt in range(1, args.attempts + 1):
             temporary: tempfile.TemporaryDirectory | None = None
-            execution_cwd = args.cwd
+            execution_cwd = args.catalog_root
             fixture_evidence: dict[str, Any] | None = None
             verifier_ok = True
             try:
@@ -1031,6 +1433,8 @@ def main() -> int:
             finally:
                 if temporary is not None:
                     temporary.cleanup()
+    for temporary_catalog in reversed(catalog_temporaries):
+        temporary_catalog.cleanup()
     print(f"captured {len(cases) * args.attempts} artifacts in {args.output}; capture failures={failures}")
     return 1 if failures else 0
 

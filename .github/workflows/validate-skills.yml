@@ -19,6 +19,9 @@ jobs:
         with:
           python-version: "3.12"
           cache: pip
+          cache-dependency-path: |
+            requirements-validation.txt
+            requirements-examples.txt
       - name: Install Python dependencies
         run: python -m pip install --requirement requirements-validation.txt --requirement requirements-examples.txt
       - name: Set up Bun
@@ -27,7 +30,11 @@ jobs:
           bun-version: "1.4.2"
       - name: Validate repository skills
         run: python3 scripts/validate_skills.py
+      - name: Validate evaluation suites
+        run: python3 evals/validate.py
       - name: Run Python tests
-        run: python3 -m unittest discover -s tests
+        run: |
+          python3 -m unittest discover -s tests
+          python3 -m unittest discover -s context-compression/tests
       - name: Run hook test
         run: bun test tests/leancode_hook.test.ts

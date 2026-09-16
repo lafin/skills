@@ -12,7 +12,8 @@ import sys
 from pathlib import Path
 from typing import Any
 
-SCHEMA_VERSION = 4
+SCHEMA_VERSION = 5
+SUPPORTED_SCHEMA_VERSIONS = {4, SCHEMA_VERSION}
 HASH = re.compile(r"[0-9a-f]{64}")
 POLICY_FLAGS = {"extensions": "disabled", "rules": "disabled", "sessions": "disabled"}
 SENSITIVE_CONFIG_KEY = re.compile(
@@ -396,8 +397,102 @@ def validate_manifest(run: Path, manifest: dict[str, Any]) -> None:
         "case_ids",
         "case_snapshot",
     }
-    if required - manifest.keys() or manifest.get("schema_version") != SCHEMA_VERSION:
+    if manifest.get("schema_version") == SCHEMA_VERSION:
+        required.update(
+            {
+                "created_at",
+                "suite",
+                "suites",
+                "mode",
+                "selector",
+                "suite_manifest",
+                "comparison_contracts",
+                "comparison_contract",
+                "case_source_revision",
+                "case_source_revisions",
+                "evaluated_catalog",
+                "evaluated_catalogs",
+                "resolved_catalogs",
+                "holdout_catalogs",
+                "effective_timeouts",
+                "case_files",
+                "fixture_files",
+            }
+        )
+    if (
+        required - manifest.keys()
+        or manifest.get("schema_version") not in SUPPORTED_SCHEMA_VERSIONS
+    ):
         raise ValueError(f"{run}: unsupported or incomplete manifest schema")
+    if manifest["schema_version"] == SCHEMA_VERSION:
+        if (
+            manifest["mode"]
+            not in {
+                "development",
+                "holdout",
+                "independent-holdout",
+                "release",
+                "proposal-baseline",
+            }
+            or manifest["selector"] not in {"cases", "suite", "proposal-baseline"}
+            or not isinstance(manifest["suites"], list)
+            or not manifest["suites"]
+            or not all(isinstance(name, str) and name for name in manifest["suites"])
+            or manifest["suite"]
+            != (
+                manifest["suites"][0]
+                if len(manifest["suites"]) == 1
+                else None
+            )
+        ):
+            raise ValueError(f"{run}: invalid suite lifecycle metadata")
+        suite_manifest = manifest["suite_manifest"]
+        if (
+            not isinstance(suite_manifest, dict)
+            or suite_manifest.get("path") != "evals/suites.json"
+            or not isinstance(suite_manifest.get("schema_version"), int)
+        ):
+            raise ValueError(f"{run}: invalid suite manifest metadata")
+        require_hash(suite_manifest.get("sha256"), f"{run}: suite manifest")
+        contracts = manifest["comparison_contracts"]
+        if (
+            not isinstance(contracts, list)
+            or not contracts
+            or any(
+                not isinstance(record, dict)
+                or set(record) != {"name", "path", "sha256"}
+                or not isinstance(record["name"], str)
+                or not record["path"].startswith("evals/suites.json#/")
+                for record in contracts
+            )
+        ):
+            raise ValueError(f"{run}: invalid comparison contract metadata")
+        for record in contracts:
+            require_hash(record["sha256"], f"{run}: comparison contract")
+        timeouts = manifest["effective_timeouts"]
+        if (
+            not isinstance(timeouts, dict)
+            or set(timeouts)
+            != {
+                "omp_max_time_seconds",
+                "rpc_grace_seconds",
+                "per_attempt_seconds",
+                "overall_seconds",
+                "policy",
+            }
+            or any(
+                not isinstance(timeouts[field], (int, float))
+                or isinstance(timeouts[field], bool)
+                or timeouts[field] <= 0
+                for field in (
+                    "omp_max_time_seconds",
+                    "rpc_grace_seconds",
+                    "per_attempt_seconds",
+                    "overall_seconds",
+                )
+            )
+        ):
+            raise ValueError(f"{run}: invalid effective timeout metadata")
     if manifest["condition"] not in {"baseline", "treatment"}:
         raise ValueError(f"{run}: invalid condition")
     if not isinstance(manifest["attempts"], int) or isinstance(manifest["attempts"], bool) or manifest["attempts"] < 1:
@@ -471,8 +566,28 @@ def validate_manifest(run: Path, manifest: dict[str, Any]) -> None:
         or len(tools) != len(set(tools))
     ):
         raise ValueError(f"{run}: invalid explicit tool allowlist")
-    if config.get("canonical_skill_root") != ".":
-        raise ValueError(f"{run}: unexpected canonical skill root")
+    canonical_skill_root = config.get("canonical_skill_root")
+    if (
+        not isinstance(canonical_skill_root, str)
+        or (
+            canonical_skill_root != "."
+            and not Path(canonical_skill_root).is_absolute()
+        )
+    ):
+        raise ValueError(f"{run}: invalid canonical skill root")
+    evaluated_catalog = manifest.get("evaluated_catalog")
+    if evaluated_catalog is not None:
+        if (
+            not isinstance(evaluated_catalog, dict)
+            or set(evaluated_catalog) != {"role", "revision", "root", "tree"}
+            or not isinstance(evaluated_catalog["role"], str)
+            or not evaluated_catalog["role"]
+            or re.fullmatch(r"[0-9a-f]{40}", evaluated_catalog["revision"]) is None
+            or re.fullmatch(r"[0-9a-f]{40}", evaluated_catalog["tree"]) is None
+            or evaluated_catalog["root"] != canonical_skill_root
+            or not Path(evaluated_catalog["root"]).is_absolute()
+        ):
+            raise ValueError(f"{run}: invalid evaluated catalog metadata")
     config_files = config.get("config_files")
     if not isinstance(config_files, list):
         raise ValueError(f"{run}: invalid config file metadata")
@@ -769,7 +884,7 @@ def validate_artifact(
         raise ValueError(f"{path}: artifact is stored at the wrong path")
     artifact = read_json(path)
     exact = {
-        "schema_version": SCHEMA_VERSION,
+        "schema_version": manifest.get("schema_version", artifact.get("schema_version")),
         "case_id": case["id"],
         "kind": case["kind"],
         "split": case["split"],
@@ -842,12 +957,16 @@ def validate_artifact(
         validate_fixture_artifact(artifact.get("fixture"), case, manifest, command)
         if rpc_cwd != artifact["fixture"]["worktree"]:
             raise ValueError(f"{path}: repository RPC cwd differs from its worktree")
-    elif (
-        not isinstance(rpc_cwd, str)
-        or rpc_cwd != manifest["configuration"]["cwd"]
-        or f"--cwd={rpc_cwd}" not in command
-    ):
-        raise ValueError(f"{path}: command cwd differs from artifact")
+    else:
+        expected_rpc_cwd = manifest["configuration"].get("canonical_skill_root", ".")
+        if expected_rpc_cwd == ".":
+            expected_rpc_cwd = manifest["configuration"]["cwd"]
+        if (
+            not isinstance(rpc_cwd, str)
+            or rpc_cwd != expected_rpc_cwd
+            or f"--cwd={rpc_cwd}" not in command
+        ):
+            raise ValueError(f"{path}: command cwd differs from artifact")
     requests = artifact.get("rpc_requests")
     descriptions = {
         name: record["description"] for name, record in manifest["skill_files"].items()
@@ -1077,7 +1196,7 @@ def grade_artifact(case: dict[str, Any], artifact: dict[str, Any]) -> dict[str, 
         )
         results.extend(verifier.get("checks") or [])
     capture_ok = (
-        artifact.get("schema_version") == SCHEMA_VERSION
+        artifact.get("schema_version") in SUPPORTED_SCHEMA_VERSIONS
         and artifact.get("exit_code") == 0
         and not artifact.get("event_parse_errors")
         and bool(artifact.get("response"))
@@ -1216,6 +1335,33 @@ def grade_run(run: Path) -> dict[str, Any]:
     return summary
 
 
+def comparable_configuration(manifest: dict[str, Any]) -> dict[str, Any]:
+    config = manifest["configuration"]
+    root = manifest.get("evaluated_catalog", {}).get("root")
+    generated_config = (
+        str(Path(root).parent / "catalog-root.yaml")
+        if isinstance(root, str) and Path(root).is_absolute()
+        else None
+    )
+
+    def normalize(value: Any) -> Any:
+        if isinstance(value, str):
+            if value == root:
+                return "<catalog-root>"
+            if value == generated_config:
+                return "<catalog-config>"
+            return value
+        if isinstance(value, list):
+            return [normalize(item) for item in value]
+        if isinstance(value, dict):
+            if value.get("path") == generated_config and set(value) == {"path", "sha256"}:
+                return {"path": "<catalog-config>", "sha256": "<materialized>"}
+            return {key: normalize(item) for key, item in value.items()}
+        return value
+
+    return normalize(config)
+
+
 def comparison_signature(manifest: dict[str, Any]) -> dict[str, Any]:
     return {
         "adapter": manifest["adapter"],
@@ -1224,7 +1370,7 @@ def comparison_signature(manifest: dict[str, Any]) -> dict[str, Any]:
         "model_requested": manifest["model_requested"],
         "fixture_files": manifest.get("fixture_files", {}),
         "evaluator_files": manifest["evaluator_files"],
-        "configuration": manifest["configuration"],
+        "configuration": comparable_configuration(manifest),
         "attempts": manifest["attempts"],
     }
 
@@ -1411,7 +1557,10 @@ def judge_payloads(baseline: Path, treatment: Path, output: Path) -> dict[str, A
 
 def score_judges(key_path: Path, results_path: Path, output: Path) -> dict[str, Any]:
     key_document = read_json(key_path)
-    if key_document.get("schema_version") != SCHEMA_VERSION or not isinstance(key_document.get("pairs"), dict):
+    if (
+        key_document.get("schema_version") not in SUPPORTED_SCHEMA_VERSIONS
+        or not isinstance(key_document.get("pairs"), dict)
+    ):
         raise ValueError(f"{key_path}: unsupported judge key schema")
     key = key_document["pairs"]
     results = read_jsonl(results_path)

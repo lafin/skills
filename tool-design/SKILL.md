@@ -58,14 +58,14 @@ Namespace tools under common prefixes as the collection grows, because agents be
 Build single comprehensive tools instead of multiple narrow tools that overlap. Rather than implementing `list_users`, `list_events`, and `create_event` separately, implement `schedule_event` that finds availability and schedules in one call. The comprehensive tool handles the full workflow internally, removing the agent's burden of chaining calls in the correct order.
 
 **Why Consolidation Works**
-Apply consolidation because agents have limited context and attention. Each tool in the collection competes for attention during tool selection, each description consumes context budget tokens, and overlapping functionality creates ambiguity. Consolidation eliminates redundant descriptions, removes selection ambiguity, and shrinks the effective tool set. Vercel reported better results after reducing its d0 text-to-SQL agent to two primitive tools on five internal questions; this result is workload-specific. See the [dated Vercel evidence](skill://project-development/references/case-studies.md#evidence-vercel-d0-architectural-reduction-december-2025).
+Apply consolidation because agents have limited context and attention. Each tool in the collection competes for attention during tool selection, each description consumes context budget tokens, and overlapping functionality creates ambiguity. Consolidation eliminates redundant descriptions, removes selection ambiguity, and shrinks the effective tool set. Vercel reported better results after reducing its d0 text-to-SQL agent to two primitive tools on five internal questions; this result is workload-specific. See the [dated Vercel evidence](skill://tool-design/references/d0-evidence.md#evidence-vercel-d0-architectural-reduction-december-2025).
 
 **When Not to Consolidate**
 Keep tools separate when they have fundamentally different behaviors, serve different contexts, or must be callable independently. Over-consolidation creates a different problem: a single tool with too many parameters and modes becomes hard for agents to parameterize correctly.
 
 ### Architectural Reduction
 
-Architectural reduction removes specialized tools in favor of primitive, general-purpose capabilities. Vercel reported that this approach improved its d0 evaluation, but the small internal comparison does not establish a general advantage. See the [dated Vercel evidence](skill://project-development/references/case-studies.md#evidence-vercel-d0-architectural-reduction-december-2025).
+Architectural reduction removes specialized tools in favor of primitive, general-purpose capabilities. Vercel reported that this approach improved its d0 evaluation, but the small internal comparison does not establish a general advantage. See the [dated Vercel evidence](skill://tool-design/references/d0-evidence.md#evidence-vercel-d0-architectural-reduction-december-2025).
 
 **The File System Agent Pattern**
 Provide direct file system access through a single command execution tool instead of building custom tools for data exploration, schema lookup, and query validation. The agent uses standard Unix utilities (grep, cat, find, ls) to explore and operate on the system. This works because file systems are a proven abstraction that models understand deeply, standard tools have predictable behavior, agents can chain primitives flexibly rather than being constrained to predefined workflows, and good documentation in files replaces summarization tools.
@@ -284,7 +284,14 @@ Internal references:
 - [Architectural Reduction Case Study](skill://tool-design/references/architectural_reduction.md) - Read when: considering removing specialized tools in favor of primitives, or evaluating whether a complex tool architecture is justified
 
 Runnable script:
-- [description_generator.py](skill://tool-design/scripts/description_generator.py) - Status: Example; Boundary: scores descriptions with deterministic text heuristics without a model or live tool runtime - `ToolSpec` description generation, `ToolDescriptionEvaluator`, `ErrorMessageGenerator`, `ToolSchemaBuilder` - Run when: drafting or auditing tool descriptions and schemas
+
+### `description_generator.py`
+
+- **Status:** Example.
+- **Boundary:** Scores descriptions with deterministic text heuristics. Generated parameter prose omits enum constraints, and generated descriptions cannot satisfy every evaluator signal. It invokes no model and does not exercise a live tool, so its score does not prove routing, schema, or runtime correctness.
+- **Run:** From the repository root, run `python tool-design/scripts/description_generator.py`. The demo accepts no arguments or credentials and uses a built-in customer-tool specification.
+- **Output:** Writes the built specification, generated description, criterion scores, and a sample actionable error message to standard output. Library callers receive a `ToolSpec`, rendered strings, and score dictionaries.
+- **Failure:** The demo exits non-zero only on an uncaught Python error. Library generation can raise `KeyError` when a specification or error-template context omits required fields; an unknown error type falls back to the `INVALID_INPUT` template. Supply the required schema fields and template placeholders before retrying. Heuristic criterion scores are report data and do not change the exit status.
 
 Related skills in this collection:
 - context-fundamentals - Tool context interactions

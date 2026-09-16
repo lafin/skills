@@ -199,7 +199,14 @@ Internal reference:
 - [Context Components Reference](skill://context-fundamentals/references/context-components.md) - Read when: debugging a specific context component (system prompts, tool definitions, message history, tool outputs) or implementing chunking, observation masking, or budget allocation tables
 
 Runnable script:
-- [context_manager.py](skill://context-fundamentals/scripts/context_manager.py) - Status: Example; Boundary: approximates token counts from character ratios instead of tokenizer output - Token estimation, `ContextBuilder`, truncation, `ProgressiveDisclosureManager` - Run when: assembling or budgeting a context window in code
+
+### `context_manager.py`
+
+- **Status:** Example.
+- **Boundary:** Approximates token counts from character ratios rather than tokenizer output. It validates only its local context structure and does not prove model behavior.
+- **Run:** From the repository root, run `python context-fundamentals/scripts/context_manager.py`. The demo accepts no arguments or credentials and uses built-in prompt, task, and document strings.
+- **Output:** Writes a human-readable estimated token total, utilization, section breakdown, and validation result to standard output. `build_agent_context` returns `context`, `usage_report`, and `validation` fields.
+- **Failure:** The demo exits non-zero only on an uncaught Python error. Repair the reported import or input-type error; a printed validation failure is report data and does not set a non-zero exit status.
 
 Related skills in this collection:
 - context-degradation - Read when: agent performance drops as conversations grow or measured context pressure rises

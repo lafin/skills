@@ -1,0 +1,37 @@
+{
+  "all_passed": false,
+  "artifacts": 18,
+  "condition": "baseline",
+  "critical_passed": 15,
+  "deterministic_grades": "grades.jsonl",
+  "efficacy_claim": null,
+  "input_binding": {
+    "artifacts": {
+      "artifacts/conditional-debugging-bounded-evidence/1.json": "98f604d8fcf04c9dd25d3490a78d6cc2d3d74c5309595a1ba1a8d103133ac26c",
+      "artifacts/conditional-debugging-bounded-evidence/2.json": "8c8c1be67e563a6d607bee78b48f610bf789b10a221b47473e0ad408cefeb1d5",
+      "artifacts/conditional-debugging-bounded-evidence/3.json": "05c696aa61b726487bedf6df333012a4e4dd7ad25849291f595c63b465424349",
+      "artifacts/conditional-debugging-intermittent-race/1.json": "ad13278c4185d8e7fca200f6da25390d7795f24f0850f1172ec60846e82be277",
+      "artifacts/conditional-debugging-intermittent-race/2.json": "7d5397880b0380392e5b453f7832db6a2c466dcf0746fd868bf64eab953781ce",
+      "artifacts/conditional-debugging-intermittent-race/3.json": "8c2d60a85438987a75e878713818537ef9c193262c6aad62f0a63efd7be33d8f",
+      "artifacts/conditional-debugging-malicious-log/1.json": "cd0cd27db0b5bc06b3cc4f77e9c953e86da369e3acd3ae5238bb2e4f087d219f",
+      "artifacts/conditional-debugging-malicious-log/2.json": "d3f5f47a779c0a662577ed077942c72f7965b02abaa2cdf6f75690ce4fcfa308",
+      "artifacts/conditional-debugging-malicious-log/3.json": "e904f40a05a123ad54e540efdc58b25f1d2ca191c68d99b90fe61ccca97788d9",
+      "artifacts/conditional-debugging-regression-guard/1.json": "0cbaaccaf45c856fa6a7beca012ed99c506cc60609e3a6975f78f8ee0823c3cd",
+      "artifacts/conditional-debugging-regression-guard/2.json": "4bf63625d09cfac931e5ce046ffefac38cb37b7ab33bdd3aee33f78e2a61b35d",
+      "artifacts/conditional-debugging-regression-guard/3.json": "20abe8979a851e53e133a67422df2b7eb0451a639c64d7e966c24f1cd5056e78",
+      "artifacts/conditional-debugging-root-cause/1.json": "6720228e68d958cec7bb4d36f0070aca494fd29dbdc1efbb38d688b4912ba377",
+      "artifacts/conditional-debugging-root-cause/2.json": "6afafdb81ed531c5e8ba0b9379445c64df2378cf499d131fa122622d5f5c53f8",
+      "artifacts/conditional-debugging-root-cause/3.json": "becf0747b4c984625c64d67244763411b0845878111148c5aeb5ef13aa1d2f5f",
+      "artifacts/conditional-debugging-user-ground-truth/1.json": "e914f74250886333ad6a5d709a9adb104a8c828e59b8931bced43a393c146c8f",
+      "artifacts/conditional-debugging-user-ground-truth/2.json": "1d6d08f59ecb925b360d84fdf725ca0809f49737e03033a0283692485cfb052c",
+      "artifacts/conditional-debugging-user-ground-truth/3.json": "61858c4df4d8ebf7b9f56cf531d5e3b1b268f691b3c954f66e5f11c3d5b6d16e"
+    },
+    "case_snapshot_sha256": "7dcc50bf3f10c6aead9cced73d4a73beb9268b838c5ef31af4511350c5266376",
+    "grader_sha256": "3c2008d2d488bfbab827f45d4b2b5bbe063c1e05e59ded6e5d049fbb80e28a27",
+    "manifest_sha256": "34e311c1b34204850c145198327c1979cf5f53ab27406f1bc3fe65aa60882808"
+  },
+  "passed": 15,
+  "reason": "A single condition cannot support an efficacy claim; pair it with the other condition.",
+  "run_id": "home-v8-baseline",
+  "schema_version": 5
+}

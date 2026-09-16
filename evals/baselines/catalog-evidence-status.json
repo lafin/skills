@@ -1,0 +1,72 @@
+{
+  "schema_version": 1,
+  "catalog_revision": "50cf61c53aea66ebf60d89088b453eadd788d092",
+  "case_manifest": {
+    "path": "evals/suites.json",
+    "sha256": "4f75efe7362d8b619fc7915d6fbb945477c506f8a67d660eb9acc1478fde426e"
+  },
+  "definitions": {
+    "verified": "Accepted routing and behavior gates pass for the named skill.",
+    "routing-only": "Accepted routing gates pass, but accepted behavior evidence is absent.",
+    "unverified": "Accepted catalog-level routing and behavior gates do not both pass. Registered cases alone do not change this status."
+  },
+  "verified": [
+    {
+      "name": "simplified-engineering-english",
+      "release_eligible": false,
+      "reason": "Automated routing and behavior gates pass; the separate release decision remains inconclusive because external evidence gates are incomplete.",
+      "evidence": [
+        {
+          "path": "evals/results/see-improvement/remediation-v24-gate.json",
+          "sha256": "21886442e9d8a5f16fba34ba4e69ead31336832f66ffe9642f12a5ce9a5242a4",
+          "decision": "pass"
+        },
+        {
+          "path": "evals/results/see-improvement/release-gate-final.json",
+          "sha256": "5e0d6804cb351b6d12309517ecba8ea85866b9d81112e01fb42b99506ef0cfc2",
+          "decision": "inconclusive"
+        }
+      ]
+    }
+  ],
+  "routing-only": [],
+  "unverified": [
+    {
+      "name": "leancode",
+      "reason": "The latest combined routing and behavior release gate failed.",
+      "evidence": {
+        "path": "evals/results/leancode-improvement/combined-release-gate.json",
+        "sha256": "f654d3825bf186f209ab46c187f695cdeb20b145521c1a95e8ed924883af98b4",
+        "decision": "fail"
+      }
+    },
+    {
+      "reason": "Canonical development and holdout cases are registered, but no accepted live catalog-level gate result exists.",
+      "names": [
+        "advanced-evaluation",
+        "ai-stage-gate",
+        "bdi-mental-states",
+        "context-compression",
+        "context-degradation",
+        "context-fundamentals",
+        "context-optimization",
+        "evaluation",
+        "filesystem-context",
+        "harness-engineering",
+        "hosted-agents",
+        "latent-briefing",
+        "leancode-audit",
+        "leancode-debt",
+        "leancode-review",
+        "long-horizon-prompting",
+        "lossless-doc-compress",
+        "memory-systems",
+        "ml-system-design-review",
+        "multi-agent-patterns",
+        "project-development",
+        "self-improvement-loops",
+        "tool-design"
+      ]
+    }
+  ]
+}

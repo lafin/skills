@@ -2,13 +2,17 @@
 
 ## Decision
 
-**NO-GO.** The V24 automated gate passes for the evaluated configuration, but publication and release remain blocked. Do not claim release readiness, SEE conformance, general efficacy, or qualified approval.
+**INCONCLUSIVE.** The V24 automated gate passes for the locally captured evaluated configuration, but required evidence is missing. Under the evidence policy, missing required review, immutable-root, comparison-contract, timeout, or durable-artifact evidence cannot produce either `GO` or `NO-GO`. Do not claim release readiness, SEE conformance, general efficacy, or qualified approval.
 
 - Overall decision: `release-gate-final.json`
-- Automated gate: `remediation-v24-gate.json`
+- Automated gate: `remediation-v24-gate.json` (`pass`, supporting evidence only)
+- Failed substantive gates: none established from complete evidence
+- Incomplete gates: immutable evaluated catalogs, frozen comparison contract, timeout equality, human calibration and adjudication, technical attestation, and durable external storage
 - Overall `efficacy_claim`: `null`
 
-## Evaluated Configuration
+## Evaluated Configuration and Missing Identity Evidence
+
+The local manifests record:
 
 - Model: `openai-codex/gpt-5.6-sol`
 - OMP: `omp/18.1.17`
@@ -16,14 +20,28 @@
 - Thinking: `off`
 - Attempts: 3 per case
 - Tools: none
-- Behavior timeout: 10 minutes
-- Routing timeout: 2 minutes
+- Behavior per-attempt timeout: 10 minutes
+- Routing per-attempt timeout: 2 minutes
 - Candidate `simplified-engineering-english/SKILL.md` SHA-256: `256976f959ac379e0080835f7b6f5201908b722dbab4384d0e32cc12e31e20a8`
 - Runner `evals/run.py` SHA-256: `be310d7d73869c11412724d66d66105850b22cd3210e4c753f1cbc4aa443cca0`
 - Grader `evals/grade.py` SHA-256: `21f818a084b4aecf52a6980f15558b2424bcedc640fb6b59647804d3a5fb0cc8`
 - Independent holdout SHA-256: `c69cf79fc08fe1e97cad6fa35f5759ea8df53362b0e2eb83ea3cc6f001907842`
 
-The treatment manifests bind the candidate hash above. The independent V21 holdout was authored and audited without access to the candidate, prior evidence, responses, or this remediation history; its final response-blind audit was `GO`.
+Required comparison identity fields remain unavailable:
+
+| Field | Baseline | Treatment | Status |
+| --- | --- | --- | --- |
+| Evaluated catalog revision | unavailable | unavailable | incomplete |
+| Resolved evaluated root | unavailable | unavailable | incomplete |
+| Comparison-contract path and SHA-256 | unavailable | unavailable | incomplete |
+| Effective overall timeout | unavailable | unavailable | incomplete |
+| Timeout equality | — | — | unverified |
+| Immutable artifact URI and hash | unavailable | unavailable | incomplete |
+| Artifact access policy | unavailable | unavailable | incomplete |
+| Artifact retention period | unavailable | unavailable | incomplete |
+| Responsible owner | unavailable | unavailable | incomplete |
+
+The repository freeze records bind the candidate and case hashes shown above. They do not supply the immutable evaluated baseline and treatment revisions and roots, the pre-registered comparison-contract identity, or the durable artifact metadata required for release evidence.
 
 ## Paired Results
 
@@ -52,7 +70,7 @@ The final candidate and evaluator cover these observed failure classes:
 
 ## Gate Interpretation
 
-`remediation-v24-gate.json` passes all automated criteria: known cost metrics, development improvement, preserved holdout passes, measured correctness benefit for increased behavior cost, no critical deterministic regressions, and complete routing holdout passage. Its claim applies only to the evaluated model, OMP version, profile, prompts, cases, and three-attempt configuration.
+`remediation-v24-gate.json` passes its legacy automated criteria: known cost metrics, development improvement, preserved holdout passes, measured correctness benefit for increased behavior cost, no critical deterministic regressions, and complete routing holdout passage. This is a local automated observation only. The accepted run metadata does not establish the immutable evaluated roots, registered comparison contract, effective overall timeouts and equality, or durable artifacts needed to reproduce a release comparison.
 
 The independent Anthropic Claude Sonnet 4.6 judge ran through the `work` profile with thinking off and no tools. It returned valid results for all 156 blinded payloads: 84 development payloads and 72 holdout payloads. Capture cost was $3.10253265.
 
@@ -63,11 +81,16 @@ The independent Anthropic Claude Sonnet 4.6 judge ran through the `work` profile
 
 The judge is supporting evidence only. Thirty of 78 swapped pairs were position-sensitive. Six pairs contained a critical-issue flag; the pair-level flag does not identify the affected condition, and several rationales conflict across orderings. Human calibration and adjudication remain required.
 
-The overall decision remains `NO-GO` because:
+The overall decision remains `INCONCLUSIVE` because:
 
-1. The 26-pair, seven-dimension human calibration packet has no reviewer or scores, and the model-judge disagreements have not been adjudicated.
-2. The technical attestation has no named qualified authority or assessments.
-3. Raw artifacts are local and Git-ignored; no durable external artifact store is configured.
+1. The accepted results do not identify immutable baseline and treatment catalog revisions and resolved roots.
+2. No pre-registered comparison-contract path and content hash are recorded for this comparison.
+3. The legacy manifests record per-attempt limits but not effective overall timeouts or an explicit baseline/treatment timeout-equality result.
+4. The 26-pair, seven-dimension human calibration packet has no reviewer, qualifications, scores, confidence, comments, or locked adjudications.
+5. The technical attestation has no named qualified authority, qualification basis, assessments, decision, or signature.
+6. Raw artifacts are local and Git-ignored; immutable baseline and treatment URIs and hashes, access policy, retention period, and responsible owner are unavailable.
+
+These are incomplete gates, not established failed substantive gates. The automated pass cannot replace them.
 
 ## Iteration Disposition
 
@@ -83,7 +106,7 @@ Rejected runs remain separate for auditability. They were not substituted into f
 
 ## Evidence and Reproduction
 
-Accepted run directories:
+The following local run directories supplied the automated summaries:
 
 - `remediation-v24-development-behavior-baseline`
 - `remediation-v24b-development-behavior-treatment`
@@ -94,7 +117,7 @@ Accepted run directories:
 - `remediation-v19-independent-routing-baseline`
 - `remediation-v23-independent-routing-treatment`
 
-Compact evidence:
+Compact repository evidence:
 
 - `paired-results.json`
 - `remediation-v24-gate.json`
@@ -103,25 +126,26 @@ Compact evidence:
 - `remediation-holdout-freeze-v24.json`
 - `remediation-v24-human-calibration-packet.json` and restricted key
 - `remediation-v24-technical-attestation.json`
-- `remediation-v24-development-judge/` and `remediation-v24-holdout-judge/`
 - `remediation-v24-model-judge-analysis.json`
 - `evidence-manifest.json`
 
-Runnable repository checks:
+The raw `artifacts/` directories are local and excluded by `.gitignore`. They are not durable publication storage and no release claim in this report relies on their continued availability.
 
-```sh
-python3 scripts/validate_skills.py
-PYTHONPATH=. python3 -m unittest discover -s tests -p test_evaluation_harness.py
-python3 -m evals.grade --help
-```
+The release decision can be regenerated only after all of these external inputs are supplied:
 
-Raw manifests, prompts, responses, usage, runtimes, grader evidence, and hashes are retained under each accepted run directory. The raw `artifacts/` directories are local and excluded by `.gitignore`. This is not durable publication storage.
+1. immutable baseline and treatment catalog revisions plus their resolved roots;
+2. the frozen comparison-contract path and SHA-256;
+3. baseline and treatment effective per-attempt and overall timeouts plus an explicit equality result;
+4. complete baseline and treatment artifact sets in durable storage, each with an immutable URI and content hash;
+5. the storage access policy, retention period, and responsible owner;
+6. completed qualified human calibration and locked dispositions for all position-sensitive and critical-flagged pairs; and
+7. a completed attestation from a named qualified technical authority.
 
 ## Supported and Unsupported Claims
 
-Supported: for the exact evaluated configuration, deterministic behavior improved from 29/42 to 42/42 on development and from 24/36 to 36/36 on the independently frozen holdout; routing stayed at 30/30 and 36/36; no deterministic critical regression was observed.
+Supported automated observation: in the local captures for the stated configuration, deterministic behavior changed from 29/42 to 42/42 on development and from 24/36 to 36/36 on holdout; routing stayed at 30/30 and 36/36; no deterministic critical regression was recorded.
 
-Unsupported: release readiness, SEE conformance, human-calibrated semantic superiority, qualified technical approval, cost reduction, published efficacy, and generalization to other models, profiles, prompts, repositories, or production traffic.
+This observation is not a release or efficacy claim because the required immutable and durable evidence is incomplete. Unsupported: release readiness, SEE conformance, human-calibrated semantic superiority, qualified technical approval, cost reduction, published efficacy, and generalization to other models, profiles, prompts, repositories, or production traffic.
 
 ## Rollback
 

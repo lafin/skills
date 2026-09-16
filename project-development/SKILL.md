@@ -291,7 +291,15 @@ Internal references:
 - [Pipeline Patterns](skill://project-development/references/pipeline-patterns.md) - Read when: designing a new pipeline stage layout, choosing caching strategies, or debugging stage boundaries
 
 Runnable script:
-- [pipeline_template.py](skill://project-development/scripts/pipeline_template.py) - Status: Template; Replacement points: implement `fetch_items_from_source`, `call_llm`, and `render_html` for the target source, provider, and format - Staged batch-pipeline structure with sample data and mock model output - Use when: adapting a multi-stage LLM pipeline
+
+### `pipeline_template.py`
+
+- **Status:** Template.
+- **Boundary:** The bundled acquire stage uses sample data and the process stage uses mock model output. It does not call a model or a real source and is not a production pipeline.
+- **Replacement points:** Implement `fetch_items_from_source`, `call_llm`, and `render_html` for the target source, provider, and output format before production use.
+- **Run:** From the repository root, run `python project-development/scripts/pipeline_template.py all --batch-id YYYY-MM-DD`. The required positional input is one of `acquire`, `prepare`, `process`, `parse`, `render`, `all`, `clean`, or `estimate`; `--batch-id` defaults to today's date. `--limit`, `--workers`, `--model`, and `--clean-stage` refine the applicable stage.
+- **Output:** Writes stage progress to standard output and materializes staged files under `data/<batch-id>/` plus rendered HTML under `output/<batch-id>/`. Parse produces `data/<batch-id>/all_results.json`; estimate prints and returns token and cost estimates. `clean` removes data-stage artifacts but does not remove rendered `output/<batch-id>/index.html`.
+- **Failure:** Argument errors and uncaught Python or filesystem errors exit non-zero. Running `prepare`, `process`, or `parse` before the batch directory exists can raise `FileNotFoundError`; run `acquire` first. Individual process-item exceptions are printed as `Error - <message>` but do not set a non-zero process exit; repair the named replacement point or failed item and rerun its idempotent stage.
 
 Related skills in this collection:
 - tool-design - Tool architecture and reduction patterns

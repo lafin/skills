@@ -93,6 +93,16 @@ without asserting ownership of third-party wording.
 No substantive external match was found for `leancode-review`,
 `leancode-audit`, or `leancode-debt`.
 
+## Staged Addy Osmani Pilot Adaptations
+
+The non-active proposals in `proposals/source-driven-development`,
+`proposals/api-and-interface-design`, and `proposals/deprecation-and-migration`
+adapt the matching `skills/<name>/SKILL.md` files from
+https://github.com/addyosmani/agent-skills at commit
+`be4e44a9fbc5e8df0beaefadbb28bd22ee61cc39`. They are modified evaluation
+candidates, not enabled root skills. The upstream MIT notice is preserved in
+[LICENSE-addy-agent-skills](LICENSE-addy-agent-skills).
+
 ## Simplified Engineering English
 
 `simplified-engineering-english` is repository-original material inspired by

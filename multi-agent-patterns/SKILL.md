@@ -52,7 +52,7 @@ Reach for multi-agent architectures when a single agent's context fills with acc
 Partition work across multiple context windows so each agent operates in a clean context focused on its subtask. Aggregate results at a coordination layer without any single context bearing the full burden.
 
 **The Token Economics Reality**
-Budget for higher token costs than single-agent chat. Anthropic reported that its multi-agent research system used about 15 times as many tokens as ordinary chat, but that ratio is specific to its workload and architecture. See the [dated Anthropic evidence](skill://project-development/references/case-studies.md#evidence-anthropic-multi-agent-research-june-2025).
+Budget for higher token costs than single-agent chat. Anthropic reported that its multi-agent research system used about 15 times as many tokens as ordinary chat, but that ratio is specific to its workload and architecture. See the [dated Anthropic evidence](skill://multi-agent-patterns/references/multi-agent-research-evidence.md#evidence-anthropic-multi-agent-research-june-2025).
 
 | Architecture | Token Multiplier | Use Case |
 |--------------|------------------|----------|
@@ -60,7 +60,7 @@ Budget for higher token costs than single-agent chat. Anthropic reported that it
 | Single agent with tools | Higher than baseline | Tool-using tasks |
 | Multi-agent system | Much higher than baseline | Complex research/coordination |
 
-Anthropic's BrowseComp analysis attributed most observed performance variance to token usage, with tool calls and model choice also contributing. Treat this as evidence from one research system, and compare each multi-agent design against a single-agent baseline. See the [dated Anthropic evidence](skill://project-development/references/case-studies.md#evidence-anthropic-multi-agent-research-june-2025).
+Anthropic's BrowseComp analysis attributed most observed performance variance to token usage, with tool calls and model choice also contributing. Treat this as evidence from one research system, and compare each multi-agent design against a single-agent baseline. See the [dated Anthropic evidence](skill://multi-agent-patterns/references/multi-agent-research-evidence.md#evidence-anthropic-multi-agent-research-june-2025).
 
 Prioritize model selection alongside architecture design. Measure whether a stronger model improves results more than additional tokens for the target workload.
 
@@ -228,7 +228,7 @@ def handle_customer_request(request):
 ## Gotchas
 
 1. **Supervisor bottleneck scaling** — Supervisor context pressure grows with worker count and result size. Set a measured worker cap per supervisor or add another coordination tier before the supervisor becomes the bottleneck.
-2. **Token cost underestimation** — Anthropic reported about 15 times the token usage of ordinary chat for its multi-agent research system. Use this only as a workload-specific planning signal, and measure coordination overhead, retries, and consensus rounds directly. See the [dated Anthropic evidence](skill://project-development/references/case-studies.md#evidence-anthropic-multi-agent-research-june-2025).
+2. **Token cost underestimation** — Anthropic reported about 15 times the token usage of ordinary chat for its multi-agent research system. Use this only as a workload-specific planning signal, and measure coordination overhead, retries, and consensus rounds directly. See the [dated Anthropic evidence](skill://multi-agent-patterns/references/multi-agent-research-evidence.md#evidence-anthropic-multi-agent-research-june-2025).
 3. **Sycophantic consensus** — Agents in debate patterns tend to converge on agreeable answers, not correct ones. LLMs have an inherent bias toward agreement. Counter this by assigning explicit adversarial roles and requiring agents to state disagreements before convergence is allowed.
 4. **Agent sprawl** — Adding agents can produce diminishing returns while increasing coordination overhead. Dense peer-to-peer topologies add pairwise communication channels. Start with the minimum viable number of agents and add one only when a clear context-isolation benefit exists.
 5. **Telephone game in message-passing** — Information degrades through repeated summarization as it passes between agents. Each agent paraphrases and loses nuance. Use filesystem coordination instead of message-passing for state that multiple agents need to access faithfully.
@@ -254,7 +254,14 @@ Internal reference:
 - [Frameworks Reference](skill://multi-agent-patterns/references/frameworks.md) - Read when: implementing a specific multi-agent pattern in LangGraph, AutoGen, or CrewAI and needing framework-specific code examples
 
 Runnable script:
-- [coordination.py](skill://multi-agent-patterns/scripts/coordination.py) - Status: Example; Boundary: uses synchronous rule-based simulations without agents, models, or remote workers - `AgentCommunication`, `SupervisorAgent`, `HandoffProtocol`, `ConsensusManager`, `AgentFailureHandler` - Run when: implementing supervisor coordination, handoffs, or failure recovery
+
+### `coordination.py`
+
+- **Status:** Example.
+- **Boundary:** Uses synchronous rule-based simulations. Weighted consensus sums confidence values without an expertise factor, and `transfer_with_state` has no built-in receiver acknowledgment. It invokes no agents, models, or remote workers, so it does not validate a deployed coordination system.
+- **Run:** From the repository root, run `python multi-agent-patterns/scripts/coordination.py`. The demo accepts no arguments or credentials and uses built-in workers, handoffs, votes, and failures.
+- **Output:** Writes a human-readable sequence covering communication, worker registration, handoff acceptance, weighted consensus, and circuit-breaker behavior to standard output. Library callers receive dataclasses and dictionaries from the exported coordination classes.
+- **Failure:** The demo exits non-zero only on an uncaught Python error. Library calls raise `ValueError` for unknown workers or topics and when no worker is available; handoff transfer returns `False` without an externally supplied acknowledgment, while invalid vote submissions can be ignored. Register the referenced objects, validate voters and selections before submission, and provide a receiver acknowledgment before retrying.
 
 Related skills in this collection:
 - context-fundamentals - Read when: needing to understand context window mechanics before designing agent partitioning

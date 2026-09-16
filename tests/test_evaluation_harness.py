@@ -241,6 +241,163 @@ class EvaluationHarnessTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "unredacted"):
             GRADE.validate_redacted_config(config)
 
+    def test_locked_contract_binds_configuration_and_effective_timeouts(self) -> None:
+        args = argparse.Namespace(
+            model="provider/model",
+            profile="isolated",
+            tools="",
+            thinking="off",
+            attempts=3,
+            system_prompt=None,
+            max_time="10m",
+        )
+        contract = {
+            "execution_config": {
+                "model": "provider/model",
+                "profile": "isolated",
+                "tools": [],
+                "thinking": "off",
+                "attempt_count": 3,
+                "system_prompt_sha256": None,
+            },
+            "timeout_policy": {
+                "omp_max_time_seconds": 600,
+                "rpc_grace_seconds": 30,
+                "per_attempt_seconds": 630,
+                "overall": "per_attempt_seconds * attempt_count * case_count",
+            },
+        }
+
+        timeouts = RUN.verify_locked_contract(
+            contract, args, [routing_case()], []
+        )
+
+        self.assertEqual(630, timeouts["per_attempt_seconds"])
+        self.assertEqual(1890, timeouts["overall_seconds"])
+        args.attempts = 1
+        with self.assertRaisesRegex(ValueError, "execution_config.attempt_count"):
+            RUN.verify_locked_contract(contract, args, [routing_case()], [])
+
+    def test_catalog_revision_is_materialized_without_working_tree_fallback(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            for command in (
+                ["git", "init"],
+                ["git", "config", "user.email", "eval@example.invalid"],
+                ["git", "config", "user.name", "Evaluation Test"],
+                ["git", "config", "commit.gpgsign", "false"],
+            ):
+                code, _, stderr = RUN.run_text(command, root)
+                self.assertEqual(0, code, stderr)
+            (root / "catalog.txt").write_text("frozen\n", encoding="utf-8")
+            for command in (
+                ["git", "add", "catalog.txt"],
+                ["git", "commit", "-m", "freeze catalog"],
+            ):
+                code, _, stderr = RUN.run_text(command, root)
+                self.assertEqual(0, code, stderr)
+            revision = RUN.git_value(root, "rev-parse", "HEAD")
+            self.assertIsNotNone(revision)
+            (root / "catalog.txt").write_text("editable\n", encoding="utf-8")
+
+            temporary, record = RUN.materialize_catalog(
+                root, revision, "baseline"
+            )
+            try:
+                archived = Path(record["root"]) / "catalog.txt"
+                self.assertEqual("frozen\n", archived.read_text(encoding="utf-8"))
+                self.assertEqual(revision, record["revision"])
+                self.assertNotEqual(root, Path(record["root"]))
+            finally:
+                temporary.cleanup()
+
+
+    def test_runner_selector_keeps_holdouts_behind_the_guard(self) -> None:
+        manifest = json.loads((ROOT / "evals/suites.json").read_text(encoding="utf-8"))
+        select = RUN.evaluation_selector()
+
+        development = select(
+            manifest, ROOT, mode="normal", suite="routing", condition="treatment"
+        )
+        self.assertTrue(
+            all(entry["split"] == "development" for entry in development["entries"])
+        )
+        with self.assertRaisesRegex(ValueError, "cannot expose holdout"):
+            select(
+                manifest,
+                ROOT,
+                mode="normal",
+                case_paths=[ROOT / "evals/cases/routing-holdout.jsonl"],
+                condition="baseline",
+            )
+
+        for mode, suite in (
+            ("holdout", "routing"),
+            ("independent-holdout", "see-behavior"),
+            ("release", "see-routing"),
+        ):
+            with self.subTest(mode=mode):
+                selected = select(
+                    manifest,
+                    ROOT,
+                    mode=mode,
+                    suite=suite,
+                    condition="treatment",
+                )
+                self.assertTrue(selected["guarded_holdout"])
+                self.assertEqual(
+                    selected["treatment_catalog_revision"],
+                    selected["evaluated_catalog_revision"],
+                )
+
+    def test_runner_selector_requires_explicit_historical_catalog(self) -> None:
+        manifest = json.loads((ROOT / "evals/suites.json").read_text(encoding="utf-8"))
+        select = RUN.evaluation_selector()
+        path = ROOT / "evals/cases/see-behavior-development-v2.jsonl"
+
+        with self.assertRaisesRegex(ValueError, "retained catalog side"):
+            select(manifest, ROOT, mode="normal", case_paths=[path])
+        selected = select(
+            manifest,
+            ROOT,
+            mode="normal",
+            case_paths=[path],
+            allow_historical=True,
+            historical_catalog="baseline",
+            condition="baseline",
+        )
+        self.assertFalse(selected["guarded_holdout"])
+        self.assertEqual(
+            selected["baseline_catalog_revision"],
+            selected["evaluated_catalog_revision"],
+        )
+
+    def test_runner_selector_uses_proposal_baseline_revision(self) -> None:
+        manifest = json.loads((ROOT / "evals/suites.json").read_text(encoding="utf-8"))
+        proposal = dict(
+            next(
+                entry
+                for entry in manifest["case_files"]
+                if entry["path"] == "evals/cases/routing-development.jsonl"
+            ),
+            status="proposal",
+            baseline_catalog_revision=manifest["base_catalog_revision"],
+        )
+        manifest["case_files"] = [proposal]
+        selected = RUN.evaluation_selector()(
+            manifest,
+            ROOT,
+            mode="proposal-baseline",
+            proposal_baseline=ROOT / proposal["path"],
+            condition="baseline",
+        )
+
+        self.assertFalse(selected["guarded_holdout"])
+        self.assertEqual(
+            manifest["base_catalog_revision"],
+            selected["evaluated_catalog_revision"],
+        )
+
     def test_rpc_command_enforces_condition_skill_and_runtime_scope(self) -> None:
         args = argparse.Namespace(
             omp="omp",
@@ -926,6 +1083,65 @@ class EvaluationHarnessTest(unittest.TestCase):
             )
             with self.assertRaisesRegex(ValueError, "duplicate judge result"):
                 GRADE.score_judges(key_path, results_path, root / "duplicate.json")
+
+    def test_materialized_catalog_paths_do_not_change_comparison_signature(self) -> None:
+        def manifest(role: str, root: str) -> dict:
+            generated = str(Path(root).parent / "catalog-root.yaml")
+            return {
+                "adapter": {"name": "omp-rpc-jsonl"},
+                "omp_executable": {"path": "/bin/omp", "sha256": "same"},
+                "omp_version": "omp/test",
+                "model_requested": "provider/model",
+                "fixture_files": {},
+                "evaluator_files": {"run.py": "same", "grade.py": "same"},
+                "attempts": 3,
+                "evaluated_catalog": {
+                    "role": role,
+                    "revision": role * 40,
+                    "root": root,
+                    "tree": role * 40,
+                },
+                "configuration": {
+                    "cwd": str(ROOT),
+                    "canonical_skill_root": root,
+                    "config_files": [{"path": generated, "sha256": role * 64}],
+                    "profile": "isolated",
+                    "tools": [],
+                    "thinking": "off",
+                    "effective_omp_config": {
+                        "value": {"skills": {"customDirectories": [root]}}
+                    },
+                },
+            }
+
+        baseline = manifest("b", "/tmp/baseline/catalog")
+        treatment = manifest("c", "/tmp/treatment/catalog")
+        self.assertEqual(
+            GRADE.comparison_signature(baseline),
+            GRADE.comparison_signature(treatment),
+        )
+        treatment["configuration"]["tools"] = ["read"]
+        self.assertNotEqual(
+            GRADE.comparison_signature(baseline),
+            GRADE.comparison_signature(treatment),
+        )
+
+    def test_non_repository_artifact_accepts_materialized_catalog_cwd(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            path = root / "artifacts/routing-case/1.json"
+            case, artifact, manifest = captured_artifact(path)
+            catalog = str(root / "catalog")
+            manifest["configuration"]["canonical_skill_root"] = catalog
+            artifact["rpc_cwd"] = catalog
+            artifact["command"] = [
+                f"--cwd={catalog}" if item == f"--cwd={ROOT}" else item
+                for item in artifact["command"]
+            ]
+            path.write_text(json.dumps(artifact), encoding="utf-8")
+
+            validated = GRADE.validate_artifact(path, path, case, manifest, 1)
+            self.assertEqual("SELECTED_SKILL: evaluation", validated["response"])
 
     def test_routing_pair_rejects_unchanged_evaluated_skill(self) -> None:
         case = routing_case()

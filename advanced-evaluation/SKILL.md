@@ -396,7 +396,14 @@ Internal reference:
 - [Evaluation Pipeline Diagram](skill://advanced-evaluation/references/evaluation-pipeline.md) - Read when: designing the architecture of a multi-stage evaluation system
 
 Runnable script:
-- [evaluation_example.py](skill://advanced-evaluation/scripts/evaluation_example.py) - Status: Example; Boundary: returns fixed illustrative evaluator outputs and does not call a model - Direct-scoring, pairwise-comparison, and rubric-generation examples - Run when: wiring an LLM judge and wanting a working implementation to adapt
+
+### `evaluation_example.py`
+
+- **Status:** Example.
+- **Boundary:** Returns fixed illustrative evaluator outputs and invokes no model. The results demonstrate data shapes and position swapping; they do not validate a judge.
+- **Run:** From the repository root, run `python advanced-evaluation/scripts/evaluation_example.py`. The demo accepts no arguments or credentials and uses built-in prompts, responses, and rubric data.
+- **Output:** Writes human-readable direct-scoring, pairwise-comparison, and rubric-generation examples to standard output. The three exported functions return dictionaries.
+- **Failure:** The demo exits non-zero only on an uncaught Python error. Repair the reported interpreter or import error; illustrative scores and winners are output, not process failures.
 
 External research:
 - [Eugene Yan: Evaluating the Effectiveness of LLM-Evaluators](https://eugeneyan.com/writing/llm-evaluators/) - Read when: surveying the state of the art in LLM evaluation

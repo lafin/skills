@@ -61,14 +61,18 @@ Redirect large tool outputs to files instead of returning them directly to conte
 Write the output to a scratch file, extract a compact summary, and return a file reference. The agent then uses targeted retrieval (grep for patterns, read with line ranges) to access only what it needs.
 
 ```python
-def handle_tool_output(output: str, threshold: int = 2000) -> str:
-    if len(output) < threshold:
+from pathlib import Path
+from time import time_ns
+
+def handle_tool_output(tool_name: str, output: str, threshold: int = 2000) -> str:
+    estimated_tokens = max(1, (len(output) + 3) // 4)
+    if estimated_tokens <= threshold:
         return output
 
-    file_path = f"scratch/{tool_name}_{timestamp}.txt"
-    write_file(file_path, output)
-
-    key_summary = extract_summary(output, max_tokens=200)
+    file_path = Path("scratch") / f"{tool_name}_{time_ns()}.txt"
+    file_path.parent.mkdir(parents=True, exist_ok=True)
+    file_path.write_text(output)
+    key_summary = output[:800].replace("\n", " ")
     return f"[Output written to {file_path}. Summary: {key_summary}]"
 ```
 
@@ -284,7 +288,14 @@ Internal reference:
 - [Implementation Patterns](skill://filesystem-context/references/implementation-patterns.md) - Read when: implementing scratch pad, plan persistence, or tool output offloading and need concrete code beyond the inline examples
 
 Runnable script:
-- [filesystem_context.py](skill://filesystem-context/scripts/filesystem_context.py) - Status: Example; Boundary: approximates token counts, writes only local sample files, and calls no external service - `ScratchPadManager`, `AgentPlan`, `ToolOutputHandler` - Run when: implementing scratchpads, plan persistence, or tool-output offloading
+
+### `filesystem_context.py`
+
+- **Status:** Example.
+- **Boundary:** Approximates token counts, writes only local sample files, and calls no external service. It does not provide durable storage, concurrency control, semantic memory, or a complete plan-state machine; callers must define any status beyond `pending`, `in_progress`, `completed`, and `blocked`.
+- **Run:** From the repository root, run `python filesystem-context/scripts/filesystem_context.py`. The demo accepts no arguments or credentials; it creates a disposable `demo_scratch/` directory relative to the current working directory and removes it after a successful run.
+- **Output:** Writes human-readable offload decisions, file references, token savings, plan state, tool-output handling, and cleanup status to standard output. The transient sample scratch and plan files are removed before successful exit. Library callers receive strings, dictionaries, or `AgentPlan` objects.
+- **Failure:** The demo exits non-zero on an uncaught Python, filesystem-permission, or malformed-plan error. Repair the path permissions or JSON/input named by the exception, remove any incomplete demo file, and retry.
 
 Related skills in this collection:
 - context-optimization - Read when: applying token reduction techniques alongside filesystem offloading

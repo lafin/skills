@@ -42,7 +42,7 @@ Run deterministic validation before LLM judgment whenever the artifact has machi
 
 **Performance Drivers**
 
-Anthropic's [June 2025 BrowseComp and production research](skill://project-development/references/case-studies.md#evidence-anthropic-multi-agent-research-june-2025) reported that token usage explained most performance variance in its BrowseComp experiments, with tool calls and model choice adding explanatory power. Treat that result as evidence from Anthropic's studied systems, not a universal ranking.
+Anthropic's [June 2025 BrowseComp and production research](skill://evaluation/references/multi-agent-research-evidence.md#evidence-anthropic-multi-agent-research-june-2025) reported that token usage explained most performance variance in its BrowseComp experiments, with tool calls and model choice adding explanatory power. Treat that result as evidence from Anthropic's studied systems, not a universal ranking.
 
 Use it to frame evaluation questions rather than assume the same ordering:
 - **Set realistic token budgets**: Evaluate agents with production-realistic token limits, not unlimited resources.
@@ -268,7 +268,14 @@ Internal reference:
 - [Metrics Reference](skill://evaluation/references/metrics.md) - Read when: designing specific evaluation metrics, choosing scoring scales, or implementing weighted rubric calculations
 
 Runnable script:
-- [evaluator.py](skill://evaluation/scripts/evaluator.py) - Status: Example; Boundary: uses heuristic scoring and simulated agent output without executing an agent or model - `RubricDimension`, `AgentEvaluator`, `TestSet`, `EvaluationRunner`, `ProductionMonitor` - Run when: building a regression suite or wiring a quality gate
+
+### `evaluator.py`
+
+- **Status:** Example.
+- **Boundary:** Uses heuristic scoring and simulated agent output. It does not execute an agent or model, so its scores do not prove production quality.
+- **Run:** From the repository root, run `python evaluation/scripts/evaluator.py`. The demo accepts no arguments or credentials and uses its built-in test set.
+- **Output:** Writes a human-readable rubric, per-test progress, pass count, pass rate, dimension averages, and failures to standard output. Library callers receive dictionaries from `AgentEvaluator`, `EvaluationRunner`, and `ProductionMonitor`.
+- **Failure:** The demo exits non-zero only on an uncaught Python error. Repair the reported import, environment, or input-type error; a low heuristic score is data in the report, not a process failure.
 
 Internal skills:
 - All other skills connect to evaluation for quality measurement
