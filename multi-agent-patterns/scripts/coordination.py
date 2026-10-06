@@ -164,7 +164,8 @@ class SupervisorAgent:
                 }
             ]
 
-        for subtask in subtasks:
+        for index, subtask in enumerate(subtasks, 1):
+            subtask["id"] = f"{task.get('id', 'task')}-{index}"
             subtask["parent_task"] = task.get("id")
             subtask["priority"] = task.get("priority", 0)
 
@@ -361,7 +362,11 @@ class HandoffProtocol:
         Use when: a handoff must carry full task state and progress so the
         receiving agent can resume without re-deriving context.
 
-        Returns True if the receiving agent acknowledged the handoff.
+        Returns True only if ``from_agent``'s inbox holds a RESPONSE from
+        ``to_agent`` with ``status == "handoff_received"``. Only those ack
+        messages are consumed; other messages stay in the inbox. This
+        simulation runs no receiver, so it returns False unless the caller
+        supplies the acknowledgment.
         """
         handoff = self.create_handoff(
             from_agent=from_agent,
@@ -378,13 +383,16 @@ class HandoffProtocol:
 
         # In production, replace sleep with async await + timeout
         time.sleep(0.1)
-        ack = self.communication.receive(from_agent)
-
-        return any(
-            m.message_type == MessageType.RESPONSE
+        inbox = self.communication.inbox.get(from_agent, [])
+        acks = [
+            m
+            for m in inbox
+            if m.sender == to_agent
+            and m.message_type == MessageType.RESPONSE
             and m.content.get("status") == "handoff_received"
-            for m in ack
-        )
+        ]
+        self.communication.inbox[from_agent] = [m for m in inbox if m not in acks]
+        return bool(acks)
 
 
 # ---------------------------------------------------------------------------
@@ -396,8 +404,7 @@ class ConsensusManager:
     """Manager for multi-agent consensus building.
 
     Use when: multiple agents must vote on a decision and the system needs
-    weighted consensus that accounts for confidence and expertise rather
-    than naive majority voting.
+    each vote weighted by the voter's confidence rather than counted equally.
     """
 
     def __init__(self) -> None:
@@ -441,7 +448,8 @@ class ConsensusManager:
 
         Use when: votes are in and the system needs to determine a winner
         weighted by each agent's confidence rather than simple majority.
-        Weight = confidence * expertise_factor.
+        Weight = confidence (no expertise factor). ``consensus_strength`` is
+        the winner's share of the total cast weight.
         """
         if topic_id not in self.votes:
             raise ValueError(f"Unknown topic: {topic_id}")
@@ -476,12 +484,16 @@ class ConsensusManager:
 
         winner = max(results.keys(), key=lambda s: results[s]["weighted_score"])
 
+        total_weight = sum(r["weighted_score"] for r in results.values())
+
         return {
             "status": "complete",
             "result": winner,
             "details": results,
             "consensus_strength": (
-                results[winner]["weighted_score"] / len(votes) if votes else 0.0
+                results[winner]["weighted_score"] / total_weight
+                if total_weight
+                else 0.0
             ),
         }
 

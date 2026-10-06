@@ -4,7 +4,7 @@ description: "This skill should be used for persistent semantic memory in agent 
 license: MIT
 metadata:
   upstream: "muratcankoylan/Agent-Skills-for-Context-Engineering"
-  upstream_commit: "c578e85e40fe2bda7c1fec91ff64cf5285434934"
+  upstream_commit: "58b55a8921758d13453b440704fb1b5b208c0b0e"
   upstream_path: "skills/memory-systems"
   adaptation: modified
   license_notice: LICENSE-context-engineering
@@ -57,13 +57,22 @@ version and test date with every product-specific decision.
 
 Do not rank memory systems by vendor-published results from different
 benchmarks, models, or configurations. For each shortlisted system, run the
-same corpus, queries, model, retrieval budget, and latency measurement. Record
-the benchmark version and configuration with the result.
+same corpus, queries, retrieval budget, and latency measurement, and hold the
+answering LLM and the embedding model fixed across every arm. Swapping only the
+embedding model can move accuracy by several points and flip the ranking.
+Include a verbatim-RAG or plain-filesystem baseline: an agent searching raw
+conversation text with ordinary search tools has matched or beaten dedicated
+memory tools on LoCoMo. Record the benchmark version and configuration with the
+result.
 
-Compare retrieval accuracy for the product's query shapes, temporal and
-multi-hop behavior when required, ingestion cost, latency, and operational
-complexity. Start with the shallowest implementation and add semantic or graph
-structure only when the simpler layer fails a measured requirement.
+Report retrieval accuracy per question type (for example single-hop,
+multi-hop, temporal, knowledge update), not only one aggregate score; a system
+can tie the baseline on a few types and lose on the rest. Report write-path
+cost (extraction LLM calls, tokens, and ingestion latency per stored item) next
+to read latency and operational complexity. A memory system that ties the
+baseline at many times the write cost has not earned its place. Start with the
+shallowest implementation and add semantic or graph structure only when the
+simpler layer fails a measured requirement.
 
 ### Memory Layers (Decision Points)
 
@@ -92,7 +101,7 @@ Hybrid approaches reduce active context by retrieving only relevant subgraphs or
 
 ### Memory Consolidation
 
-Run consolidation periodically to prevent unbounded growth, because unchecked memory accumulation degrades retrieval quality over time. **Invalidate but do not discard** — preserving history matters for temporal queries that need to reconstruct past states. Trigger consolidation on memory count thresholds, degraded retrieval quality, or scheduled intervals. See [Implementation Reference](skill://memory-systems/references/implementation.md) for working consolidation code.
+Run consolidation periodically to prevent unbounded growth, because unchecked memory accumulation degrades retrieval quality over time. **Invalidate but do not discard** — set `valid_until` on superseded facts instead of deleting them, because temporal queries need history to reconstruct past states. Trigger consolidation on memory count thresholds, degraded retrieval quality, or scheduled intervals. See [Implementation Reference](skill://memory-systems/references/implementation.md) for a consolidation example.
 
 ## Practical Guidance
 
@@ -100,10 +109,10 @@ Run consolidation periodically to prevent unbounded growth, because unchecked me
 
 **Start with the simplest viable layer and add complexity only when retrieval quality degrades.** Most agents do not need a temporal knowledge graph on day one. Follow this escalation path:
 
-1. **Prototype**: Use file-system memory. Store facts as structured JSON with timestamps. This validates agent behavior before committing to infrastructure.
+1. **Prototype**: Use file-system memory. Store facts as structured JSON with timestamps. This validates agent behavior before committing to infrastructure. Anthropic's client-side [memory tool](https://platform.claude.com/docs/en/agents-and-tools/tool-use/memory-tool) is one vendor implementation: the model requests file operations under `/memories`, and your application executes them against storage you control and must reject paths outside that directory (docs checked 2026-10-06).
 2. **Scale**: Move to Mem0 or a vector store with metadata when the agent needs semantic search and multi-tenant isolation, because file-based lookup cannot handle similarity queries.
 3. **Complex reasoning**: Add Zep/Graphiti when the agent needs relationship traversal, temporal validity, or cross-session synthesis. Graphiti uses structured ties with generic relations, keeping graphs simple and easy to reason about; Cognee builds denser multi-layer semantic graphs with detailed relationship edges — choose based on whether the agent needs temporal bi-modeling (Graphiti) or richer interconnected knowledge structures (Cognee).
-4. **Full control**: Use Letta or Cognee when the agent must self-manage its own memory with deep introspection, because these frameworks expose memory operations as first-class agent actions.
+4. **Full control**: Use Letta or Cognee when the agent must self-manage its own memory with deep introspection, because these frameworks expose memory operations as first-class agent actions. As of 2026-10-06, the Letta Filesystem API (folders with file tools) is deprecated and disabled; Letta replaces it with direct filesystem access and context repositories.
 
 ### Integration with Context
 
@@ -124,12 +133,14 @@ Handle retrieval failures gracefully because memory systems are inherently noisy
 ```python
 from mem0 import Memory
 
+# Mem0 OSS v3 API (Python package mem0ai 2.x), docs checked 2026-10-06.
 m = Memory()
-m.add("User prefers dark mode and Python 3.12", user_id="alice")
-m.add("User switched to light mode", user_id="alice")
+m.add([{"role": "user", "content": "I prefer dark mode and Python 3.12"}], user_id="alice")
+m.add([{"role": "user", "content": "I switched to light mode"}], user_id="alice")
 
-# Retrieves current preference (light mode), not outdated one
-results = m.search("What theme does the user prefer?", user_id="alice")
+# add() is add-only: both preferences stay stored, and search may return either.
+# Track supersession yourself (validity metadata or expiration_date on add).
+results = m.search("What theme does the user prefer?", filters={"user_id": "alice"})
 ```
 
 **Example 2: Temporal Query**
@@ -153,20 +164,20 @@ results = graph.query_at_time(
 **Example 3: Cognee Memory Ingestion and Search**
 ```python
 import cognee
-from cognee.modules.search.types import SearchType
+from cognee import SearchType
 
-# Ingest and build knowledge graph
-await cognee.add("./docs/")
-await cognee.add("any data")
-await cognee.cognify()
+# Cognee v1.0 API (Python package cognee 1.x), docs checked 2026-10-06.
+# remember() ingests, builds the graph, and runs improve() enrichment;
+# add(), cognify(), and memify() are legacy.
+await cognee.remember("any data")
 
-# Enrich memory
-await cognee.memify()
+# Re-run enrichment on the existing graph (replaces legacy memify())
+await cognee.improve()
 
-# Agent retrieves relationship-aware context
+# Agent retrieves relationship-aware context (HYBRID_COMPLETION is the default)
 results = await cognee.search(
     query_text="Any query for your memory",
-    query_type=SearchType.GRAPH_COMPLETION,
+    query_type=SearchType.HYBRID_COMPLETION,
 )
 ```
 
@@ -178,7 +189,7 @@ results = await cognee.search(
 4. Consolidate memories periodically — invalidate but don't discard
 5. Design for retrieval failure: always have a fallback when memory lookup returns nothing
 6. Consider privacy implications of persistent memory (retention policies, deletion rights)
-7. Benchmark your memory system against LoCoMo or LongMemEval before and after changes
+7. Benchmark your memory system against LoCoMo or LongMemEval before and after changes, with the LLM and embedding model fixed, a verbatim-RAG or filesystem baseline, write-path cost, and per-question-type scores
 8. Monitor memory growth and retrieval latency in production
 
 ## Gotchas
@@ -228,7 +239,9 @@ External resources:
 - Mem0 production architecture paper (arXiv:2504.19413) - Read when: assessing managed memory infrastructure trade-offs
 - Cognee optimized knowledge graph + LLM reasoning paper (arXiv:2505.24478) - Read when: comparing multi-layer semantic graph approaches
 - LoCoMo benchmark (Snap Research) - Read when: evaluating long-conversation memory retention
-- MemBench evaluation framework (ACL 2025) - Read when: designing memory evaluation suites
+- [MemBench](https://aclanthology.org/2025.findings-acl.989/) (Findings of ACL 2025) - Read when: designing memory evaluation suites
+- [MemDelta (arXiv:2606.29914)](https://arxiv.org/abs/2606.29914) - Read when: controlling LLM, embedding model, baseline, and write-path cost in memory comparisons
+- [Letta: Benchmarking AI Agent Memory](https://www.letta.com/blog/benchmarking-ai-agent-memory) (2025-08-12) - Read when: building a filesystem baseline; its 74.0% LoCoMo result used the now-deprecated Letta Filesystem
 - Graphiti open-source temporal KG engine (github.com/getzep/graphiti) - Read when: implementing temporal knowledge graphs
 - Cognee open-source knowledge graph memory (github.com/topoteretes/cognee) - Read when: building customizable ECL pipelines for memory
 - [Cognee comparison: Form vs Function](https://www.cognee.ai/blog/deep-dives/competition-comparison-form-vs-function) - Read when: comparing graph structures across Mem0, Graphiti, LightRAG, Cognee

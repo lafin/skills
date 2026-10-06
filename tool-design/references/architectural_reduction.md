@@ -8,43 +8,25 @@ The production example that motivates this pattern is documented in the [dated V
 
 ### The File System Agent
 
-```python
-from ai import ToolLoopAgent, tool
-from sandbox import Sandbox
+Model-neutral pseudocode of the pattern. Vercel's published version (December 2025) is TypeScript on the AI SDK `ToolLoopAgent` with Vercel Sandbox; see the [source](https://vercel.com/blog/we-removed-80-percent-of-our-agents-tools).
 
-# Create sandboxed environment with your data layer
-sandbox = Sandbox.create()
-await sandbox.write_files(data_layer_files)
+```text
+# Pseudocode
+sandbox = create_sandbox()
+sandbox.write_files(data_layer_files)   # semantic-layer YAML, Markdown, JSON
 
-# Single primitive tool
-def create_execute_tool(sandbox):
-    return tool(
-        name="execute_command",
-        description="""
-        Execute a bash command in the sandbox environment.
-        
-        Use standard Unix tools to explore and understand the data layer:
-        - ls: List directory contents
-        - cat: Read file contents
-        - grep: Search for patterns
-        - find: Locate files
-        
-        The sandbox contains the semantic layer documentation:
-        - /data/entities/*.yaml: Entity definitions
-        - /data/measures/*.yaml: Measure calculations  
-        - /data/joins/*.yaml: Join relationships
-        - /docs/*.md: Additional documentation
-        """,
-        execute=lambda command: sandbox.exec(command)
-    )
+execute_command = tool(
+    name = "execute_command",
+    description = "Run a bash command in the sandbox. Explore the data layer with
+        ls, cat, grep, find. Layout: /data/entities/*.yaml (entities),
+        /data/measures/*.yaml (measures), /data/joins/*.yaml (joins),
+        /docs/*.md (documentation).",
+    run = (command) -> sandbox.exec(command),
+)
 
-# Minimal agent
-agent = ToolLoopAgent(
-    model="claude-opus-4.5",
-    tools={
-        "execute_command": create_execute_tool(sandbox),
-        "execute_sql": sql_tool,
-    }
+agent = tool_loop_agent(
+    model = WORKER_MODEL,
+    tools = [execute_command, execute_sql],   # execute_sql: existing query tool
 )
 ```
 

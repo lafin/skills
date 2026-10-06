@@ -259,6 +259,11 @@ def parse_response(text: str) -> ParseResult:
     except Exception as e:
         result.parse_errors.append(f"Items extraction failed: {e}")
     
+    # A missing section is a parse error too, not a silent default
+    for name, value in (("Summary", result.summary), ("Score", result.score), ("Analysis", result.items)):
+        if value in ("", None, []):
+            result.parse_errors.append(f"{name}: section missing")
+    
     return result
 ```
 
@@ -336,17 +341,18 @@ def process_batch_with_partial_success(items: list) -> tuple[list, list]:
 
 ### Token Counting
 
-```python
-import tiktoken
+Characters per token depends on the tokenizer, and a fixed encoding such as `cl100k_base` or a chars/4 rule undercounts on current tokenizers. Calibrate from the manual prototype: divide prompt characters by the provider-reported input tokens, or call the provider's token-counting endpoint directly.
 
-def count_tokens(text: str, model: str = "gpt-4") -> int:
-    """Count tokens for cost estimation."""
-    try:
-        encoding = tiktoken.encoding_for_model(model)
-    except KeyError:
-        encoding = tiktoken.get_encoding("cl100k_base")
-    
-    return len(encoding.encode(text))
+```python
+from typing import Callable
+
+def calibrate_chars_per_token(prototype_prompts: list[str], reported_input_tokens: list[int]) -> float:
+    """Characters per token observed on the target model's own usage reports."""
+    return sum(len(p) for p in prototype_prompts) / sum(reported_input_tokens)
+
+def ratio_counter(chars_per_token: float) -> Callable[[str], int]:
+    """Token counter from a calibrated ratio; swap in a provider token-counting call when available."""
+    return lambda text: round(len(text) / chars_per_token)
 
 def estimate_cost(
     input_tokens: int,
@@ -362,39 +368,35 @@ def estimate_cost(
 
 ### Batch Cost Estimation
 
+Prices, output tokens per item, and the retry rate are required inputs. Take prices from the provider's current price page and the other two from prototype usage and observed failures; no default stays correct across models.
+
 ```python
 def estimate_batch_cost(
-    items: list,
-    prompt_template: str,
-    avg_output_tokens: int = 1000,
-    model_pricing: dict = None,
+    prompts: list[str],
+    count_tokens: Callable[[str], int],
+    output_tokens_per_item: int,
+    retry_rate: float,
+    input_price_per_mtok: float,
+    output_price_per_mtok: float,
 ) -> dict:
-    """Estimate total cost for a batch."""
-    model_pricing = model_pricing or {
-        "input_price_per_mtok": 3.00,   # Example: GPT-4 Turbo input
-        "output_price_per_mtok": 15.00,  # Example: GPT-4 Turbo output
-    }
-    
-    total_input_tokens = 0
-    for item in items:
-        prompt = format_prompt(prompt_template, item)
-        total_input_tokens += count_tokens(prompt)
-    
-    total_output_tokens = len(items) * avg_output_tokens
-    
+    """Estimate total cost for a batch of prepared prompts."""
+    total_input_tokens = sum(count_tokens(p) for p in prompts)
+    total_output_tokens = len(prompts) * output_tokens_per_item
+
     estimated_cost = estimate_cost(
         total_input_tokens,
         total_output_tokens,
-        **model_pricing,
-    )
-    
+        input_price_per_mtok,
+        output_price_per_mtok,
+    ) * (1 + retry_rate)
+
     return {
-        "item_count": len(items),
+        "item_count": len(prompts),
         "total_input_tokens": total_input_tokens,
         "total_output_tokens": total_output_tokens,
         "estimated_cost_usd": estimated_cost,
-        "avg_input_tokens_per_item": total_input_tokens / len(items),
-        "cost_per_item_usd": estimated_cost / len(items),
+        "avg_input_tokens_per_item": total_input_tokens / len(prompts),
+        "cost_per_item_usd": estimated_cost / len(prompts),
     }
 ```
 
@@ -433,8 +435,8 @@ def main():
     )
     parser.add_argument(
         "--model",
-        default="gpt-4-turbo",
-        help="Model to use for processing",
+        required=True,
+        help="Model ID to use for processing",
     )
     parser.add_argument(
         "--dry-run",
@@ -547,33 +549,38 @@ class PipelineCheckpoint:
 
 ### Stage Unit Tests
 
+These tests target `scripts/pipeline_template.py`. Run them with pytest from `project-development/scripts/`.
+
 ```python
+from textwrap import dedent
+
+from pipeline_template import generate_prompt, parse_response
+
 def test_prepare_stage():
     """Test prompt generation independently."""
-    test_item = {"id": "test", "content": "Sample content"}
-    prompt = prepare_prompt(test_item)
-    
+    prompt = generate_prompt({"title": "Test", "content": "Sample content"})
+
     assert "Sample content" in prompt
-    assert "## Section 1" in prompt  # Format markers present
+    assert "## Summary" in prompt  # Format markers present
 
 def test_parse_stage():
     """Test parsing with known good output."""
-    test_response = """
-    ## Summary
-    This is a test summary.
-    
-    ## Score
-    Rating: 7
-    """
-    
+    test_response = dedent("""\
+        ## Summary
+        This is a test summary.
+
+        ## Score
+        Rating: 7
+        """)
+
     result = parse_response(test_response)
     assert result.summary == "This is a test summary."
     assert result.score == 7
 
 def test_parse_stage_malformed():
-    """Test parsing handles malformed output."""
+    """Test parsing records missing sections as errors."""
     test_response = "Some random text without sections"
-    
+
     result = parse_response(test_response)
     assert result.summary == ""
     assert result.score is None
@@ -583,28 +590,25 @@ def test_parse_stage_malformed():
 ### Integration Test Pattern
 
 ```python
-def test_pipeline_end_to_end():
+import pipeline_template as pt
+
+def test_pipeline_end_to_end(tmp_path, monkeypatch):
     """Test full pipeline with single item."""
-    test_dir = Path("test_data")
-    test_item = create_test_item()
-    
-    try:
-        # Run each stage
-        acquire_result = stage_acquire(test_dir, [test_item])
-        assert (test_dir / test_item.id / "raw.json").exists()
-        
-        prepare_result = stage_prepare(test_dir)
-        assert (test_dir / test_item.id / "prompt.md").exists()
-        
-        # Skip process stage in unit tests (costs money)
-        # Create mock response instead
-        mock_response(test_dir / test_item.id)
-        
-        parse_result = stage_parse(test_dir)
-        assert (test_dir / test_item.id / "parsed.json").exists()
-        
-    finally:
-        # Cleanup
-        shutil.rmtree(test_dir, ignore_errors=True)
+    monkeypatch.setattr(pt, "DATA_DIR", tmp_path / "data")
+    monkeypatch.setattr(pt, "OUTPUT_DIR", tmp_path / "output")
+    batch_id = "test"
+
+    [item_dir] = pt.stage_acquire(batch_id, limit=1)
+    assert (item_dir / "raw.json").exists()
+
+    pt.stage_prepare(batch_id)
+    assert (item_dir / "prompt.md").exists()
+
+    # Skip the process stage in unit tests (it calls the model).
+    # Write a fixed response instead.
+    (item_dir / "response.md").write_text("## Summary\nOk.\n\n## Score\nRating: 5\n")
+
+    pt.stage_parse(batch_id)
+    assert (item_dir / "parsed.json").exists()
 ```
 

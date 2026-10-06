@@ -4,7 +4,7 @@ description: "This skill should be used when modeling agent mental states with B
 license: MIT
 metadata:
   upstream: "muratcankoylan/Agent-Skills-for-Context-Engineering"
-  upstream_commit: "c578e85e40fe2bda7c1fec91ff64cf5285434934"
+  upstream_commit: "58b55a8921758d13453b440704fb1b5b208c0b0e"
   upstream_path: "skills/bdi-mental-states"
   adaptation: modified
   license_notice: LICENSE-context-engineering
@@ -20,7 +20,7 @@ Activate this skill when:
 - Processing external RDF context into agent beliefs about world states
 - Modeling rational agency with perception, deliberation, and action cycles
 - Enabling explainability through traceable reasoning chains
-- Implementing BDI frameworks (SEMAS, JADE, JADEX)
+- Implementing BDI frameworks (SEMAS; the JADE/JADEX mappings in the framework reference are illustrative sketches)
 - Augmenting LLMs with formal cognitive structures (Logic Augmented Generation)
 - Coordinating mental states across multi-agent platforms
 - Tracking temporal evolution of beliefs, desires, and intentions
@@ -165,15 +165,21 @@ Assign validity intervals to every mental state using `bdi:hasValidity` with `Ti
 :TimeInterval_TI1 a bdi:TimeInterval ;
     bdi:hasStartTime :TimeInstant_9am ;
     bdi:hasEndTime :TimeInstant_11am .
+
+:TimeInstant_9am a bdi:TimeInstant ;
+    bdi:time "2025-01-04T09:00:00"^^xsd:dateTime .
+
+:TimeInstant_11am a bdi:TimeInstant ;
+    bdi:time "2025-01-04T11:00:00"^^xsd:dateTime .
 ```
 
-Query mental states active at a specific moment using SPARQL temporal filters. Use this pattern to resolve conflicts when multiple beliefs about the same world state overlap in time:
+`hasStartTime` and `hasEndTime` are object properties whose values are `TimeInstant` IRIs; the `xsd:dateTime` literal sits on the instant's `bdi:time`. Query mental states active at a specific moment through the instant, because comparing the instant IRI itself to a literal returns no rows. Use this pattern to resolve conflicts when multiple beliefs about the same world state overlap in time:
 
 ```sparql
 SELECT ?mentalState WHERE {
     ?mentalState bdi:hasValidity ?interval .
-    ?interval bdi:hasStartTime ?start ;
-              bdi:hasEndTime ?end .
+    ?interval bdi:hasStartTime/bdi:time ?start ;
+              bdi:hasEndTime/bdi:time ?end .
     FILTER(?start <= "2025-01-04T10:00:00"^^xsd:dateTime &&
            ?end >= "2025-01-04T10:00:00"^^xsd:dateTime)
 }
@@ -193,30 +199,7 @@ Decompose complex beliefs into constituent parts using `bdi:hasPart` relations, 
     bdi:modifies :Belief_meeting_location .
 ```
 
-## Practical Guidance
-
-### Build a BDI Model in Six Passes
-
-Use this workflow when converting external semantic context into a BDI representation:
-
-1. **Define the world-state substrate**: Identify the external facts or events the agent can perceive. Model these as world states before creating beliefs.
-2. **Create belief instances**: Translate each relevant world state into a belief with provenance, temporal validity, and a justification reference.
-3. **Derive desires from beliefs**: Add desires only when a belief creates a goal-relevant motivation. Link each desire to the belief that motivates it.
-4. **Commit intentions deliberately**: Promote a desire to an intention only when the agent commits to a plan. Record the selected plan and preconditions.
-5. **Project action results back to triples**: After execution, emit resulting world states as RDF so downstream systems can consume the new state.
-6. **Validate with competency questions**: Query for provenance, motivation, plan sequence, and active validity windows before trusting the model.
-
-### Keep the Ontology Small
-
-Start with `Agent`, `WorldState`, `Belief`, `Desire`, `Intention`, `Plan`, `Task`, `Justification`, and `TimeInterval`. Add specialized classes only after competency questions prove the core model cannot answer required queries. A compact ontology is easier to serialize into prompts, easier to validate, and less likely to create brittle reasoning chains.
-
-### Use BDI Only When Mental-State Semantics Matter
-
-BDI modeling is justified when the system needs explainable agency: why an agent believed something, what desire that belief created, which intention was selected, and what plan executed. If the system only needs to remember facts across sessions, use `memory-systems`. If it only needs to split work across agents, use `multi-agent-patterns`.
-
 ## Detailed Topics
-
-### Integration Patterns
 
 ### Logic Augmented Generation (LAG)
 
@@ -249,6 +232,27 @@ Translate BDI ontology patterns into executable production rules when deploying 
 [CONDITIONALS: belief(agent_a, has_shopping_list)] »
 [TAIL: commit_intention(agent_a, buy_groceries)].
 ```
+
+## Practical Guidance
+
+### Build a BDI Model in Six Passes
+
+Use this workflow when converting external semantic context into a BDI representation:
+
+1. **Define the world-state substrate**: Identify the external facts or events the agent can perceive. Model these as world states before creating beliefs.
+2. **Create belief instances**: Translate each relevant world state into a belief with provenance, temporal validity, and a justification reference.
+3. **Derive desires from beliefs**: Add desires only when a belief creates a goal-relevant motivation. Link each desire to the belief that motivates it.
+4. **Commit intentions deliberately**: Promote a desire to an intention only when the agent commits to a plan. Record the selected plan and preconditions.
+5. **Project action results back to triples**: After execution, emit resulting world states as RDF so downstream systems can consume the new state.
+6. **Validate with competency questions**: Query for provenance, motivation, plan sequence, and active validity windows before trusting the model.
+
+### Keep the Ontology Small
+
+Start with `Agent`, `WorldState`, `Belief`, `Desire`, `Intention`, `Plan`, `Task`, `Justification`, and `TimeInterval`. Add specialized classes only after competency questions prove the core model cannot answer required queries. A compact ontology is easier to serialize into prompts, easier to validate, and less likely to create brittle reasoning chains.
+
+### Use BDI Only When Mental-State Semantics Matter
+
+BDI modeling is justified when the system needs explainable agency: why an agent believed something, what desire that belief created, which intention was selected, and what plan executed. If the system only needs to remember facts across sessions, use `memory-systems`. If it only needs to split work across agents, use `multi-agent-patterns`.
 
 ## Guidelines
 
@@ -293,10 +297,19 @@ SELECT ?process WHERE {
 }
 
 # CQ4: What is the ordered sequence of tasks in a plan?
-SELECT ?task ?nextTask WHERE {
-    :Plan_P1 bdi:hasComponent ?task .
-    OPTIONAL { ?task bdi:precedes ?nextTask }
-} ORDER BY ?task
+# bdi:precedes is transitive, so a reasoner may add every later task as a
+# successor. Walk from bdi:beginsWith, keep only the immediate successor,
+# and order by position in the chain, not by IRI.
+SELECT ?task (COUNT(DISTINCT ?prev) AS ?position) ?nextTask WHERE {
+    :Plan_P1 bdi:beginsWith ?first .
+    ?first bdi:precedes* ?task .
+    ?first bdi:precedes* ?prev .
+    ?prev bdi:precedes* ?task .
+    OPTIONAL {
+        ?task bdi:precedes ?nextTask .
+        FILTER NOT EXISTS { ?task bdi:precedes ?mid . ?mid bdi:precedes ?nextTask }
+    }
+} GROUP BY ?task ?nextTask ORDER BY ?position
 ```
 
 ## Examples
@@ -366,7 +379,7 @@ Internal references:
 - [Framework Integration](skill://bdi-mental-states/references/framework-integration.md) - Read when: deploying BDI models to SEMAS, JADE, or LAG pipelines
 
 Primary sources:
-- Zuppiroli et al. "The Belief-Desire-Intention Ontology" (2025) — Read when: implementing formal BDI class hierarchies or validating ontology alignment
+- Zuppiroli et al. "The Belief–Desire–Intention ontology for modelling mental reality and agency", *Journal of Web Semantics* (2026), DOI [10.1016/j.websem.2026.100885](https://doi.org/10.1016/j.websem.2026.100885); preprint [arXiv:2511.17162](https://arxiv.org/abs/2511.17162). Ontology: <https://w3id.org/fossr/ontology/bdi/> — Read when: implementing formal BDI class hierarchies or validating ontology alignment
 - Rao & Georgeff "BDI agents: From theory to practice" (1995) — Read when: understanding the theoretical foundations of practical reasoning agents
 - Bratman "Intention, plans, and practical reason" (1987) — Read when: grounding implementation decisions in the philosophical basis of intentionality
 

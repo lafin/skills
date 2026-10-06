@@ -4,7 +4,7 @@ description: "This skill should be used when designing autonomous agent harnesse
 license: MIT
 metadata:
   upstream: "muratcankoylan/Agent-Skills-for-Context-Engineering"
-  upstream_commit: "c578e85e40fe2bda7c1fec91ff64cf5285434934"
+  upstream_commit: "58b55a8921758d13453b440704fb1b5b208c0b0e"
   upstream_path: "skills/harness-engineering"
   adaptation: modified
   license_notice: LICENSE-context-engineering
@@ -30,6 +30,8 @@ Do not activate this skill for adjacent work owned by other skills:
 - Tool schemas, response formats, and recovery errors for harness tools: `tool-design`.
 - Project-level task-model fit, pipeline shape, and cost planning: `project-development`.
 - Remote sandbox, warm-pool, and hosted session infrastructure: `hosted-agents`.
+- Loops that rewrite their own harness, prompts, or scaffold and accept the changes they measure: `self-improvement-loops`.
+- Wording of the launch brief itself (success predicate, non-counting outcomes, effort floor, return condition): `long-horizon-prompting`.
 
 ## Core Concepts
 
@@ -52,6 +54,15 @@ Autonomy works when feedback is fast, unambiguous, and hard to game. Karpathy's 
 
 For open-ended research-to-skill work, replace the scalar metric with locked rubrics, deterministic structure checks, source traceability, and human review thresholds.
 
+### Locked-Surface Mechanics
+
+Make locked surfaces mechanical, not just stated in the prompt ([Anthropic, Nov 2025](https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents); [OpenAI, Feb 2026](https://openai.com/index/harness-engineering/)):
+
+- **Pass-flag feature list**: a structured file of required features where the agent may only flip each `passes` field; removing or editing entries is forbidden.
+- **`init.sh` smoke test**: one script that starts the environment and runs a basic end-to-end check at the start of every session, before new work.
+- **Initializer/coder split**: a first-session initializer prompt builds the feature list, progress file, `init.sh`, and git baseline; every later session runs an incremental coder prompt that picks one unfinished item.
+- **Remediating linters**: custom lints and structural tests whose error messages state the fix, so a violation injects the repair instruction into the agent's context.
+
 ### Durable State
 
 Long-running agents must externalize state. Store plans, source queues, results, failures, and handoffs in files so future agents can resume without relying on chat history. Prime Intellect's autonomous nanoGPT work showed the value of durable scratchpads and `THREAD.md`-style logs for recovery, monitoring, and audit.
@@ -69,7 +80,7 @@ Use append-only logs for:
 Agents tend to exploit the nearest surface, stack complexity, and under-run pruning. Add explicit search rules:
 
 1. Refresh upstream sources on a schedule.
-2. Require novelty checks before spending large budgets.
+2. Deduplicate each candidate against the mechanism registry, source queue, and rejected log before spending large budgets. A novelty gate filters repeats; it does not generate new ideas, and Prime Intellect's novelty-gated run could not improve its baseline.
 3. Preserve rejected attempts to avoid rediscovery.
 4. Run leave-one-out pruning when a stack has multiple additions.
 5. Reward simplification when quality is equal.
@@ -147,7 +158,7 @@ Use monitoring agents for long runs, but restrict them to read-only reporting un
 3. Choose the feedback mechanism: scalar metric, rubric, deterministic tests, human review, or combination.
 4. Define keep, discard, crash, timeout, and review states.
 5. Create a durable thread log before the loop starts.
-6. Add source refresh, mechanism-registry novelty, and pruning rules for long-running loops.
+6. Add source refresh, mechanism-registry deduplication, and pruning rules for long-running loops.
 7. Define what the agent may do without asking and what requires approval.
 8. Validate the harness on one known good and one known bad artifact.
 
@@ -193,7 +204,7 @@ An agent prepares a branch and PR body after passing source, skill, and structur
 7. Prefer simplification when quality is equal.
 8. Separate PR preparation from merge authority.
 9. Revalidate harness changes with old and new evaluators.
-10. Treat stopped autonomous loops as harness failures, not agent personality quirks.
+10. Treat stopped autonomous loops as harness failures, not agent personality quirks. Prompt text alone did not keep agents running; re-arm the loop from outside the agent (scheduler, wakeup, or supervisor) and let a read-only monitor flag idle time.
 
 ## Gotchas
 
@@ -201,7 +212,7 @@ An agent prepares a branch and PR body after passing source, skill, and structur
 2. **Chat-only memory**: Long runs fail after compaction when plans live only in conversation history. Write thread logs and result files from the start.
 3. **No discard record**: Without rejected-attempt logs, agents repeat failed ideas. Preserve failures with enough detail to avoid rediscovery.
 4. **Complexity accretion**: Agents stack changes and rarely remove them. Require pruning rounds and reward equal-quality simplification.
-5. **Premature novelty claims**: Agents label recombinations as novel. Compare against existing repo skills, source queue, and rejected logs before claiming novelty.
+5. **Premature novelty claims**: Agents label recombinations as novel. Deduplicate against the mechanism registry, existing repo skills, source queue, and rejected logs before claiming novelty; do not expect the gate to supply new ideas.
 6. **Monitor misreporting**: Monitoring agents can summarize stale or inconsistent state. Require them to cite the files or logs behind claims.
 7. **Human approval ambiguity**: "Prepare a PR" is not "merge a PR." Make approval boundaries explicit in the harness.
 8. **Volatile source drift**: Fast-moving lab claims age quickly. Put dated evidence in references and schedule revalidation.
@@ -220,17 +231,19 @@ This skill connects to:
 
 ## References
 
-External resources:
-- Karpathy `autoresearch` - Constrained autonomous experiment loop with locked evaluation
-- Prime Intellect autonomous nanoGPT speedrun - Durable scratchpads, handoffs, monitoring, and autonomy failure modes
-- AlphaEvolve and FunSearch - LLM-generated candidates paired with systematic evaluators
-- HELM and LM Evaluation Harness - Transparent, reproducible evaluation infrastructure
+External resources (accessed 2026-10-06):
+- Karpathy `autoresearch` (<https://github.com/karpathy/autoresearch>) - Constrained autonomous experiment loop with locked evaluation
+- Prime Intellect, "Autonomous AI research for nanogpt speedrun" (May 14, 2026; <https://www.primeintellect.ai/auto-nanogpt>) - Durable scratchpads, handoffs, monitoring, a novelty-gated run that did not beat its baseline, and agents that stopped despite autonomy instructions
+- Anthropic, "Effective harnesses for long-running agents" (Nov 26, 2025; <https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents>) - Pass-flag feature list, `init.sh`, initializer/coder split
+- OpenAI, "Harness engineering: leveraging Codex in an agent-first world" (Feb 11, 2026; <https://openai.com/index/harness-engineering/>) - Custom linters whose messages carry remediation instructions
+- AlphaEvolve (May 2025; <https://deepmind.google/blog/alphaevolve-a-gemini-powered-coding-agent-for-designing-advanced-algorithms/>) and FunSearch (Nature, Dec 2023; <https://www.nature.com/articles/s41586-023-06924-6>) - LLM-generated candidates paired with systematic evaluators
+- HELM (<https://crfm.stanford.edu/helm/>) and LM Evaluation Harness (<https://github.com/EleutherAI/lm-evaluation-harness>) - Transparent, reproducible evaluation infrastructure
 
 ---
 
 ## Skill Metadata
 
 **Created**: 2026-05-14
-**Last Updated**: 2026-05-15
+**Last Updated**: 2026-10-06
 **Author**: Agent Skills for Context Engineering Contributors
 **Version**: 1.1.0

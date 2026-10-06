@@ -4,7 +4,7 @@ description: "This skill should be used for the tool-interface layer of an agent
 license: MIT
 metadata:
   upstream: "muratcankoylan/Agent-Skills-for-Context-Engineering"
-  upstream_commit: "c578e85e40fe2bda7c1fec91ff64cf5285434934"
+  upstream_commit: "58b55a8921758d13453b440704fb1b5b208c0b0e"
   upstream_path: "skills/tool-design"
   adaptation: modified
   license_notice: LICENSE-context-engineering
@@ -50,7 +50,7 @@ Design each tool as a self-contained contract. When humans call APIs, they read 
 Write tool descriptions knowing they load directly into agent context and collectively steer behavior. A vague description like "Search the database" with cryptic parameter names forces the agent to guess -- and guessing produces incorrect calls. Instead, include usage context, parameter format examples, and sensible defaults. Every word in the description either helps or hurts tool selection accuracy.
 
 **Namespacing and Organization**
-Namespace tools under common prefixes as the collection grows, because agents benefit from hierarchical grouping. When an agent needs database operations, it routes to the `db_*` namespace; when it needs web interactions, it routes to `web_*`. Without namespacing, agents must evaluate every tool in a flat list, which degrades selection accuracy as the count grows.
+Namespace tools under common prefixes as the collection grows (`db_*`, `web_*`, or dotted `db.query`) so related tools group together and similar names stay distinguishable. Anthropic reports wrong tool selection and wrong parameters as the most common large-catalog failures, especially among similarly named tools ([source](https://www.anthropic.com/engineering/advanced-tool-use)).
 
 ### The Consolidation Principle
 
@@ -58,7 +58,7 @@ Namespace tools under common prefixes as the collection grows, because agents be
 Build single comprehensive tools instead of multiple narrow tools that overlap. Rather than implementing `list_users`, `list_events`, and `create_event` separately, implement `schedule_event` that finds availability and schedules in one call. The comprehensive tool handles the full workflow internally, removing the agent's burden of chaining calls in the correct order.
 
 **Why Consolidation Works**
-Apply consolidation because agents have limited context and attention. Each tool in the collection competes for attention during tool selection, each description consumes context budget tokens, and overlapping functionality creates ambiguity. Consolidation eliminates redundant descriptions, removes selection ambiguity, and shrinks the effective tool set. Vercel reported better results after reducing its d0 text-to-SQL agent to two primitive tools on five internal questions; this result is workload-specific. See the [dated Vercel evidence](skill://tool-design/references/d0-evidence.md#evidence-vercel-d0-architectural-reduction-december-2025).
+Apply consolidation because agents have limited context and attention. Each tool in the collection competes for attention during tool selection, each description consumes context budget tokens, and overlapping functionality creates ambiguity. Consolidation eliminates redundant descriptions, removes selection ambiguity, and shrinks the effective tool set. Consolidate overlap, not size: a large catalog of distinct tools calls for deferred loading first (see Tool Collection Design). Vercel reported better results after reducing its d0 text-to-SQL agent to two primitive tools on five internal questions; this result is workload-specific. See the [dated Vercel evidence](skill://tool-design/references/d0-evidence.md#evidence-vercel-d0-architectural-reduction-december-2025).
 
 **When Not to Consolidate**
 Keep tools separate when they have fundamentally different behaviors, serve different contexts, or must be callable independently. Over-consolidation creates a different problem: a single tool with too many parameters and modes becomes hard for agents to parameterize correctly.
@@ -97,7 +97,7 @@ Offer response format options (concise vs. detailed) because tool response size 
 
 ### Error Message Design
 
-Design error messages for two audiences: developers debugging issues and agents recovering from failures. For agents, every error message must be actionable -- it must state what went wrong and how to correct it. Include retry guidance for retryable errors, corrected format examples for input errors, and specific missing fields for incomplete requests. An error that says only "failed" provides zero recovery signal.
+Design error messages for two audiences: developers debugging issues and agents recovering from failures. For agents, every error message must be actionable -- it must state what went wrong and how to correct it. Include retry guidance for retryable errors, corrected format examples for input errors, and specific missing fields for incomplete requests. An error that says only "failed" provides zero recovery signal. MCP servers return these as `isError: true` tool results (checklist item 11).
 
 ### Tool Definition Schema
 
@@ -105,62 +105,19 @@ Establish a consistent schema across all tools. Use verb-noun pattern for tool n
 
 ### Tool Collection Design
 
-Limit tool collections to the smallest set with non-overlapping purposes, because description overlap causes model confusion and more tools do not always lead to better outcomes. When more tools are genuinely needed, use namespacing to create logical groupings. Implement selection mechanisms: tool grouping by domain, example-based selection hints, and umbrella tools that route to specialized sub-tools.
+Limit tool collections to the smallest set with non-overlapping purposes, because description overlap causes model confusion. When a catalog is large because it covers many distinct capabilities (many MCP servers, 100+ tools), consider deferred loading or a tool-search tool before merging tools that do different things: keep the few most-used tools loaded and let the agent discover the rest on demand. Anthropic's reported context and accuracy gains from tool search are vendor-scoped; measure on your catalog ([source](https://www.anthropic.com/engineering/advanced-tool-use)). Other selection aids: namespacing, example-based hints, and umbrella tools that route to sub-tools.
 
-### MCP Tool Naming Requirements
+### MCP Tool Naming
 
-Always use fully qualified tool names with MCP (Model Context Protocol) to avoid "tool not found" errors.
+Pinned to MCP specification revision [2026-07-28](https://modelcontextprotocol.io/specification/2026-07-28/server/tools); recheck when the revision changes.
 
-Format: `ServerName:tool_name`
-
-```python
-# Correct: Fully qualified names
-"Use the BigQuery:bigquery_schema tool to retrieve table schemas."
-"Use the GitHub:create_issue tool to create issues."
-
-# Incorrect: Unqualified names
-"Use the bigquery_schema tool..."  # May fail with multiple servers
-```
-
-Without the server prefix, agents may fail to locate tools when multiple MCP servers are available. Establish naming conventions that include server context in all tool references.
+- **Server authors** choose names of 1-128 characters from `A-Z a-z 0-9 _ - .`, case-sensitive and unique within the server. Use dots or underscores for namespaces (`billing.get_invoice`); no spaces, colons, or slashes.
+- **Hosts and clients** disambiguate across servers, for example by prefixing a server identifier. The server `name` is not guaranteed unique, so do not rely on it.
+- **Prompts** refer to a tool by the exact name the host exposes to the model, not by an invented `Server:tool` string.
 
 ### Using Agents to Optimize Tools
 
-Feed observed tool failures back to an agent to diagnose issues and improve descriptions. Treat reported efficiency gains as workload-specific until reproduced on the target tool catalog.
-
-**The Tool-Testing Agent Pattern**:
-
-```python
-def optimize_tool_description(tool_spec, failure_examples):
-    """
-    Use an agent to analyze tool failures and improve descriptions.
-
-    Process:
-    1. Agent attempts to use tool across diverse tasks
-    2. Collect failure modes and friction points
-    3. Agent analyzes failures and proposes improvements
-    4. Test improved descriptions against same tasks
-    """
-    prompt = f"""
-    Analyze this tool specification and the observed failures.
-
-    Tool: {tool_spec}
-
-    Failures observed:
-    {failure_examples}
-
-    Identify:
-    1. Why agents are failing with this tool
-    2. What information is missing from the description
-    3. What ambiguities cause incorrect usage
-
-    Propose an improved tool description that addresses these issues.
-    """
-
-    return get_agent_response(prompt)
-```
-
-This creates a feedback loop: agents using tools generate failure data, which agents then use to improve tool descriptions, which reduces future failures.
+Feed observed tool failures back to an agent to diagnose issues and improve descriptions: give it the tool spec and failure transcripts, ask why calls failed and what is missing or ambiguous, then rerun the same tasks against the revised description. Treat reported efficiency gains as workload-specific until reproduced on the target tool catalog.
 
 ### Testing Tool Design
 
@@ -189,6 +146,14 @@ Use this checklist for every tool before adding it to an agent:
 6. **Overlap**: no other tool has the same activation scenario.
 7. **Consolidation decision**: adjacent narrow tools are merged unless independent calls are required.
 8. **Token impact**: large responses support concise mode or file-reference mode.
+
+MCP servers (revision 2026-07-28) also need:
+
+9. **Structured output**: structured results declare `outputSchema` and return matching `structuredContent`.
+10. **Annotations**: `readOnlyHint`, `destructiveHint`, `idempotentHint`, and `openWorldHint` state the real behavior. Clients treat annotations from untrusted servers as untrusted, so never rely on them as a safety control.
+11. **Error channel**: input-validation and business failures return `isError: true` tool results with recovery text, not JSON-RPC protocol errors.
+12. **State**: cross-call state uses explicit server-minted handles passed as arguments (the revision has no protocol sessions); the creating tool's description states handle lifetime.
+13. **Listing order**: `tools/list` returns tools in a deterministic order, which helps client caching and prompt-cache hits.
 
 ## Examples
 
@@ -240,28 +205,13 @@ def search(query):
 - Agents cannot interpret results
 - Agents cannot recover from failures
 
-## Guidelines
-
-1. Write descriptions that answer what, when, and what returns
-2. Use consolidation to reduce ambiguity
-3. Implement response format options for token efficiency
-4. Design error messages for agent recovery
-5. Establish and follow consistent naming conventions
-6. Limit tool count and use namespacing for organization
-7. Test tool designs with actual agent interactions
-8. Iterate based on observed failure modes
-9. Question whether each tool enables or constrains the model
-10. Prefer primitive, general-purpose tools over specialized wrappers
-11. Invest in documentation quality over tooling sophistication
-12. Build minimal architectures that benefit from model improvements
-
 ## Gotchas
 
 1. **Vague descriptions**: Descriptions like "Search the database for customer information" leave too many questions unanswered. State the exact database, query format, and return shape.
 2. **Cryptic parameter names**: Parameters named `x`, `val`, or `param1` force agents to guess meaning. Use descriptive names that convey purpose without reading further documentation.
 3. **Missing error recovery guidance**: Tools that fail with generic messages like "Error occurred" provide no recovery signal. Every error response must tell the agent what went wrong and what to try next.
 4. **Inconsistent naming across tools**: Using `id` in one tool, `identifier` in another, and `customer_id` in a third creates confusion. Standardize parameter names across the entire tool collection.
-5. **MCP namespace collisions**: When multiple MCP tool providers register tools with similar names (e.g., two servers both exposing `search`), agents cannot disambiguate. Always use fully qualified `ServerName:tool_name` format and audit for collisions when adding new providers.
+5. **MCP namespace collisions**: Two servers can both expose `search`, and a server author cannot fix that alone. Keep names specific and unique within the server (`tickets.search`), rely on the host's disambiguation, audit the merged catalog the host exposes when adding providers, and refer to tools in prompts by that exposed name.
 6. **Tool description rot**: Descriptions become inaccurate as underlying APIs evolve -- parameters get added, return formats change, error codes shift. Treat descriptions as code: version them, review them during API changes, and test them against current behavior.
 7. **Over-consolidation**: Making a single tool handle unrelated workflows produces a parameter surface that agents struggle to use. Split it when evaluation shows selection or argument errors caused by fundamentally different use cases.
 8. **Parameter explosion**: Too many optional parameters overwhelm agent decision-making. Each parameter the agent must evaluate adds cognitive load. Provide sensible defaults, group related options into format presets, and move rarely-used parameters into an `options` object.
@@ -298,7 +248,7 @@ Related skills in this collection:
 - evaluation - Tool testing patterns
 
 External resources:
-- MCP (Model Context Protocol) documentation - Read when: implementing tools for multi-server agent environments or debugging tool routing failures
+- [MCP tools specification, revision 2026-07-28](https://modelcontextprotocol.io/specification/2026-07-28/server/tools) - Read when: implementing tools for multi-server agent environments or debugging tool routing failures
 - Framework tool conventions - Read when: adopting a new agent framework and need to map tool design principles to framework-specific APIs
 - API design best practices for agents - Read when: translating existing human-facing APIs into agent-facing tool interfaces
 - Vercel d0 agent architecture case study - Read when: evaluating whether to consolidate tools or seeking production evidence for architectural reduction
@@ -308,6 +258,6 @@ External resources:
 ## Skill Metadata
 
 **Created**: 2025-12-20
-**Last Updated**: 2026-05-15
+**Last Updated**: 2026-10-06
 **Author**: Agent Skills for Context Engineering Contributors
 **Version**: 2.2.0

@@ -4,7 +4,7 @@ description: "This skill should be used when the user asks to \"share memory bet
 license: MIT
 metadata:
   upstream: "muratcankoylan/Agent-Skills-for-Context-Engineering"
-  upstream_commit: "c578e85e40fe2bda7c1fec91ff64cf5285434934"
+  upstream_commit: "58b55a8921758d13453b440704fb1b5b208c0b0e"
   upstream_path: "skills/latent-briefing"
   adaptation: modified
   license_notice: LICENSE-context-engineering
@@ -24,7 +24,7 @@ Activate this skill when:
 - Evaluating alternatives to LLM summarization or RAG for cross-agent state transfer
 - Implementing or studying **KV cache compaction** as a first-class inference primitive, not only prefix caching of identical prompts
 - Debugging token explosion in recursive, hierarchical, or tool-heavy agent graphs
-- Interpreting benchmarks that report worker-token savings, total-token savings, compaction overhead, and accuracy together
+- Interpreting benchmarks that report worker-token savings, total-token savings, compaction overhead, and accuracy together; check any reported number against the scope in [the published Latent Briefing evidence](skill://latent-briefing/references/ramp-evidence.md)
 
 Do not activate this skill for adjacent work owned by other skills:
 - API-only stacks where internal KV tensors are inaccessible: use `context-compression`, `memory-systems`, or `multi-agent-patterns`.
@@ -67,7 +67,7 @@ In the ideal setup, the worker maintains a persistent KV state for the orchestra
 1. **Task-guided query vectors.** Use queries from the current worker task prompt, not generic samples from the context. Forward-pass the trajectory plus current task through the worker model, then score trajectory positions by how strongly the task attends to them.
 
 2. **Shared token selection.** Aggregate scores across layers and heads into one per-position score. One shared mask enables batched operations and avoids many incompatible per-head solves.
-3. **MAD thresholding.** Keep positions above a robust outlier threshold such as `median + tau * MAD`. Higher `tau` is more aggressive. Optimal settings depend on task regime, trajectory quality, and document length.
+3. **MAD thresholding.** Keep positions above a robust outlier threshold such as `median + tau * MAD`. Higher `tau` is more aggressive. A negative `tau` puts the cutoff below the median, so more than half of the positions are kept. Optimal settings depend on task regime, trajectory quality, and document length.
 
 ### Infrastructure Preconditions
 
@@ -94,14 +94,14 @@ Evaluate these hypotheses on the target workload:
 - **Harder questions:** more aggressive compaction may help when the orchestrator trajectory contains speculative or low-value branches.
 - **Shorter, easier contexts:** moderate compaction may remove redundancy without dropping needed evidence.
 
-These are tuning hypotheses, not established laws.
+These are tuning hypotheses, not established laws. They come from one published LongBench v2 run whose best threshold differed by condition; read [the evidence and its limits](skill://latent-briefing/references/ramp-evidence.md) before reusing its settings.
 
 ## Practical Guidance
 
 - **Define the shared memory boundary first.** Decide exactly what enters the trajectory cache: prior worker replies, tool output, chain-of-thought, or only selected artifacts. Compaction quality depends on what is allowed into the cache in the first place.
 - **Tune on validation data, not anecdotes.** Track task accuracy, worker tokens, total tokens, retention rate, and compaction overhead together.
 - **Measure end-to-end latency.** Compaction only pays off if compaction plus generation beats the best text-layer alternative for the same quality target.
-- **Use strong baselines.** Compare against prefix caching, structured notes, retrieval, and selective text handoff, not only "send everything."
+- **Use strong baselines.** Compare against prefix caching, token eviction (keep high-scoring KV positions with no `beta` or `C2` refit), structured notes, retrieval, and selective text handoff, not only "send everything."
 - **Expect orchestrator variance.** If decomposition strategy changes run to run, average over enough trials to separate compaction effects from orchestrator noise.
 
 ## Examples
@@ -125,7 +125,7 @@ If the worker runs behind a hosted text-generation API that does not expose KV t
 
 1. Prefer Latent Briefing when the main waste comes from replaying orchestrator state into workers, not from retrieving source documents.
 2. Prefer plain text handoff when auditability, portability, or closed-model APIs matter more than token efficiency.
-3. Co-design compaction with **evaluation**. A small quality drop can erase large token savings.
+3. Co-design compaction with **evaluation**. A small quality drop can erase large token savings. Include a mismatched-cache control before attributing a gain to transferred orchestrator state.
 4. Expose compaction aggressiveness as a controlled parameter, not a hidden constant.
 
 ## Gotchas
@@ -133,9 +133,12 @@ If the worker runs behind a hosted text-generation API that does not expose KV t
 1. **Infrastructure access is the first gate.** If the runtime cannot inspect and rewrite worker KV state, Latent Briefing is a research idea, not a deployable technique.
 2. **Shared model space matters.** KV compaction is defined in a specific model's attention space. Do not assume latent handoff works cleanly across unrelated model families.
 3. **Threshold is workload-dependent.** Do not assume one global `tau` works across long vs short context and easy vs hard tasks. Check for accuracy cliffs as compaction becomes more aggressive.
-4. **Benchmark transfer is uncertain.** Validate code generation, math, and multi-document synthesis separately instead of extrapolating from another workload.
+4. **Benchmark transfer is uncertain.** The published result covers one LongBench v2 setup with 42 questions per condition ([evidence](skill://latent-briefing/references/ramp-evidence.md)). Validate code generation, math, and multi-document synthesis separately instead of extrapolating from another workload.
 5. **Orchestrator variance can hide the signal.** A stochastic orchestrator can change the trajectory enough to swamp small compaction gains or losses.
-6. **Weak baselines inflate the apparent win.** Compare against strong text-level alternatives before claiming a system-level advantage.
+6. **Weak baselines inflate the apparent win.** Compare against token eviction and strong text-level alternatives before claiming a system-level advantage.
+7. **Proxy query and timing decide quality.** The current task prompt is only a proxy for what the worker will need. In a study of online KV compaction for agents, compacting immediately often hurt accuracy, delaying compaction until the agent's later queries were available recovered much of the gap, and token eviction was often more robust than AM under imperfect proxies ([Liu et al., 2026](https://arxiv.org/abs/2608.00902)). Record the query source and compaction point for every result, and test a delayed variant.
+8. **A benchmark gain does not prove latent transfer.** Before claiming the worker uses the transferred orchestrator state, run a mismatched-cache audit: replace the cache with one from a different example, a zeroed cache, and a random cache with matched statistics. If the mismatched cache scores about as well as the matched one, the gain is not example-specific transfer ([Cheng et al., 2026](https://arxiv.org/abs/2608.04893)).
+9. **KV state that crosses a process or trust boundary is security-sensitive.** A tampered cache can collapse answers while the visible text still looks plausible. Text-only verifiers miss this, and adaptive attacks can evade magnitude checks ([Brito and Baquero, 2026](https://arxiv.org/abs/2606.28958)). Authenticate KV payloads in transport, binding sender, session, model, tensor metadata, and payload digest, and reject state that fails verification.
 
 ## Integration
 
@@ -149,6 +152,7 @@ If the worker runs behind a hosted text-generation API that does not expose KV t
 
 Internal reference:
 - [Attention Matching formulation and task-guided scoring](skill://latent-briefing/references/attention-matching-formulation.md) - Read when: needing the AM objective, how task-guided scoring changes the query source, or why a shared global mask matters for batching
+- [Published Latent Briefing evidence](skill://latent-briefing/references/ramp-evidence.md) - Read when: interpreting or citing the reported token savings, accuracy change, or threshold settings
 
 Related skills in this collection:
 - context-optimization - Read when: the main need is prefix caching, observation masking, or text-layer compaction rather than worker KV manipulation
@@ -157,15 +161,18 @@ Related skills in this collection:
 - memory-systems - Read when: comparing in-model latent state with external persistent memory
 
 External resources:
-- Ramp Labs announcement: [Latent Briefing: Efficient Memory Sharing for Multi-Agent Systems via KV Cache Compaction](https://x.com/RampLabs/status/2042660310851449223)
+- Ramp Labs writeup: [Latent Briefing: Efficient Memory Sharing for Multi-Agent Systems via KV Cache Compaction](https://labs.ramp.com/research/latent-briefing-kv-cache/index.md), Ben Geist, 2026-04-10
 - Attention Matching (AM): [Fast KV Compaction via Attention Matching](https://arxiv.org/abs/2602.16284)
 - Recursive Language Models: [Recursive Language Models](https://arxiv.org/abs/2512.24601)
+- Online compaction proxies and timing: [Practical Online KV Cache Compaction for LLM Agents](https://arxiv.org/abs/2608.00902)
+- Mismatched-cache audit: [When Does Latent Communication Pay?](https://arxiv.org/abs/2608.04893)
+- KV payload integrity: [When Latent Agents Lie](https://arxiv.org/abs/2606.28958)
 
 ---
 
 ## Skill Metadata
 
 **Created**: 2026-04-14
-**Last Updated**: 2026-05-15
-**Author**: Agent Skills for Context Engineering Contributors; primary technical source Ramp Labs (public post)
-**Version**: 1.2.0
+**Last Updated**: 2026-10-06
+**Author**: Agent Skills for Context Engineering Contributors; primary technical source Ramp Labs (Ben Geist, 2026-04-10)
+**Version**: 1.3.0

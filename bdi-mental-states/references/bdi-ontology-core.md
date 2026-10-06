@@ -86,6 +86,7 @@ bdi:TimeInstant       # Point in time reference
 | `hasValidity` | MentalEntity | TimeInterval | Persistence bounds |
 | `hasStartTime` | TimeInterval | TimeInstant | Interval start |
 | `hasEndTime` | TimeInterval | TimeInstant | Interval end |
+| `time` (datatype) | TimeInstant (declared `rdfs:domain` is TimeInterval) | xsd:dateTime | Literal value of an instant |
 
 ### Justification Relations
 
@@ -105,10 +106,11 @@ bdi:Belief rdfs:subClassOf [
     owl:someValuesFrom bdi:WorldState
 ] .
 
-bdi:Belief rdfs:subClassOf [
+# Published form: inherited by Belief, Desire, and Intention from MentalState
+bdi:MentalState rdfs:subClassOf [
     a owl:Restriction ;
     owl:onProperty bdi:hasValidity ;
-    owl:maxCardinality 1
+    owl:someValuesFrom bdi:TimeInterval
 ] .
 ```
 

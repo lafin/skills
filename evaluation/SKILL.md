@@ -4,7 +4,7 @@ description: "This skill should be used when building agent evaluation systems: 
 license: MIT
 metadata:
   upstream: "muratcankoylan/Agent-Skills-for-Context-Engineering"
-  upstream_commit: "c578e85e40fe2bda7c1fec91ff64cf5285434934"
+  upstream_commit: "58b55a8921758d13453b440704fb1b5b208c0b0e"
   upstream_path: "skills/evaluation"
   adaptation: modified
   license_notice: LICENSE-context-engineering
@@ -32,7 +32,7 @@ Do not activate this skill for adjacent work owned by other skills:
 
 ## Core Concepts
 
-Focus evaluation on outcomes rather than execution paths, because agents may find alternative valid routes to goals. Judge whether the agent achieves the right outcome via a reasonable process, not whether it followed a specific sequence of steps.
+Focus evaluation on outcomes rather than execution paths, because agents may find alternative valid routes to goals. Grade the final outcome by default. Add tool-call or process assertions only for steps that safety or policy requires, such as identity verification before a refund; do not assert the order or count of other steps.
 
 Use multi-dimensional rubrics instead of single scores because one number hides critical failures in specific dimensions. Capture factual accuracy, completeness, citation accuracy, source quality, and tool efficiency as separate dimensions, then weight them for the use case.
 
@@ -50,6 +50,17 @@ Use it to frame evaluation questions rather than assume the same ordering:
 - **Validate multi-agent architectures**: Extra agents add tokens and tool calls; evaluate them against single-agent baselines.
 
 ## Detailed Topics
+
+### Trials and Reliability
+
+Agent outputs vary between runs, so one run per task does not measure reliability.
+
+- Run k trials per task. Start each trial from a clean, isolated environment; shared files, caches, or git history between trials correlate failures and can inflate scores.
+- Report pass@1 (per-trial success rate) for capability. Report pass^k (all k trials succeed) when users expect the same result every time. A 0.75 per-trial success rate gives about 42% pass^k at k=3.
+- Keep two suites. A capability suite starts at a low pass rate and measures progress. A regression suite should pass at nearly 100% and blocks changes that break existing behavior. Move saturated capability tasks into the regression suite.
+- Write a reference solution for each task that passes every grader. It proves that the task is solvable and that the graders are configured correctly.
+- Read transcripts of failed and passed trials before trusting a score. A failure must show what the agent did wrong, not a grader that rejected a valid solution.
+- Treat 0% pass@100 as a broken task or grader until a transcript shows otherwise.
 
 ### Evaluation Challenges
 
@@ -99,7 +110,7 @@ For agents that mutate persistent state (files, databases, configurations), eval
 
 **Select Representative Samples**
 
-Start with the smallest sample that covers known behavior and failure classes. Expand it with representative production cases as the system matures. Sample from real usage patterns, add known edge cases, and report coverage across complexity levels.
+Start with the smallest sample that covers known behavior and failure classes, drawn from real failures and manual checks. Write each task so that two domain experts would reach the same pass/fail verdict, and give it a reference solution. Expand the set with representative production cases as the system matures. Sample from real usage patterns, add known edge cases, and report coverage across complexity levels.
 
 **Stratify by Complexity**
 
@@ -151,7 +162,7 @@ Follow this sequence to build an evaluation framework, because skipping early st
 
 Guard against these common failures that undermine evaluation reliability:
 
-- **Overfitting to specific paths**: Evaluate outcomes, not specific steps, because agents find novel valid paths.
+- **Overfitting to specific paths**: Evaluate outcomes, not specific steps, because agents find novel valid paths. Assert a process step only when safety or policy requires it.
 - **Ignoring edge cases**: Include diverse test scenarios covering the full complexity spectrum.
 - **Single-metric obsession**: Use multi-dimensional rubrics because a single score hides dimension-specific failures.
 - **Neglecting context effects**: Test with realistic context sizes and histories rather than clean-room conditions.
@@ -164,9 +175,10 @@ Guard against these common failures that undermine evaluation reliability:
 def evaluate_agent_response(response, expected):
     rubric = load_rubric()
     scores = {}
-    for dimension, config in rubric.items():
+    for dimension in rubric:
         scores[dimension] = assess_dimension(response, expected, dimension)
-    overall = weighted_average(scores, config["weights"])
+    weights = {d: c["weight"] for d, c in rubric.items()}
+    overall = weighted_average(scores, weights)
     return {"passed": overall >= 0.7, "scores": scores}
 ```
 
@@ -231,7 +243,7 @@ gate:
 ## Guidelines
 
 1. Use multi-dimensional rubrics, not single metrics
-2. Evaluate outcomes, not specific execution paths
+2. Evaluate outcomes, not specific execution paths; assert a process step only when safety or policy requires it
 3. Cover complexity levels from simple to complex
 4. Test with realistic context sizes and histories
 5. Run evaluations continuously, not just before release
@@ -246,7 +258,7 @@ gate:
 3. **Test set contamination**: Eval examples leak into training data or prompt templates, inflating scores. Keep eval sets versioned and separate from any data used in prompts or fine-tuning.
 4. **Metric gaming**: Optimizing for the metric rather than actual quality produces agents that score well but disappoint users. Cross-validate automated metrics against human judgments regularly.
 5. **Single-dimension scoring**: One aggregate number hides critical failures in specific dimensions. Always report per-dimension scores alongside the overall score, and fail the eval if any single dimension falls below its minimum threshold.
-6. **Eval set too small**: Small samples can produce high variance between runs. Report uncertainty and expand the set until the decision is stable enough for the product risk.
+6. **One trial per task**: A single run cannot separate a reliable agent from a lucky one. Run k isolated trials per task, report pass@1 and pass^k, and read transcripts before trusting the score. A 0% pass rate across many trials usually means a broken task or grader; check it against the task's reference solution.
 7. **Not stratifying by difficulty**: Easy examples inflate overall scores, masking failures on hard cases. Report scores per complexity stratum and weight the overall score to prevent easy-case dominance.
 8. **Treating eval as one-time**: Evaluation must be continuous, not a launch gate. Agent quality drifts as models update, tools change, and usage patterns evolve. Run evals on every change and on a regular production cadence.
 
@@ -274,22 +286,11 @@ Runnable script:
 - **Status:** Example.
 - **Boundary:** Uses heuristic scoring and simulated agent output. It does not execute an agent or model, so its scores do not prove production quality.
 - **Run:** From the repository root, run `python evaluation/scripts/evaluator.py`. The demo accepts no arguments or credentials and uses its built-in test set.
-- **Output:** Writes a human-readable rubric, per-test progress, pass count, pass rate, dimension averages, and failures to standard output. Library callers receive dictionaries from `AgentEvaluator`, `EvaluationRunner`, and `ProductionMonitor`.
+- **Output:** Writes a human-readable rubric, per-test progress, pass count, pass rate, dimension averages, and failures to standard output. A dimension without evidence scores `unknown` and is excluded from the weighted average; an output with no scored dimension fails. The built-in factual test fails because the simulated output lacks the expected answer. Library callers receive dictionaries from `AgentEvaluator`, `EvaluationRunner`, and `ProductionMonitor`.
 - **Failure:** The demo exits non-zero only on an uncaught Python error. Repair the reported import, environment, or input-type error; a low heuristic score is data in the report, not a process failure.
 
 Internal skills:
 - All other skills connect to evaluation for quality measurement
 
 External resources:
-- LLM evaluation benchmarks - Read when: selecting or building benchmark suites for agent comparison
-- Agent evaluation research papers - Read when: adopting new evaluation methodologies or validating current approach
-- Production monitoring practices - Read when: setting up alerting, dashboards, or sampling strategies for live systems
-
----
-
-## Skill Metadata
-
-**Created**: 2025-12-20
-**Last Updated**: 2026-05-15
-**Author**: Agent Skills for Context Engineering Contributors
-**Version**: 1.2.0
+- [Anthropic: Demystifying evals for AI agents](https://www.anthropic.com/engineering/demystifying-evals-for-ai-agents) - Read when: designing trials, pass@k and pass^k reporting, capability and regression suites, graders, or transcript review

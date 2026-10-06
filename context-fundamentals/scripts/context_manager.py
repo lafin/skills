@@ -2,12 +2,13 @@
 Context Management Utilities for Agent Systems.
 
 Status: Example
-Boundary: Token counts are character-ratio approximations, not tokenizer output.
+Boundary: Token counts come from a caller-supplied counter; without one they use
+a labeled 4-characters-per-token fallback, not tokenizer output.
 
 Public API
 ----------
 Functions:
-    estimate_token_count     — Rough token estimate from text (demo only).
+    estimate_token_count     — Token count from a supplied counter or fallback.
     estimate_message_tokens  — Token estimate for a message list.
     count_tokens_by_type     — Break down token usage by context component.
     truncate_context         — Trim a context string to a token budget.
@@ -28,22 +29,27 @@ entry point:
     result = build_agent_context(
         task="Refactor auth module",
         system_prompt="You are a senior Python engineer.",
+        context_limit=measured_safe_limit,
         documents=["# Auth module docs ..."],
+        count_tokens=provider_token_counter,
     )
     print(result["usage_report"])
 
 Run this module directly (`python context_manager.py`) for an interactive demo
 that builds a sample context and prints the usage report.
 
-Note: Token estimation in this module uses a character-ratio heuristic. For
-production systems, replace `estimate_token_count` with a real tokenizer
-(tiktoken for OpenAI, Anthropic's token-counting API, etc.).
+Note: Characters per token depend on the tokenizer. The 4-characters-per-token
+fallback undercounts by about 35-40% on Anthropic's current tokenizer
+(1M tokens ≈ 2.5M characters). Pass `count_tokens` backed by the provider's
+tokenizer or token-counting API for any budget decision.
 """
 
 from __future__ import annotations
 
 import hashlib
-from typing import Any, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional
+
+TokenCounter = Callable[[str], int]
 
 __all__ = [
     "estimate_token_count",
@@ -62,24 +68,25 @@ __all__ = [
 # Token estimation
 # ---------------------------------------------------------------------------
 
-def estimate_token_count(text: str) -> int:
-    """Return a rough token estimate for *text*.
+def estimate_token_count(text: str, count_tokens: Optional[TokenCounter] = None) -> int:
+    """Return the token count for *text*.
 
-    Uses the ~4 characters-per-token heuristic for English prose.
+    Uses *count_tokens* when supplied. Without it, falls back to
+    ``len(text) // 4``. The ratio depends on the tokenizer: this fallback
+    undercounts by about 35-40% on Anthropic's current tokenizer, and code,
+    URLs, and non-English text differ further.
 
-    Use when: quick budget checks during development or logging. Do NOT rely
-    on this for hard budget enforcement — code, URLs, and non-English text
-    tokenize at very different ratios (see module docstring).
-
-    WARNING: Production systems must use a real tokenizer:
-    - OpenAI models  → ``tiktoken``
-    - Anthropic      → Anthropic token-counting API
-    - Others         → provider-specific tokenizer
+    Use when: quick checks during development. Supply a counter backed by the
+    provider's tokenizer or token-counting API for budget enforcement.
     """
-    return len(text) // 4
+    if count_tokens is not None:
+        return count_tokens(text)
+    return len(text) // 4  # Labeled fallback; real ratio depends on the tokenizer.
 
 
-def estimate_message_tokens(messages: List[Dict[str, Any]]) -> int:
+def estimate_message_tokens(
+    messages: List[Dict[str, Any]], count_tokens: Optional[TokenCounter] = None
+) -> int:
     """Estimate total tokens across a list of chat messages.
 
     Use when: deciding whether to trigger compaction on message history.
@@ -89,12 +96,14 @@ def estimate_message_tokens(messages: List[Dict[str, Any]]) -> int:
     total = 0
     for msg in messages:
         content = msg.get("content", "")
-        total += estimate_token_count(content)
+        total += estimate_token_count(content, count_tokens)
         total += 10  # Overhead for role/formatting
     return total
 
 
-def count_tokens_by_type(context: Dict[str, Any]) -> Dict[str, int]:
+def count_tokens_by_type(
+    context: Dict[str, Any], count_tokens: Optional[TokenCounter] = None
+) -> Dict[str, int]:
     """Break down token usage by context component type.
 
     Use when: profiling where tokens are spent so the highest-cost
@@ -113,18 +122,18 @@ def count_tokens_by_type(context: Dict[str, Any]) -> Dict[str, int]:
     }
 
     if "system" in context:
-        breakdown["system_prompt"] = estimate_token_count(context["system"])
+        breakdown["system_prompt"] = estimate_token_count(context["system"], count_tokens)
 
     if "tools" in context:
         for tool in context["tools"]:
-            breakdown["tool_definitions"] += estimate_token_count(str(tool))
+            breakdown["tool_definitions"] += estimate_token_count(str(tool), count_tokens)
 
     if "documents" in context:
         for doc in context["documents"]:
-            breakdown["retrieved_documents"] += estimate_token_count(doc)
+            breakdown["retrieved_documents"] += estimate_token_count(doc, count_tokens)
 
     if "messages" in context:
-        breakdown["message_history"] = estimate_message_tokens(context["messages"])
+        breakdown["message_history"] = estimate_message_tokens(context["messages"], count_tokens)
 
     return breakdown
 
@@ -141,16 +150,23 @@ class ContextBuilder:
     ceiling. Higher-priority sections are kept first when the budget is
     tight.
 
+    *context_limit* is required: set it from the workload's measured safe
+    limit, not from the nominal window.
+
     Example::
 
-        builder = ContextBuilder(context_limit=80_000)
+        builder = ContextBuilder(context_limit=measured_safe_limit,
+                                 count_tokens=provider_token_counter)
         builder.add_section("system", prompt, priority=10)
         builder.add_section("task", task_text, priority=9)
         built = builder.build()
     """
 
-    def __init__(self, context_limit: int = 100_000) -> None:
+    def __init__(
+        self, context_limit: int, count_tokens: Optional[TokenCounter] = None
+    ) -> None:
         self.context_limit: int = context_limit
+        self.count_tokens: Optional[TokenCounter] = count_tokens
         self.sections: Dict[str, Dict[str, Any]] = {}
         self.order: List[str] = []
 
@@ -172,7 +188,7 @@ class ContextBuilder:
             "content": content,
             "priority": priority,
             "category": category,
-            "tokens": estimate_token_count(content),
+            "tokens": estimate_token_count(content, self.count_tokens),
         }
 
     def build(self, max_tokens: Optional[int] = None) -> str:
@@ -264,6 +280,7 @@ def truncate_context(
 def truncate_messages(
     messages: List[Dict[str, Any]],
     max_tokens: int,
+    count_tokens: Optional[TokenCounter] = None,
 ) -> List[Dict[str, Any]]:
     """Truncate message history while preserving structural integrity.
 
@@ -289,19 +306,19 @@ def truncate_messages(
             recent_messages.append(msg)
 
     tokens_for_system = (
-        estimate_token_count(system_prompt["content"]) if system_prompt else 0
+        estimate_token_count(system_prompt["content"], count_tokens) if system_prompt else 0
     )
     tokens_for_summary = (
-        estimate_token_count(summary["content"]) if summary else 0
+        estimate_token_count(summary["content"], count_tokens) if summary else 0
     )
     available = max_tokens - tokens_for_system - tokens_for_summary
 
-    tokens_for_recent = estimate_message_tokens(recent_messages)
+    tokens_for_recent = estimate_message_tokens(recent_messages, count_tokens)
     if tokens_for_recent > available:
         truncated_recent: List[Dict[str, Any]] = []
         current_tokens = 0
         for msg in reversed(recent_messages):
-            msg_tokens = estimate_token_count(msg.get("content", ""))
+            msg_tokens = estimate_token_count(msg.get("content", ""), count_tokens)
             if current_tokens + msg_tokens <= available:
                 truncated_recent.insert(0, msg)
                 current_tokens += msg_tokens
@@ -320,12 +337,17 @@ def truncate_messages(
 # Context Validation
 # ---------------------------------------------------------------------------
 
-def validate_context_structure(context: Dict[str, Any]) -> Dict[str, Any]:
+def validate_context_structure(
+    context: Dict[str, Any],
+    context_limit: int,
+    count_tokens: Optional[TokenCounter] = None,
+) -> Dict[str, Any]:
     """Validate a context dict for common structural issues.
 
     Use when: testing context assembly before sending to the model.
-    Checks for empty sections, excessive length, missing recommended
-    sections, and potential duplicate content.
+    Checks for empty sections, length over *context_limit* (the workload's
+    measured safe limit), missing recommended sections, and potential
+    duplicate content.
 
     Returns a dict with ``valid`` (bool), ``issues`` (list), and
     ``recommendations`` (list).
@@ -340,11 +362,11 @@ def validate_context_structure(context: Dict[str, Any]) -> Dict[str, Any]:
             issues.append(f"Empty {section} section")
             recommendations.append(f"Remove or populate {section}")
 
-    # Check for excessive length
-    total_tokens = sum(estimate_token_count(str(c)) for c in context.values())
-    if total_tokens > 80_000:
+    # Check for excessive length against the caller's measured limit
+    total_tokens = sum(estimate_token_count(str(c), count_tokens) for c in context.values())
+    if total_tokens > context_limit:
         issues.append(
-            f"Context length ({total_tokens} tokens) exceeds recommended limit"
+            f"Context length ({total_tokens} tokens) exceeds limit ({context_limit})"
         )
         recommendations.append("Consider context compaction or partitioning")
 
@@ -451,8 +473,9 @@ class ProgressiveDisclosureManager:
 def build_agent_context(
     task: str,
     system_prompt: str,
+    context_limit: int,
     documents: Optional[List[str]] = None,
-    context_limit: int = 80_000,
+    count_tokens: Optional[TokenCounter] = None,
 ) -> Dict[str, Any]:
     """Build an optimized, validated context dict for an agent task.
 
@@ -463,7 +486,7 @@ def build_agent_context(
     Returns a dict with keys ``context`` (str), ``usage_report`` (dict),
     and ``validation`` (dict).
     """
-    builder = ContextBuilder(context_limit=context_limit)
+    builder = ContextBuilder(context_limit=context_limit, count_tokens=count_tokens)
 
     # System prompt — highest priority, persists across turns
     builder.add_section("system", system_prompt, priority=10, category="system")
@@ -487,7 +510,7 @@ def build_agent_context(
         "documents": documents or [],
     }
 
-    validation = validate_context_structure(context_dict)
+    validation = validate_context_structure(context_dict, context_limit, count_tokens)
 
     return {
         "context": builder.build(),
@@ -513,13 +536,24 @@ if __name__ == "__main__":
         "# Current Auth Module\ndef login(user, password): ...",
     ]
 
+    # Demo values only: replace the counter with the provider's tokenizer or
+    # token-counting API, and the limit with your measured safe limit.
+    def demo_counter(text: str) -> int:
+        return -(-len(text) * 2 // 5)  # ceil(chars / 2.5)
+
+    demo_limit = 80_000
+
     result = build_agent_context(
         task=sample_task,
         system_prompt=sample_prompt,
+        context_limit=demo_limit,
         documents=sample_docs,
+        count_tokens=demo_counter,
     )
 
     report = result["usage_report"]
+    print("Token counter: supplied demo counter (2.5 characters per token)")
+    print(f"Limit        : {demo_limit:,} tokens (demo value)")
     print(f"Total tokens : {report['total_tokens']}")
     print(f"Utilization  : {report['utilization']:.1%}")
     print(f"Status       : {report['status']}")

@@ -23,7 +23,7 @@ A root skill uses this layout:
   assets/      # only when needed
 ```
 
-Do not add empty directories. The directory and frontmatter `name` must use lower-case kebab case and must match exactly. A `description` must be non-empty and no longer than 1,024 characters. It should state the owned work, user-language triggers, and the closest exclusions. Keep workflow detail in the body.
+Do not add empty directories. The directory and frontmatter `name` must use lower-case kebab case and must match exactly. A `description` must be non-empty and no longer than 1,024 characters. It should state the owned work, user-language triggers, and the closest exclusions. Keep workflow detail in the body. Top-level frontmatter keys are limited to `name`, `description`, `license`, `compatibility`, `metadata`, and `allowed-tools`; put vendor or runtime keys under `metadata`. Write model-neutral procedures; see [Skill anatomy](docs/skill-anatomy.md#model-neutral-procedure).
 
 Repository-original metadata uses:
 
@@ -49,6 +49,13 @@ metadata:
 ```
 
 Update `ATTRIBUTION.md` when attribution scope changes. Do not infer copying direction or replace an immutable revision with a branch or tag.
+
+Before each catalog release, check every pinned upstream for drift and record each delta's disposition in `ATTRIBUTION.md`:
+
+```sh
+gh api "repos/<owner>/<repo>/compare/<pinned-sha>...HEAD" \
+  --jq '.files[] | select(.filename | startswith("skills/")) | "\(.status) \(.filename)"'
+```
 
 ## References and progressive disclosure
 

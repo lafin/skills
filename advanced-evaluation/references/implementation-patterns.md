@@ -113,7 +113,7 @@ Quick Screen (cheap model) → Detailed Evaluation (expensive model) → Human R
 async def quick_screen(response, prompt, threshold=0.7):
     """Fast, cheap screening for obvious passes/fails."""
     result = await generate_text(
-        model='gpt-5.2',  # Cheaper model
+        model=SCREEN_MODEL,  # Lower-cost screening judge
         prompt=f"Rate 0-1 if this response adequately addresses the prompt:\n\nPrompt: {prompt}\n\nResponse: {response}",
         temperature=0
     )
@@ -127,7 +127,7 @@ async def quick_screen(response, prompt, threshold=0.7):
 async def detailed_evaluation(response, prompt, criteria):
     """Full evaluation for borderline or important cases."""
     result = await generate_text(
-        model='gpt-5.2',  # More capable model
+        model=JUDGE_MODEL,  # Higher-capability judge
         system=DETAILED_EVALUATION_PROMPT,
         prompt=build_detailed_prompt(response, prompt, criteria),
         temperature=0.3
@@ -173,11 +173,11 @@ def aggregate_scores(results):
 
 ## Pattern 4: Confidence Calibration
 
-Confidence scores should be calibrated to actual reliability:
+Confidence scores should be calibrated to actual reliability. The multipliers below are illustrative and have no published source; fit them against human labels (for example, by checking that 0.8-confidence verdicts agree with humans about 80% of the time) before trusting them:
 
 ```python
 def calibrate_confidence(raw_confidence, position_consistent, evidence_count):
-    """Calibrate confidence based on multiple signals."""
+    """Adjust confidence from multiple signals (illustrative weights)."""
     
     # Base confidence from model output
     calibrated = raw_confidence

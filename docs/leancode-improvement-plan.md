@@ -310,6 +310,7 @@ Acceptance:
 - Cache fixtures preserve tenant and freshness boundaries.
 - The skill does not imply that network results are safe to cache indefinitely.
 - Performance fixtures still prefer native or standard-library caching when it is correct and measured.
+- The skill does not recommend `@lru_cache` on an `async def`: it caches the coroutine object, so the second call raises `RuntimeError: cannot reuse already awaited coroutine`.
 
 ### Candidate 5: Reduce Prompt Density
 

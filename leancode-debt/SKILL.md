@@ -5,7 +5,7 @@ description: >
   shortcuts and deferrals get tracked instead of rotting into "later means
   never". Use when the user says "leancode debt",
   "/skill:leancode-debt", "what did leancode defer", "list the shortcuts", "leancode
-  ledger", or "what did we mark to do later". One-shot report, changes nothing.
+  ledger", or "what did we mark to do later". One-shot report, changes no source.
 license: MIT
 metadata:
   provenance: repository-original
@@ -19,9 +19,9 @@ permanent.
 
 ## Scan
 
-Search comment content for `lean-debt:` using the language-appropriate prefixes
-in the repository (commonly `#`, `//`, `/* ... */`, `--`, `;`, or `%`). Do
-not prescribe one brittle regex. Exclude dependencies, generated code, build
+Start from `git grep -nI -F "lean-debt:"`, then keep only hits inside comments,
+using the language-appropriate prefixes in the repository (commonly `#`, `//`,
+`/* ... */`, `--`, `;`, or `%`). Exclude dependencies, generated code, build
 artifacts, lockfiles, and VCS metadata by default; scan any of them only when
 the user explicitly opts in.
 
@@ -41,9 +41,9 @@ so pull the ceiling and trigger straight from the comment. Want an owner per row
 Flag the rot risk: a missing revisit trigger gets `no-trigger`; a missing ceiling
 gets `no-ceiling`.
 
-End with `<N> markers, <M> with no trigger.` Nothing found: `No lean-debt entries. Clean ledger.`
+End with `<N> markers, <M> no-trigger, <K> no-ceiling.` Nothing found: `No lean-debt entries. Clean ledger.`
 
 ## Boundaries
 
-Reads and reports only, changes nothing. To persist it, ask and it writes the
+Reads and reports only, changes no source. To persist it, ask and it writes the
 ledger to a file (e.g. `LEANCODE-DEBT.md`). One-shot.

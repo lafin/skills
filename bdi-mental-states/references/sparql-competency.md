@@ -162,12 +162,22 @@ SELECT ?intention ?plan ?goal WHERE {
 ```sparql
 PREFIX bdi: <https://w3id.org/fossr/ontology/bdi/>
 
-SELECT ?plan ?task ?nextTask WHERE {
+# bdi:precedes is transitive, so a reasoner may add every later task as a
+# successor. Walk from bdi:beginsWith, keep only the immediate successor,
+# and order by position in the chain, not by IRI.
+SELECT ?plan ?task (COUNT(DISTINCT ?prev) AS ?position) ?nextTask WHERE {
     ?plan a bdi:Plan ;
-          bdi:hasComponent ?task .
-    OPTIONAL { ?task bdi:precedes ?nextTask }
+          bdi:beginsWith ?first .
+    ?first bdi:precedes* ?task .
+    ?first bdi:precedes* ?prev .
+    ?prev bdi:precedes* ?task .
+    OPTIONAL {
+        ?task bdi:precedes ?nextTask .
+        FILTER NOT EXISTS { ?task bdi:precedes ?mid . ?mid bdi:precedes ?nextTask }
+    }
 }
-ORDER BY ?task
+GROUP BY ?plan ?task ?nextTask
+ORDER BY ?plan ?position
 ```
 
 ### CQ14: What is the first and last task of a plan?
@@ -204,8 +214,8 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 
 SELECT ?mentalState ?type WHERE {
     ?mentalState bdi:hasValidity ?interval .
-    ?interval bdi:hasStartTime ?start ;
-              bdi:hasEndTime ?end .
+    ?interval bdi:hasStartTime/bdi:time ?start ;
+              bdi:hasEndTime/bdi:time ?end .
     ?mentalState a ?type .
     FILTER(?start <= "2026-01-04T10:00:00"^^xsd:dateTime && 
            ?end >= "2026-01-04T10:00:00"^^xsd:dateTime)
@@ -232,8 +242,8 @@ PREFIX bdi: <https://w3id.org/fossr/ontology/bdi/>
 SELECT ?intention ?start ?end WHERE {
     ?intention a bdi:Intention ;
                bdi:hasValidity ?interval .
-    ?interval bdi:hasStartTime ?start ;
-              bdi:hasEndTime ?end .
+    ?interval bdi:hasStartTime/bdi:time ?start ;
+              bdi:hasEndTime/bdi:time ?end .
 }
 ```
 

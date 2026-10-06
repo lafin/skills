@@ -4,7 +4,7 @@ description: "This skill should be used when designing multi-agent systems that 
 license: MIT
 metadata:
   upstream: "muratcankoylan/Agent-Skills-for-Context-Engineering"
-  upstream_commit: "c578e85e40fe2bda7c1fec91ff64cf5285434934"
+  upstream_commit: "58b55a8921758d13453b440704fb1b5b208c0b0e"
   upstream_path: "skills/multi-agent-patterns"
   adaptation: modified
   license_notice: LICENSE-context-engineering
@@ -18,11 +18,11 @@ Multi-agent architectures distribute work across multiple language model instanc
 
 Activate this skill when:
 - Single-agent context limits constrain task complexity
-- Tasks decompose naturally into parallel subtasks
+- Tasks split along context boundaries into independent subtasks
 - Different subtasks require different tool sets or system prompts
 - Building systems that must handle multiple domains simultaneously
 - Scaling agent capabilities beyond single-context limits
-- Designing production agent systems with multiple specialized components
+- Deciding whether a task needs more than one agent at all
 
 Do not activate this skill for adjacent work owned by other skills:
 - Deciding task-model fit, pipeline shape, or project-level cost before topology is known: `project-development`.
@@ -32,13 +32,18 @@ Do not activate this skill for adjacent work owned by other skills:
 
 ## Core Concepts
 
-Use multi-agent patterns when a single agent's context window cannot hold all task-relevant information. Context isolation is the primary benefit — each agent operates in a clean context without accumulated noise from other subtasks, preventing the telephone game problem where information degrades through repeated summarization.
+Stay single-agent by default. Add agents only when a single agent with good prompts and tools fails a measured baseline because of one of three constraints: context pollution, independent parallel subtasks, or tool and prompt specialization ([Anthropic, 2026](https://claude.com/resources/articles/building-multi-agent-systems-when-and-how-to-use-them)). Architecture-task fit decides the outcome: across 260 controlled configurations, multi-agent performance relative to a single agent ranged from +80.8% on decomposable financial reasoning to −70.0% on sequential planning, and coordination gains shrank once the single-agent baseline was strong ([Kim et al., 2025](https://arxiv.org/abs/2512.08296)).
 
-Choose among three dominant patterns based on coordination needs, not organizational metaphor:
+Context isolation is the primary benefit — each agent operates in a clean context without accumulated noise from other subtasks, preventing the telephone game problem where information degrades through repeated summarization. Split work by context boundary, not by role: the agent that implements a feature also writes its tests, because it already holds the context. Do not split planning, implementation, testing, and review of the same work across agents.
 
-- **Supervisor/orchestrator** — Use for centralized control when tasks have clear decomposition and human oversight matters. A single coordinator delegates to specialists and synthesizes results.
-- **Peer-to-peer/swarm** — Use for flexible exploration when rigid planning is counterproductive. Any agent can transfer control to any other through explicit handoff mechanisms.
+Keep one writer per artifact. Parallel agents read and report; one owner writes each file or state key, so concurrent edits cannot conflict.
+
+Choose a pattern based on coordination needs, not organizational metaphor. Start with the simplest that fits ([Anthropic, 2026](https://claude.com/resources/articles/multi-agent-coordination-patterns)):
+
+- **Supervisor/orchestrator** — Default starting pattern. A single coordinator delegates bounded subtasks to subagents and synthesizes results. Use when decomposition is clear and subtasks have little interdependence.
+- **Generator-verifier** — A generator produces output; a verifier checks it against explicit criteria and accepts it or returns feedback. Use when output quality is critical and criteria can be stated. Cap iterations and define a fallback; a verifier without criteria rubber-stamps.
 - **Hierarchical** — Use for large-scale projects with layered abstraction (strategy, planning, execution). Each layer operates at a different level of detail with its own context structure.
+- **Peer-to-peer/swarm** — Specialist choice, not a default. Agents hand control to each other directly. Use only when agents must converse with the user across states and a measured comparison favors it over a supervisor.
 
 Design every multi-agent system around explicit coordination protocols, consensus mechanisms that resist sycophancy, and failure handling that prevents error propagation cascades.
 
@@ -65,7 +70,7 @@ Anthropic's BrowseComp analysis attributed most observed performance variance to
 Prioritize model selection alongside architecture design. Measure whether a stronger model improves results more than additional tokens for the target workload.
 
 **The Parallelization Argument**
-Assign parallelizable subtasks to dedicated agents with fresh contexts rather than processing them sequentially in a single agent. A research task requiring searches across multiple independent sources, analysis of different documents, or comparison of competing approaches benefits from parallel execution. Total real-world time approaches the duration of the longest subtask rather than the sum of all subtasks.
+Assign parallelizable subtasks to dedicated agents with fresh contexts rather than processing them sequentially in a single agent. A research task requiring searches across multiple independent sources, analysis of different documents, or comparison of competing approaches benefits from parallel execution. Parallelism buys thoroughness, not speed: parallel agents cover more ground, but multi-agent systems often take longer overall than a single agent because total computation grows ([Anthropic, 2026](https://claude.com/resources/articles/building-multi-agent-systems-when-and-how-to-use-them)).
 
 **The Specialization Argument**
 Configure each agent with only the system prompt, tools, and context it needs for its specific subtask. A general-purpose agent must carry all possible configurations in context, diluting attention. Specialized agents carry only what they need, operating with lean context optimized for their domain. Route from a coordinator to specialized agents to achieve specialization without combinatorial explosion.
@@ -84,9 +89,9 @@ Choose this pattern when: tasks have clear decomposition, coordination across do
 Expect these trade-offs: strict workflow control and easier human-in-the-loop interventions, but the supervisor context becomes a bottleneck, supervisor failures cascade to all workers, and the "telephone game" problem emerges where supervisors paraphrase sub-agent responses incorrectly.
 
 **The Telephone Game Problem and Solution**
-Treat supervisor paraphrasing as a fidelity risk. Measure task outcomes before and after direct forwarding instead of assuming the supervisor preserves specialist output.
+Treat supervisor paraphrasing as a fidelity risk. Pass artifacts by reference first: subagents write outputs to a file or store and return a lightweight reference, so the coordinator never retypes them ([Anthropic, 2025](https://www.anthropic.com/engineering/multi-agent-research-system)).
 
-Fix this by implementing a `forward_message` tool that allows sub-agents to pass responses directly to users:
+When a supervisor must relay a subagent's answer, give it a `forward_message` tool that passes the response to the user without re-generating it:
 
 ```python
 def forward_message(message: str, to_user: bool = True):
@@ -103,19 +108,17 @@ def forward_message(message: str, to_user: bool = True):
     return {"type": "supervisor_input", "content": message}
 ```
 
-Prefer swarm architectures over supervisors when sub-agents can respond directly to users, as this eliminates translation errors entirely.
+In LangChain's τ-bench study, swarm narrowly beat supervisor because swarm subagents answer the user directly, and `forward_message` narrowed the gap. Both multi-agent designs trailed a single agent when only one distractor domain was present; the single agent fell off with two or more ([LangChain, 2025](https://www.langchain.com/blog/benchmarking-multi-agent-architectures)). Measure task outcomes before and after direct forwarding instead of assuming either design preserves specialist output.
 
-**Pattern 2: Peer-to-Peer/Swarm**
-Remove central control and allow agents to communicate directly based on predefined protocols. Any agent transfers control to any other through explicit handoff mechanisms.
+**Pattern 2: Peer-to-Peer/Swarm (specialist choice)**
+Remove central control and allow agents to communicate directly based on predefined protocols. Any agent transfers control to any other through explicit handoff mechanisms. Start with a supervisor; adopt a swarm only when a measured comparison on the target task favors it.
 
 ```python
-def transfer_to_agent_b():
-    return agent_b  # Handoff via function return
+from agents import Agent  # OpenAI Agents SDK
 
-agent_a = Agent(
-    name="Agent A",
-    functions=[transfer_to_agent_b]
-)
+agent_b = Agent(name="Agent B", instructions="Handle billing questions.")
+agent_a = Agent(name="Agent A", instructions="Triage requests.", handoffs=[agent_b])
+# The model sees the handoff as a transfer_to_agent_b tool.
 ```
 
 Choose this pattern when: tasks require flexible exploration, rigid planning is counterproductive, or requirements emerge dynamically and defy upfront decomposition.
@@ -150,21 +153,18 @@ Choose based on task complexity, coordination needs, and acceptable latency. Def
 
 ### Consensus and Coordination
 
-**The Voting Problem**
-Avoid simple majority voting — it treats hallucinations from weak models as equal to reasoning from strong models. Without intervention, multi-agent discussions devolve into consensus on false premises due to inherent bias toward agreement.
-
-**Weighted Voting**
-Weight agent votes by confidence or expertise. Agents with higher confidence or domain expertise should carry more weight in final decisions.
+**Baseline: Independent Samples Plus a Weighted Vote**
+Start with independent sampling: each agent answers alone, without seeing the others, then aggregate with a vote weighted by confidence or by a verifier's check. Majority voting accounts for most of the gains attributed to multi-agent debate ([Choi et al., 2025](https://arxiv.org/abs/2508.17536)), and more discussion rounds before voting reduce accuracy ([Kaesberg et al., 2025](https://arxiv.org/abs/2502.19130)). Weight votes so an unchecked guess does not count the same as a verified answer.
 
 **Debate Protocols**
-Structure agents to critique each other's outputs over multiple rounds. Adversarial critique often yields higher accuracy on complex reasoning than collaborative consensus. Guard against sycophantic convergence where agents agree to be agreeable rather than correct.
+Use debate only when it shows a measured gain over the vote baseline on the target task. Keep rounds few and stop at convergence. Guard against sycophantic convergence where agents agree to be agreeable rather than correct.
 
 **Trigger-Based Intervention**
 Monitor multi-agent interactions for behavioral markers. Activate stall triggers when discussions make no progress. Detect sycophancy triggers when agents mimic each other's answers without unique reasoning.
 
 ### Framework Considerations
 
-Different frameworks implement these patterns with different philosophies. LangGraph uses graph-based state machines with explicit nodes and edges. AutoGen uses conversational/event-driven patterns with GroupChat. CrewAI uses role-based process flows with hierarchical crew structures.
+Frameworks implement these patterns differently. LangGraph uses graph-based state machines; a handoff tool returns `Command(goto=..., graph=Command.PARENT)`, and LangChain's subagents pattern (workers wrapped as tools of a `create_agent` supervisor) replaces the unmaintained `langgraph-supervisor` package. The OpenAI Agents SDK exposes each handoff as a `transfer_to_<agent>` tool. The Claude Agent SDK runs subagents with fresh contexts through its `Agent` tool. AutoGen is in maintenance mode; new projects should use Microsoft Agent Framework. CrewAI uses role-based process flows with hierarchical crew structures.
 
 ## Practical Guidance
 
@@ -192,13 +192,12 @@ Mitigate by validating agent outputs before passing to consumers. Implement retr
 
 ## Examples
 
-**Example 1: Research Team Architecture**
+**Example 1: Research Team Architecture (split by context boundary)**
 ```text
-Supervisor
-├── Researcher (web search, document retrieval)
-├── Analyzer (data analysis, statistics)
-├── Fact-checker (verification, validation)
-└── Writer (report generation, formatting)
+Lead agent (owns the plan and final report; sole writer)
+├── Subagent: market trends, Asia (search, read; returns findings file path)
+├── Subagent: market trends, Europe (search, read; returns findings file path)
+└── Verifier: checks report claims against cited sources (read-only)
 ```
 
 **Example 2: Handoff Protocol**
@@ -216,10 +215,10 @@ def handle_customer_request(request):
 
 ## Guidelines
 
-1. Design for context isolation as the primary benefit of multi-agent systems
-2. Choose architecture pattern based on coordination needs, not organizational metaphor
+1. Stay single-agent until a measured baseline shows a context, parallelism, or specialization limit
+2. Split work by context boundary, not by role, and keep one writer per artifact
 3. Implement explicit handoff protocols with state passing
-4. Use weighted voting or debate protocols for consensus
+4. Use independent samples plus a weighted vote as the consensus baseline; add debate only when it beats the vote on measurement
 5. Monitor for supervisor bottlenecks and implement checkpointing
 6. Validate outputs before passing between agents
 7. Set time-to-live limits to prevent infinite loops
@@ -229,7 +228,7 @@ def handle_customer_request(request):
 
 1. **Supervisor bottleneck scaling** — Supervisor context pressure grows with worker count and result size. Set a measured worker cap per supervisor or add another coordination tier before the supervisor becomes the bottleneck.
 2. **Token cost underestimation** — Anthropic reported about 15 times the token usage of ordinary chat for its multi-agent research system. Use this only as a workload-specific planning signal, and measure coordination overhead, retries, and consensus rounds directly. See the [dated Anthropic evidence](skill://multi-agent-patterns/references/multi-agent-research-evidence.md#evidence-anthropic-multi-agent-research-june-2025).
-3. **Sycophantic consensus** — Agents in debate patterns tend to converge on agreeable answers, not correct ones. LLMs have an inherent bias toward agreement. Counter this by assigning explicit adversarial roles and requiring agents to state disagreements before convergence is allowed.
+3. **Sycophantic consensus** — Agents that see each other's answers converge on agreeable answers, not correct ones, and extra discussion rounds lower accuracy. Collect independent answers before any exchange, vote on them, cap debate rounds, and require agents to state disagreements before convergence is allowed.
 4. **Agent sprawl** — Adding agents can produce diminishing returns while increasing coordination overhead. Dense peer-to-peer topologies add pairwise communication channels. Start with the minimum viable number of agents and add one only when a clear context-isolation benefit exists.
 5. **Telephone game in message-passing** — Information degrades through repeated summarization as it passes between agents. Each agent paraphrases and loses nuance. Use filesystem coordination instead of message-passing for state that multiple agents need to access faithfully.
 6. **Error propagation cascades** — One agent's hallucination becomes another agent's "fact." Downstream agents have no way to distinguish upstream hallucinations from genuine information. Add validation checkpoints between agents and never trust upstream output without verification.
@@ -251,7 +250,7 @@ This skill owns agent topology and coordination protocols. Adjacent skills own p
 ## References
 
 Internal reference:
-- [Frameworks Reference](skill://multi-agent-patterns/references/frameworks.md) - Read when: implementing a specific multi-agent pattern in LangGraph, AutoGen, or CrewAI and needing framework-specific code examples
+- [Frameworks Reference](skill://multi-agent-patterns/references/frameworks.md) - Read when: implementing a pattern with LangChain/LangGraph, the OpenAI Agents SDK, or the Claude Agent SDK, or porting AutoGen code
 
 Runnable script:
 
@@ -269,10 +268,13 @@ Related skills in this collection:
 - context-optimization - Read when: individual agent contexts are too large and need partitioning or compression strategies
 
 External resources:
-- [LangGraph Documentation](https://langchain-ai.github.io/langgraph/) - Read when: building graph-based multi-agent workflows with explicit state machines
-- [AutoGen Framework](https://microsoft.github.io/autogen/) - Read when: implementing conversational GroupChat patterns or event-driven agent coordination
+- [LangChain Multi-Agent Documentation](https://docs.langchain.com/oss/python/langchain/multi-agent) - Read when: building subagent, handoff, or router workflows with LangChain or LangGraph
+- [Microsoft Agent Framework](https://github.com/microsoft/agent-framework) - Read when: replacing AutoGen GroupChat code; AutoGen is in maintenance mode
+- [OpenAI Agents SDK Handoffs](https://openai.github.io/openai-agents-python/handoffs/) - Read when: implementing tool-based handoffs between agents
+- [Claude Agent SDK Subagents](https://code.claude.com/docs/en/agent-sdk/subagents) - Read when: defining context-isolated subagents with restricted tools
 - [CrewAI Documentation](https://docs.crewai.com/) - Read when: designing role-based hierarchical agent processes
-- [Research on Multi-Agent Coordination](https://arxiv.org/abs/2308.00352) - Read when: needing academic grounding on multi-agent system theory and evaluation
+- [Why Do Multi-Agent LLM Systems Fail? (MAST)](https://arxiv.org/abs/2503.13657) - Read when: classifying multi-agent failures across system design, inter-agent misalignment, and task verification
+- [Towards a Science of Scaling Agent Systems](https://arxiv.org/abs/2512.08296) - Read when: deciding whether a task's structure favors a single agent or a specific multi-agent architecture
 
 ---
 

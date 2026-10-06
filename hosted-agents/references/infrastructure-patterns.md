@@ -1,125 +1,80 @@
 # Infrastructure Patterns for Hosted Agents
 
-This reference provides detailed implementation patterns for building hosted agent infrastructure. These patterns are derived from production systems at scale.
+This reference provides implementation patterns for building hosted agent infrastructure. Code targets the Modal Python SDK 1.x and Cloudflare Workers; check each provider's current docs before use.
 
 ## Sandbox Architecture
 
 ### Modal Integration Pattern
 
-Modal provides the sandbox infrastructure with near-instant startup and filesystem snapshots.
+Modal sandboxes support filesystem snapshots. A snapshot is an `Image`, so restoring means creating a new sandbox from it. `exec` takes argv, not a shell string.
 
 ```python
 import modal
 
-# Define the base image with all dependencies
-image = modal.Image.debian_slim().pip_install([
-    "opencode",
-    "gitpython",
-    "psycopg2-binary",
-])
+MODEL = "provider/model"  # placeholder; set per deployment
+# Proxies outside the sandbox hold the GitHub and model credentials and only
+# allow pushes to the session branch. Nothing secret enters the sandbox.
+GIT_PROXY = "https://git-proxy.example.com"
+EGRESS = ["git-proxy.example.com", "llm-proxy.example.com"]
 
-# Create the app
-app = modal.App("coding-agent")
+app = modal.App.lookup("coding-agent", create_if_missing=True)
+base = (
+    modal.Image.debian_slim()
+    .apt_install("git", "nodejs", "npm")
+    .run_commands("npm install -g opencode-ai")
+)
 
-# Sandbox class with snapshot support
-@app.cls(image=image, timeout=3600)
-class AgentSandbox:
-    def __init__(self, repo_url: str, snapshot_id: str = None):
-        self.repo_url = repo_url
-        self.snapshot_id = snapshot_id
-    
-    @modal.enter()
-    def setup(self):
-        if self.snapshot_id:
-            # Restore from snapshot
-            modal.Sandbox.restore(self.snapshot_id)
-        else:
-            # Fresh setup from image
-            self._clone_and_setup()
-    
-    def _clone_and_setup(self):
-        """Clone repo and run initial setup."""
-        token = self._get_github_app_token()
-        os.system(f"git clone https://x-access-token:{token}@github.com/{self.repo_url}")
-        os.system("npm install")
-        os.system("npm run build")
-    
-    @modal.method()
-    def execute_prompt(self, prompt: str, user_identity: dict) -> dict:
-        """Execute a prompt in the sandbox."""
-        # Update git config for this user
-        os.system(f'git config user.name "{user_identity["name"]}"')
-        os.system(f'git config user.email "{user_identity["email"]}"')
-        
-        # Run the agent
-        result = self.agent.run(prompt)
-        
-        return {
-            "result": result,
-            "snapshot_id": modal.Sandbox.snapshot()
-        }
+
+def run(sb: modal.Sandbox, *argv: str, workdir: str = "/workspace") -> str:
+    p = sb.exec(*argv, workdir=workdir)
+    if p.wait() != 0:
+        raise RuntimeError(f"{argv[0]} failed: {p.stderr.read()}")
+    return p.stdout.read()
+
+
+def build_repo_image(repo: str) -> modal.Image:
+    """Clone, install, build, snapshot. Run on the rebuild cadence."""
+    sb = modal.Sandbox.create(app=app, image=base, timeout=30 * 60)
+    try:
+        run(sb, "git", "clone", f"{GIT_PROXY}/{repo}.git", "/workspace", workdir="/")
+        run(sb, "npm", "install")
+        run(sb, "npm", "run", "build")
+        return sb.snapshot_filesystem()  # expires after 30 days by default
+    finally:
+        sb.terminate()
+
+
+def start_session(repo_image: modal.Image, snapshot: modal.Image | None,
+                  user_name: str, user_email: str) -> modal.Sandbox:
+    """A follow-up restores its session snapshot; a new session uses the repo image."""
+    sb = modal.Sandbox.create(
+        app=app,
+        image=snapshot or repo_image,
+        timeout=2 * 60 * 60,  # default is 5 minutes; maximum is 24 hours
+        outbound_domain_allowlist=EGRESS,
+    )
+    try:
+        # argv, not a shell string: a display name cannot inject commands
+        run(sb, "git", "config", "user.name", user_name)
+        run(sb, "git", "config", "user.email", user_email)
+    except modal.exception.NotFoundError:
+        sb.terminate()
+        if snapshot is None:
+            raise
+        # Expired snapshot: start fresh, then check out the pushed session branch
+        return start_session(repo_image, None, user_name, user_email)
+    return sb
+
+
+def run_prompt(sb: modal.Sandbox, prompt: str) -> modal.Image:
+    """Run the agent, then snapshot so a follow-up can resume this work."""
+    run(sb, "opencode", "run", "--model", MODEL, prompt)
+    return sb.snapshot_filesystem()
 ```
 
 ### Image Build Pipeline
 
-Build images on a schedule to keep them fresh:
-
-```python
-import schedule
-import time
-from datetime import datetime
-
-class ImageBuilder:
-    def __init__(self, repositories: list[str]):
-        self.repositories = repositories
-        self.images = {}
-    
-    def build_all_images(self):
-        """Build images for all repositories."""
-        for repo in self.repositories:
-            try:
-                image = self._build_image(repo)
-                self.images[repo] = {
-                    "image": image,
-                    "built_at": datetime.utcnow(),
-                    "commit": self._get_latest_commit(repo)
-                }
-            except Exception as e:
-                # Log but continue with other repos
-                log.error(f"Failed to build image for {repo}: {e}")
-    
-    def _build_image(self, repo: str) -> str:
-        """Build a single repository image."""
-        sandbox = modal.Sandbox.create()
-        
-        # Clone with app token
-        token = get_app_installation_token(repo)
-        sandbox.exec(f"git clone https://x-access-token:{token}@github.com/{repo} /workspace")
-        
-        # Install dependencies
-        sandbox.exec("cd /workspace && npm install")
-        
-        # Run build
-        sandbox.exec("cd /workspace && npm run build")
-        
-        # Warm caches
-        sandbox.exec("cd /workspace && npm run dev &")
-        time.sleep(5)  # Let dev server start
-        sandbox.exec("cd /workspace && npm test -- --run")
-        
-        # Create snapshot
-        return sandbox.snapshot()
-    
-    def get_latest_image(self, repo: str) -> str:
-        """Get the most recent image for a repository."""
-        if repo not in self.images:
-            raise ValueError(f"No image available for {repo}")
-        return self.images[repo]["image"]
-
-# Schedule builds every 30 minutes
-builder = ImageBuilder(["org/frontend", "org/backend", "org/shared"])
-schedule.every(30).minutes.do(builder.build_all_images)
-```
+Call `build_repo_image` from a scheduled job on the cadence derived from the staleness target. Store each image's `object_id`, commit SHA, and build time, and expire warm sandboxes built from an older image.
 
 ### Warm Pool Management
 
@@ -128,18 +83,23 @@ Maintain pre-warmed sandboxes for instant session starts:
 ```python
 from collections import defaultdict
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
+
+import modal
 
 @dataclass
 class WarmSandbox:
-    sandbox_id: str
+    sandbox: modal.Sandbox
     repo: str
     created_at: datetime
     image_version: str
     is_claimed: bool = False
 
 class WarmPoolManager:
-    def __init__(self, target_pool_size: int = 3):
+    def __init__(self, app: modal.App, images: dict[str, modal.Image],
+                 target_pool_size: int = 3):
+        self.app = app
+        self.images = images  # repo -> latest image from build_repo_image
         self.target_size = target_pool_size
         self.pools = defaultdict(list)  # repo -> [WarmSandbox]
         self.max_age = timedelta(minutes=25)  # Expire before next image build
@@ -157,9 +117,9 @@ class WarmPoolManager:
     
     def _is_valid(self, sandbox: WarmSandbox) -> bool:
         """Check if sandbox is still valid."""
-        age = datetime.utcnow() - sandbox.created_at
-        current_image = self.image_builder.get_latest_image(sandbox.repo)
-        
+        age = datetime.now(timezone.utc) - sandbox.created_at
+        current_image = self.images[sandbox.repo].object_id
+
         return (
             age < self.max_age and
             sandbox.image_version == current_image
@@ -180,17 +140,17 @@ class WarmPoolManager:
     
     def _create_warm_sandbox(self, repo: str) -> WarmSandbox:
         """Create a new warm sandbox from latest image."""
-        image = self.image_builder.get_latest_image(repo)
-        sandbox_id = modal.Sandbox.create(image=image)
-        
-        # Sync to latest (runs in background)
-        self._sync_to_latest(sandbox_id, repo)
-        
+        image = self.images[repo]
+        sandbox = modal.Sandbox.create(app=self.app, image=image, timeout=30 * 60)
+
+        # Sync to latest; the session blocks writes until this finishes
+        sandbox.exec("git", "pull", "--ff-only", workdir="/workspace")
+
         return WarmSandbox(
-            sandbox_id=sandbox_id,
+            sandbox=sandbox,
             repo=repo,
-            created_at=datetime.utcnow(),
-            image_version=image
+            created_at=datetime.now(timezone.utc),
+            image_version=image.object_id
         )
 ```
 
@@ -198,17 +158,20 @@ class WarmPoolManager:
 
 ### Cloudflare Durable Objects for Session State
 
-Each session gets its own Durable Object with isolated SQLite:
+Each session gets its own Durable Object with isolated SQLite. Accept WebSockets with `ctx.acceptWebSocket()` so the object can hibernate between messages; hibernation discards in-memory fields, so read connections from `ctx.getWebSockets()` and keep state in SQLite ([WebSocket hibernation](https://developers.cloudflare.com/durable-objects/best-practices/websockets/), [SQLite storage API](https://developers.cloudflare.com/durable-objects/api/sqlite-storage-api/)).
 
 ```typescript
-// Session Durable Object
-export class SessionDO implements DurableObject {
-  private storage: DurableObjectStorage;
-  private sql: SqlStorage;
-  private connections: Map<string, WebSocket> = new Map();
+import { DurableObject } from "cloudflare:workers";
 
-  constructor(ctx: DurableObjectState) {
-    this.storage = ctx.storage;
+interface Env {
+  SANDBOX_QUEUE: Queue; // consumer starts or resumes the session's sandbox
+}
+
+export class SessionDO extends DurableObject<Env> {
+  private sql: SqlStorage;
+
+  constructor(ctx: DurableObjectState, env: Env) {
+    super(ctx, env);
     this.sql = ctx.storage.sql;
     this.initializeSchema();
   }
@@ -245,37 +208,28 @@ export class SessionDO implements DurableObject {
     const url = new URL(request.url);
 
     if (request.headers.get("Upgrade") === "websocket") {
-      return this.handleWebSocket(request);
+      const [client, server] = Object.values(new WebSocketPair());
+      this.ctx.acceptWebSocket(server); // unlike server.accept(), allows hibernation
+      return new Response(null, { status: 101, webSocket: client });
     }
 
     switch (url.pathname) {
       case "/message":
         return this.handleMessage(request);
-      case "/status":
-        return this.getStatus();
+      case "/event": // sandbox posts tool and file events here
+        return this.handleEvent(request);
       default:
         return new Response("Not found", { status: 404 });
     }
   }
 
-  private handleWebSocket(request: Request): Response {
-    const pair = new WebSocketPair();
-    const [client, server] = Object.values(pair);
-
-    const connectionId = crypto.randomUUID();
-    this.connections.set(connectionId, server);
-
-    server.accept();
-    server.addEventListener("close", () => {
-      this.connections.delete(connectionId);
-    });
-
-    return new Response(null, { status: 101, webSocket: client });
+  async webSocketClose(ws: WebSocket, code: number, reason: string) {
+    ws.close(code, reason);
   }
 
   private broadcast(message: object) {
     const data = JSON.stringify(message);
-    for (const ws of this.connections.values()) {
+    for (const ws of this.ctx.getWebSockets()) {
       ws.send(data);
     }
   }
@@ -283,65 +237,51 @@ export class SessionDO implements DurableObject {
   async handleMessage(request: Request): Promise<Response> {
     const { content, author } = await request.json();
 
-    // Store message
+    // Bindings are spread arguments, not an array
     this.sql.exec(
       `INSERT INTO messages (role, content, author_id, author_name) VALUES (?, ?, ?, ?)`,
-      ["user", content, author.id, author.name]
+      "user", content, author.id, author.name
     );
 
-    // Broadcast to all connected clients
-    this.broadcast({
-      type: "message",
-      role: "user",
-      content,
-      author,
-    });
+    this.broadcast({ type: "message", role: "user", content, author });
 
-    // Forward to sandbox for processing
-    const result = await this.forwardToSandbox(content, author);
+    // Hand off to the sandbox worker; results arrive later via /event
+    await this.env.SANDBOX_QUEUE.send({ sessionId: this.ctx.id.toString(), content, author });
 
-    return Response.json(result);
+    return Response.json({ queued: true }, { status: 202 });
+  }
+
+  async handleEvent(request: Request): Promise<Response> {
+    const { type, data } = await request.json<{ type: string; data: unknown }>();
+    this.sql.exec(`INSERT INTO events (type, data) VALUES (?, ?)`, type, JSON.stringify(data));
+    this.broadcast({ type, data });
+    return new Response(null, { status: 204 });
   }
 }
 ```
 
 ### Real-Time Event Streaming
 
-Stream events from sandbox to all connected clients:
-
-```typescript
-class EventStream {
-  private sessionDO: DurableObjectStub;
-
-  async streamFromSandbox(sandboxId: string, sessionId: string) {
-    const sandbox = await modal.Sandbox.get(sandboxId);
-
-    // Subscribe to sandbox events
-    for await (const event of sandbox.events()) {
-      // Forward to Durable Object for broadcast
-      await this.sessionDO.fetch(
-        new Request(`https://internal/event`, {
-          method: "POST",
-          body: JSON.stringify({
-            type: event.type,
-            data: event.data,
-          }),
-        })
-      );
-    }
-  }
-}
-```
+The agent process in the sandbox posts each tool, file, and token event to the session's `/event` endpoint, authenticated with a session-scoped credential held by the proxy. The Durable Object stores the event and broadcasts it to every connected client, so a client that reconnects after hibernation can replay from the `events` table.
 
 ## Client Integration Patterns
 
 ### Slack Bot with Repository Classification
 
-```python
-from slack_bolt import App
-from slack_bolt.adapter.socket_mode import SocketModeHandler
+Async handlers need `AsyncApp` ([Bolt for Python](https://docs.slack.dev/tools/bolt-python/)). `start_session` and `format_result_blocks` are the application's own session API and Block Kit formatter.
 
-app = App(token=os.environ["SLACK_BOT_TOKEN"])
+```python
+import asyncio
+import json
+import os
+
+from openai import AsyncOpenAI
+from slack_bolt.async_app import AsyncApp
+from slack_bolt.adapter.socket_mode.async_handler import AsyncSocketModeHandler
+
+app = AsyncApp(token=os.environ["SLACK_BOT_TOKEN"])
+llm = AsyncOpenAI()  # any OpenAI-compatible endpoint
+CLASSIFIER_MODEL = os.environ["CLASSIFIER_MODEL"]  # a fast, cheap model
 
 # Repository descriptions for classification
 REPO_DESCRIPTIONS = [
@@ -375,8 +315,8 @@ Repositories:
 
 Return ONLY the repository name, or "unknown" if unclear."""
 
-    response = await openai.chat.completions.create(
-        model="gpt-4o-mini",
+    response = await llm.chat.completions.create(
+        model=CLASSIFIER_MODEL,
         messages=[{"role": "user", "content": prompt}],
         max_tokens=50
     )
@@ -428,6 +368,9 @@ async def handle_mention(event, say, client):
         blocks=format_result_blocks(result),
         thread_ts=thread_ts
     )
+
+if __name__ == "__main__":
+    asyncio.run(AsyncSocketModeHandler(app, os.environ["SLACK_APP_TOKEN"]).start_async())
 ```
 
 ### Chrome Extension DOM Extraction
@@ -528,13 +471,9 @@ class MultiplayerSession:
     
     async def process_prompt(self, prompt: PromptContext):
         """Process prompt with author attribution."""
-        # Update git config for this author
-        await self.sandbox.exec(
-            f'git config user.name "{prompt.author.name}"'
-        )
-        await self.sandbox.exec(
-            f'git config user.email "{prompt.author.email}"'
-        )
+        # Update git config for this author; argv, not a shell string
+        await self.sandbox.exec("git", "config", "user.name", prompt.author.name)
+        await self.sandbox.exec("git", "config", "user.email", prompt.author.email)
         
         # Run agent
         result = await self.agent.run(prompt.content)
@@ -637,49 +576,43 @@ class MetricsAggregator:
 
 ### Sandbox Isolation
 
+Enforce egress at the platform, not with a command denylist: blocking `curl` does not stop `python` or `node` from opening sockets. Keep credentials out of the sandbox entirely; a token in a clone URL or environment variable persists in `.git/config` or process state and is copied into every image and snapshot. Route git and registry traffic through a proxy outside the sandbox that injects a short-lived credential and permits pushes only to the session branch ([Claude Code sandboxing](https://www.anthropic.com/engineering/claude-code-sandboxing), [Modal networking](https://modal.com/docs/guide/sandbox-networking)).
+
 ```python
 class SandboxSecurityConfig:
     """Security configuration for sandboxes."""
     
-    # Network restrictions
-    allowed_hosts = [
-        "github.com",
-        "api.github.com",
-        "registry.npmjs.org",
-        "pypi.org",
+    # Egress allowlist, enforced by the platform
+    # (Modal: Sandbox.create(outbound_domain_allowlist=...))
+    outbound_domain_allowlist = [
+        "git-proxy.example.com",       # injects the session-scoped GitHub token
+        "registry-proxy.example.com",  # injects registry credentials
     ]
     
-    # Resource limits
+    # Resource limits (Modal: sandbox timeout defaults to 5 minutes, max 24 hours)
     max_memory_mb = 4096
     max_cpu_cores = 2
     max_disk_gb = 10
     max_runtime_hours = 4
     
-    # Secrets handling
-    secrets_to_inject = [
-        "GITHUB_APP_TOKEN",
-        "NPM_TOKEN",
-    ]
-    
-    # Blocked operations
-    blocked_commands = [
-        "curl",  # Use fetch tools instead
-        "wget",
-        "ssh",
-    ]
+    # Secrets placed in the sandbox image, environment, or snapshot: none
+    secrets_in_sandbox: list[str] = []
 ```
 
 ### Token Handling
 
+This runs in the proxy and API, outside the sandbox. Installation tokens expire after one hour; mint one per request, scoped to the session's repository ([GitHub docs](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-an-installation-access-token-for-a-github-app)).
+
 ```python
 class TokenManager:
-    """Manage tokens for GitHub operations."""
+    """Manage tokens for GitHub operations, outside the sandbox."""
     
     def get_app_installation_token(self, repo: str) -> str:
         """Get short-lived token for repo access."""
-        # Token expires in 1 hour
+        # Token expires in 1 hour; scope it to one repository
         return github_app.create_installation_token(
             installation_id=self.get_installation_id(repo),
+            repositories=[repo.split("/")[1]],
             permissions={"contents": "write", "pull_requests": "write"}
         )
     
@@ -692,9 +625,12 @@ class TokenManager:
 
 ## References
 
-- [Modal Documentation](https://modal.com/docs)
+- [Modal Sandboxes](https://modal.com/docs/guide/sandboxes)
+- [Modal Sandbox Snapshots](https://modal.com/docs/guide/sandbox-snapshots)
+- [Modal 1.0 migration guide](https://modal.com/docs/guide/modal-1-0-migration)
+- [OpenCode](https://opencode.ai/docs/)
 - [Cloudflare Durable Objects](https://developers.cloudflare.com/durable-objects/)
 - [Cloudflare Agents SDK](https://developers.cloudflare.com/agents/)
 - [GitHub Apps Authentication](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app)
-- [Slack Bolt for Python](https://slack.dev/bolt-python/)
+- [Slack Bolt for Python](https://docs.slack.dev/tools/bolt-python/)
 - [Chrome Extension APIs](https://developer.chrome.com/docs/extensions/)

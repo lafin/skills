@@ -1,10 +1,10 @@
 ---
 name: project-development
-description: "This skill should be used for project-level decisions about LLM-powered systems: whether an LLM is the right primitive for the task at hand, the shape of a multi-stage batch or agent pipeline, token and cost estimation, choosing between single-agent and multi-agent at the project level, structured output design for downstream parsing, and structuring agent-assisted iteration. Use this when the unit of work is a whole project or a multi-stage pipeline. Route individual tool design to tool-design and individual skill-loading or context-budget tactics to context-optimization."
+description: "This skill should be used for project-level decisions about LLM-powered systems: whether an LLM is the right primitive for the task at hand, the shape of a multi-stage batch or agent pipeline, token and cost estimation, structured output design for downstream parsing, and structuring agent-assisted iteration. Use this when the unit of work is a whole project or a multi-stage pipeline. Route individual tool design to tool-design, individual skill-loading or context-budget tactics to context-optimization, and the single-versus-multi-agent decision and agent topology to multi-agent-patterns."
 license: MIT
 metadata:
   upstream: "muratcankoylan/Agent-Skills-for-Context-Engineering"
-  upstream_commit: "c578e85e40fe2bda7c1fec91ff64cf5285434934"
+  upstream_commit: "58b55a8921758d13453b440704fb1b5b208c0b0e"
   upstream_path: "skills/project-development"
   adaptation: modified
   license_notice: LICENSE-context-engineering
@@ -23,7 +23,7 @@ Activate this skill when the unit of work is a whole project or pipeline:
 - Deciding whether an LLM is the right primitive for a task at all (task-model fit before any code).
 - Shaping a multi-stage batch or agent pipeline (acquire / prepare / process / parse / render).
 - Estimating tokens, dollar cost, and timelines for an LLM-heavy project.
-- Choosing between single-agent and multi-agent at the project level.
+- Deciding whether a pipeline stage needs an agent at all, before any topology choice.
 - Structuring agent-assisted iteration (where the agent helps build the project itself).
 - Designing structured output at the pipeline contract level (cross-stage handoff format).
 
@@ -31,7 +31,7 @@ Do not activate this skill for adjacent work owned by other skills:
 
 - Per-tool description, schema, naming, response format, error message: `tool-design`.
 - Per-trajectory token-efficiency tactics (masking, partitioning, caching): `context-optimization`.
-- Deciding to split work across sub-agents at the agent topology level: `multi-agent-patterns`.
+- Choosing single versus multiple agents, or the agent topology (supervisor, swarm, handoffs): `multi-agent-patterns`.
 - Designing the autonomous control loop (locked metrics, novelty gates, human approval boundaries): `harness-engineering`.
 
 ## Core Concepts
@@ -139,23 +139,15 @@ Estimate LLM processing costs before starting, because token costs compound quic
 Total cost = (items x tokens_per_item x price_per_token) + API overhead
 ```
 
-For batch processing, estimate input tokens per item (prompt + context), estimate output tokens per item (typical response length), multiply by item count, and add a retry buffer derived from observed failure rates.
+For batch processing, count input tokens per item (prompt + context) with the target model's tokenizer, take output tokens per item from prototype usage, multiply by item count, and add a retry buffer derived from observed failure rates. Characters per token varies by tokenizer, so calibrate it from the provider's reported usage or a token-counting endpoint rather than assuming a fixed ratio. Treat prices, output tokens per item, and the retry rate as required inputs, not defaults.
 
-Track actual costs during development. If costs exceed estimates significantly, reduce context length through truncation, use smaller models for simpler items, cache and reuse partial results, or add parallel processing to reduce wall-clock time.
+Track actual costs during development. If costs exceed estimates significantly, reduce context length through truncation, use smaller models for simpler items, cache and reuse partial results, send non-urgent work through a provider batch API, or keep a stable prompt prefix so it is served from the prompt cache. Batch and cache discounts stack on some providers; check the current price page ([example](https://platform.claude.com/docs/en/about-claude/pricing)). Parallel processing cuts wall-clock time, not cost.
 
 ## Detailed Topics
 
-### Choosing Single vs Multi-Agent Architecture
+### Pipeline Stages Before Agent Topology
 
-Default to single-agent pipelines for batch processing with independent items, because they are simpler to manage, cheaper to run, and easier to debug. Escalate to multi-agent architectures only when one of these conditions holds:
-
-- Parallel exploration of different aspects is required
-- The task exceeds single context window capacity
-- Specialized sub-agents demonstrably improve quality on benchmarks
-
-Choose multi-agent for context isolation, not role anthropomorphization. Sub-agents get fresh context windows for focused subtasks, which prevents context degradation on long-running tasks.
-
-See `multi-agent-patterns` skill for detailed architecture guidance.
+Default to a plain pipeline for batch processing with independent items, because it is simpler to manage, cheaper to run, and easier to debug. Decide here only whether a stage needs an agent at all. Once a stage does need agents, the single-versus-multi-agent decision and the topology belong to `multi-agent-patterns`.
 
 ### Architectural Reduction
 
@@ -179,7 +171,7 @@ See `tool-design` skill for detailed tool architecture guidance.
 
 ### Iteration and Refactoring
 
-Plan for multiple architectural iterations from the start, because production agent systems at scale always require refactoring. Manus refactored their agent framework five times since launch. The Bitter Lesson suggests that structures added for current model limitations become constraints as models improve.
+Plan for multiple architectural iterations from the start, because production agent systems at scale always require refactoring. The Manus team reported rebuilding its agent framework four times in July 2025, and a later talk put the count at five (see [Case Studies](skill://project-development/references/case-studies.md#case-study-3-manus-context-engineering)). The Bitter Lesson suggests that structures added for current model limitations become constraints as models improve.
 
 Build for change by following these practices:
 - Keep architecture simple and unopinionated so refactoring is cheap
@@ -205,13 +197,14 @@ Follow this template in order, because each step validates assumptions before th
    - Estimate tokens per item for cost projection
 
 3. **Architecture Selection**
-   - Choose single pipeline vs multi-agent based on the criteria above
+   - Decide which stages need an agent; route single-versus-multi-agent and topology to `multi-agent-patterns`
    - Identify required tools and data sources
    - Design storage and caching strategy using file-system state
    - Plan parallelization approach for the process stage
 
 4. **Cost Estimation**
-   - Calculate items x tokens x price with a retry buffer derived from observed failures
+   - Calculate items x tokens x price, with output tokens per item and a retry rate taken from prototype usage and observed failures
+   - Apply batch-API and prompt-cache discounts where the workload allows them
    - Estimate development time for each pipeline stage
    - Identify infrastructure requirements (API keys, storage, compute)
    - Project ongoing operational costs for production runs
@@ -278,7 +271,7 @@ See [Case Studies](skill://project-development/references/case-studies.md) for d
 This skill owns project-shape and pipeline decisions. Adjacent decisions are owned elsewhere:
 
 - `tool-design`: the per-tool interface layer (descriptions, schemas, response formats, error messages, MCP namespacing, individual tool consolidation). If the question is "what should this specific tool look like" rather than "what should the pipeline look like," route there.
-- `multi-agent-patterns`: agent topology decisions (supervisor vs swarm vs hierarchical, handoff protocols, context isolation across agents). This skill picks single-vs-multi at the project level; the topology details belong to multi-agent-patterns.
+- `multi-agent-patterns`: the single-versus-multi-agent decision and agent topology (supervisor vs swarm vs hierarchical, handoff protocols, context isolation across agents). This skill decides whether to build and what shape the pipeline takes; once a stage needs agents, route there.
 - `harness-engineering`: the autonomous control loop around the project (locked metrics, novelty gates, run state machine, human approval boundaries). If the question is "how do we make this run unattended for days," route there.
 - `context-fundamentals`: the conceptual frame for context constraints that inform prompt design at every stage.
 - `evaluation`: outcome measurement and quality gates for pipeline runs.
@@ -297,7 +290,7 @@ Runnable script:
 - **Status:** Template.
 - **Boundary:** The bundled acquire stage uses sample data and the process stage uses mock model output. It does not call a model or a real source and is not a production pipeline.
 - **Replacement points:** Implement `fetch_items_from_source`, `call_llm`, and `render_html` for the target source, provider, and output format before production use.
-- **Run:** From the repository root, run `python project-development/scripts/pipeline_template.py all --batch-id YYYY-MM-DD`. The required positional input is one of `acquire`, `prepare`, `process`, `parse`, `render`, `all`, `clean`, or `estimate`; `--batch-id` defaults to today's date. `--limit`, `--workers`, `--model`, and `--clean-stage` refine the applicable stage.
+- **Run:** From the repository root, run `python project-development/scripts/pipeline_template.py all --batch-id YYYY-MM-DD`. The required positional input is one of `acquire`, `prepare`, `process`, `parse`, `render`, `all`, `clean`, or `estimate`; `--batch-id` defaults to today's date. `--limit`, `--workers`, `--model`, and `--clean-stage` refine the applicable stage. `estimate` also requires `--input-price`, `--output-price` (USD per million tokens, from the current price page), `--output-tokens`, `--retry-rate`, and `--chars-per-token` (from prototype usage).
 - **Output:** Writes stage progress to standard output and materializes staged files under `data/<batch-id>/` plus rendered HTML under `output/<batch-id>/`. Parse produces `data/<batch-id>/all_results.json`; estimate prints and returns token and cost estimates. `clean` removes data-stage artifacts but does not remove rendered `output/<batch-id>/index.html`.
 - **Failure:** Argument errors and uncaught Python or filesystem errors exit non-zero. Running `prepare`, `process`, or `parse` before the batch directory exists can raise `FileNotFoundError`; run `acquire` first. Individual process-item exceptions are printed as `Error - <message>` but do not set a non-zero process exit; repair the named replacement point or failed item and rerun its idempotent stage.
 
@@ -309,7 +302,7 @@ Related skills in this collection:
 External resources:
 - Karpathy's HN Time Capsule project: https://github.com/karpathy/hn-time-capsule
 - Vercel d0 architectural reduction: https://vercel.com/blog/we-removed-80-percent-of-our-agents-tools
-- Manus context engineering: Peak Ji's blog on context engineering lessons
+- Manus context engineering: https://manus.im/blog/Context-Engineering-for-AI-Agents-Lessons-from-Building-Manus (July 2025) and Lance Martin's notes, http://rlancemartin.github.io/2025/10/15/manus (October 2025)
 - Anthropic multi-agent research: How we built our multi-agent research system
 
 ---

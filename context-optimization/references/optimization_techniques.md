@@ -161,7 +161,7 @@ Masking observations that are still needed can cause errors. Track observation u
 
 ### Ignoring Attention Distribution
 
-The lost-in-middle phenomenon means that information placement matters. Place critical information at attention-favored positions (beginning and end of context). Use explicit markers to highlight important content.
+Position effects vary by model and task. Test placement of critical information at several positions on representative contexts, and use the measured best position. Use explicit markers to highlight important content.
 
 ### Premature Optimization
 
@@ -196,8 +196,8 @@ Integrate optimization into agent workflow:
 
 ```python
 class OptimizingAgent:
-    def __init__(self, context_limit: int = 80000):
-        self.context_limit = context_limit
+    def __init__(self, measured_safe_limit: int):
+        self.context_limit = measured_safe_limit
         self.optimizer = ContextOptimizer()
     
     def process(self, user_input: str, context: Dict) -> Dict:

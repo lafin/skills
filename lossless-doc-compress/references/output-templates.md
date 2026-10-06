@@ -19,7 +19,8 @@ document title.
 ## Artifact 2: Removal Log
 
 The account of what was cut. Group by the five categories from `removal-taxonomy.md`, give
-a count and one representative before → after per category, then list every flag.
+a span count, the words removed, and one representative before → after per category, then
+list every flag. The words-removed counts must sum to approximately `before − after`.
 
 ```markdown
 # Removal Log: <document title>
@@ -28,11 +29,13 @@ a count and one representative before → after per category, then list every fl
 
 ## Removed
 
-- **filler** (<n>): "It is important to note that the API is rate-limited." → "The API is rate-limited."
-- **hedging** (<n>): "This is basically a ranking problem." → "This is a ranking problem."
-- **slop** (<n>): removed ceremonial intro "In today's fast-paced world…"
-- **restatement** (<n>): removed second definition of <metric>, identical to the first.
-- **verbose-phrasing** (<n>): "at this point in time" → "now"
+- **filler** (<n> spans, −<w> words): "It is important to note that the API is rate-limited." → "The API is rate-limited."
+- **hedging** (<n> spans, −<w> words): "This is basically a ranking problem." → "This is a ranking problem."
+- **slop** (<n> spans, −<w> words): removed ceremonial intro "In today's fast-paced world…"
+- **restatement** (<n> spans, −<w> words): removed second definition of <metric>, identical to the first.
+- **verbose-phrasing** (<n> spans, −<w> words): "at this point in time" → "now"
+
+**Words removed, total:** <sum of w> (compare with <before> − <after>)
 
 ## Flags (author decides — left in the document)
 
@@ -53,7 +56,7 @@ intact and unmodified — small text, never a header.
 
 **Result:** Tightened −<percent>% · <lossless ✓ | see flags> · <n> flags
 **Words:** <before> → <after>
-**Fidelity:** lossless — no facts, numbers, decisions, or caveats removed
+**Fidelity:** lossless — no facts, numbers, decisions, or caveats removed; numbers, identifiers, code blocks, and table cells byte-exact
 **Flags:** <n> judgment calls left for the author (see removal log)
 
 **Top flag:** <the single highest-value structural suggestion, or "none">
@@ -61,6 +64,9 @@ intact and unmodified — small text, never a header.
 ```
 
 Save to `<slug>-compression-scorecard.md`.
+
+Use `lossless ✓` only after the self-check in `compression-workflow.md` passes, including the
+byte-exact check. Otherwise write `see flags` and name the failed check.
 
 ## Save Rule
 

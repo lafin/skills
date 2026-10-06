@@ -89,7 +89,7 @@ Evaluate behavior, not vibes.
 - For RAG, score retrieval separately from generation.
 - For generated answers, check grounding, unsupported claims, contradiction, refusal quality, and usefulness.
 - For agents, verify final system state or structured result, not transcript wording.
-- Use repeated runs for reliability when outputs or tool choices are stochastic.
+- Use repeated runs for reliability when outputs or tool choices are stochastic. Report pass^k (all k runs succeed) for user-facing agents, not only the per-run pass rate.
 - Keep regression cases from production failures.
 - Calibrate LLM-as-judge with human spot checks and disagreement analysis.
 - Check eval contamination: verbatim golden-set Q&A pairs in fine-tuning data or few-shot examples make scores meaningless. For RAG, retrieving the answer-bearing source document is the point — contamination is the eval answer key itself indexed as a document. Treat public-benchmark results as weak evidence when pretraining overlap is plausible.
@@ -100,7 +100,7 @@ Grade anchors:
 - D: Generic metrics or manual spot checks.
 - C: Task-specific cases exist, but coverage, calibration, or launch thresholds are weak.
 - B: Human or judge-assisted scoring covers task failures with grounding and usefulness checks.
-- A: Regression set, robustness/adversarial cases, calibrated judging, repeated runs, cost/latency metrics, and launch thresholds.
+- A: Regression set, robustness/adversarial cases, calibrated judging, repeated runs with pass^k for user-facing agents, cost/latency metrics, and launch thresholds.
 
 ## Observability And Operations
 

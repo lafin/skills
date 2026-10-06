@@ -230,7 +230,7 @@ def validate_automated_eval(automated_scores, human_scores, criteria):
 3. Diagnostic: Per-criterion breakdown
 
 ```python
-def compare_models(model_a_outputs, model_b_outputs, prompts):
+async def compare_models(model_a_outputs, model_b_outputs, prompts):
     results = []
     for a, b, p in zip(model_a_outputs, model_b_outputs, prompts):
         comparison = await compare_with_position_swap(a, b, p)

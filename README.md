@@ -73,7 +73,7 @@ framework, artifact contract, and reproduction commands.
 
 ## Credentials
 
-- The Context Engineering skills are derived from [Agent Skills for Context Engineering](https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering) at commit `c578e85e40fe2bda7c1fec91ff64cf5285434934`, © 2025 Context Engineering Agent Skills Contributors, under the MIT License. See [ATTRIBUTION.md](ATTRIBUTION.md) and [LICENSE-context-engineering](LICENSE-context-engineering).
+- The Context Engineering skills are derived from [Agent Skills for Context Engineering](https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering) at commit `58b55a8921758d13453b440704fb1b5b208c0b0e`, © 2025 Context Engineering Agent Skills Contributors, under the MIT License. See [ATTRIBUTION.md](ATTRIBUTION.md) and [LICENSE-context-engineering](LICENSE-context-engineering).
 - `latent-briefing` also draws on work from Ramp Labs.
 - `lossless-doc-compress`, `ml-system-design-review`, and `ai-stage-gate` contain imported or adapted material from [MLSystemDesign](https://github.com/ML-SystemDesign/MLSystemDesign). See [ATTRIBUTION.md](ATTRIBUTION.md) for exact commits and scopes and [LICENSE-ml-system-design](LICENSE-ml-system-design) for the required notice.
 - The `leancode` lineage is recorded against the observed external comparison commit without inferring copying direction. See [ATTRIBUTION.md](ATTRIBUTION.md).

@@ -1,10 +1,10 @@
 ---
 name: context-fundamentals
-description: "This skill should be used to explain or reason about the foundational concepts of context engineering: what context is, the anatomy of a context window, how attention mechanics work, the U-shaped attention curve, why context quality matters more than quantity, and the mental models needed to interpret every other context-engineering decision. Use this for conceptual explanation, onboarding, and background reading. Route operational work to the specialized skills: debugging attention failures goes to context-degradation, token-efficiency work goes to context-optimization, conversation summarization goes to context-compression, and project-shape decisions go to project-development."
+description: "This skill should be used to explain or reason about the foundational concepts of context engineering: what context is, the anatomy of a context window, how attention mechanics work, position sensitivity and context rot, why context quality matters more than quantity, and the mental models needed to interpret every other context-engineering decision. Use this for conceptual explanation, onboarding, and background reading. Route operational work to the specialized skills: debugging attention failures goes to context-degradation, token-efficiency work goes to context-optimization, conversation summarization goes to context-compression, and project-shape decisions go to project-development."
 license: MIT
 metadata:
   upstream: "muratcankoylan/Agent-Skills-for-Context-Engineering"
-  upstream_commit: "c578e85e40fe2bda7c1fec91ff64cf5285434934"
+  upstream_commit: "58b55a8921758d13453b440704fb1b5b208c0b0e"
   upstream_path: "skills/context-fundamentals"
   adaptation: modified
   license_notice: LICENSE-context-engineering
@@ -164,7 +164,7 @@ The corresponding operational question—how to reduce the load after measuring 
 
 1. **Nominal window is not effective capacity**: A model advertising a large context window may degrade well before that limit on complex retrieval or reasoning tasks. Budget below the nominal window until your own degradation tests prove otherwise.
 
-2. **Character-based token estimates silently drift**: Prose, code, URLs, file paths, and non-English text tokenize differently. Use the provider's actual tokenizer or counting API for any budget-critical calculation.
+2. **Character-based token estimates silently drift**: Characters per token depend on the tokenizer and the content. On Anthropic's current tokenizer, 1M tokens is about 2.5M characters, so a 4-characters-per-token estimate undercounts by about 35–40%. Use the provider's tokenizer or token-counting API for any budget-critical calculation.
 
 3. **Serialized tool schemas consume more context than their source layout suggests**: Brackets, quotes, descriptions, and repeated field metadata all count toward the prompt. Audit the serialized token count before adding tools.
 
@@ -203,8 +203,8 @@ Runnable script:
 ### `context_manager.py`
 
 - **Status:** Example.
-- **Boundary:** Approximates token counts from character ratios rather than tokenizer output. It validates only its local context structure and does not prove model behavior.
-- **Run:** From the repository root, run `python context-fundamentals/scripts/context_manager.py`. The demo accepts no arguments or credentials and uses built-in prompt, task, and document strings.
+- **Boundary:** Counts tokens with a caller-supplied `count_tokens` function; without one it falls back to a labeled 4-characters-per-token estimate. The demo uses a fixed 2.5-characters-per-token counter and a demo limit. It validates only its local context structure and does not prove model behavior.
+- **Run:** From the repository root, run `python context-fundamentals/scripts/context_manager.py`. The demo accepts no arguments or credentials and uses built-in prompt, task, and document strings. Library callers must pass `context_limit` from their measured safe limit.
 - **Output:** Writes a human-readable estimated token total, utilization, section breakdown, and validation result to standard output. `build_agent_context` returns `context`, `usage_report`, and `validation` fields.
 - **Failure:** The demo exits non-zero only on an uncaught Python error. Repair the reported import or input-type error; a printed validation failure is report data and does not set a non-zero exit status.
 
@@ -213,9 +213,12 @@ Related skills in this collection:
 - context-optimization - Read when: token costs are too high or compaction/compression strategies are needed
 
 External resources:
-- Anthropic's "Effective Context Engineering for AI Agents" — production patterns for compaction, sub-agents, and hybrid retrieval
-- Research on transformer attention mechanisms and the lost-in-the-middle effect
-- Tokenomics research on agentic software engineering token distribution
+- Anthropic, "Effective Context Engineering for AI Agents" (<https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents>) — production patterns for compaction, sub-agents, and hybrid retrieval
+- Liu et al., 2023, "Lost in the Middle" (<https://arxiv.org/abs/2307.03172>) — position effects in long-context retrieval
+- Chroma, "Context Rot" (<https://www.trychroma.com/research/context-rot>) — performance across input lengths for 18 models; no needle-position effect on its simple retrieval task
+- NoLiMa (<https://arxiv.org/abs/2502.05167>) — long-context retrieval without literal matches
+- Anthropic context-window documentation (<https://platform.claude.com/docs/en/build-with-claude/context-windows>) — window sizes, usage fields, and token counting
+- Tokenomics (<https://arxiv.org/abs/2601.14470>) — token distribution in agentic software engineering
 
 ---
 

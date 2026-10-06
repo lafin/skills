@@ -38,8 +38,11 @@ choose KEEP (leave it, don't even flag) unless there is a concrete reason to rai
 Before producing output, verify:
 
 - Every sacred item (see the Never Remove list in `removal-taxonomy.md`) present in the source is present in the compressed doc.
+- Every number, identifier, code block, and table cell in the source appears byte-exact in
+  the compressed doc: search for the exact source bytes, and paste back any span that is
+  missing or retyped. Do not claim lossless until this check passes.
 - The word-count delta is fully explained by the removal log: `before − after`
-  approximately equals the words accounted for across the logged categories.
+  approximately equals the sum of the logged words-removed counts across categories.
 - No REMOVE was applied to a span that could plausibly carry information (zero contract
   violations). If you find one, restore it and convert it to a FLAG.
 

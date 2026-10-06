@@ -342,8 +342,8 @@ class CompressionEvaluator:
     probe, then call get_summary() to retrieve aggregated results.
     """
 
-    def __init__(self, model: str = "gpt-5.2") -> None:
-        self.model = model
+    def __init__(self, judge_model: str) -> None:
+        self.judge_model = judge_model
         self.results: List[EvaluationResult] = []
 
     def evaluate(self,
@@ -471,7 +471,7 @@ class CompressionEvaluator:
 
         ```python
         result = openai.chat.completions.create(
-            model="gpt-5.2",
+            model=self.judge_model,
             messages=[
                 {"role": "system", "content": JUDGE_SYSTEM_PROMPT},
                 {"role": "user", "content": self._format_judge_input(criterion, probe, response, context)}
@@ -743,6 +743,7 @@ def evaluate_compression_quality(
     original_history: str,
     compressed_context: str,
     model_response_fn: Callable[[str, str], str],
+    judge_model: str,
 ) -> Dict:
     """Evaluate compression quality for a conversation end-to-end.
 
@@ -756,6 +757,8 @@ def evaluate_compression_quality(
         compressed_context: The compressed version to evaluate.
         model_response_fn: Callable that takes (compressed_context, question)
             and returns the model's response string.
+        judge_model: Judge model identifier. Required; choose it per
+            deployment rather than relying on a default.
 
     Returns:
         Dictionary with total evaluations, average score, per-dimension
@@ -766,7 +769,7 @@ def evaluate_compression_quality(
     probes = generator.generate_probes()
 
     # Evaluate each probe
-    evaluator = CompressionEvaluator()
+    evaluator = CompressionEvaluator(judge_model=judge_model)
 
     for probe in probes:
         # Get model response using compressed context
@@ -850,6 +853,7 @@ if __name__ == "__main__":
         original_history=sample_history,
         compressed_context=sample_compressed,
         model_response_fn=mock_model_response,
+        judge_model="JUDGE_MODEL",  # Placeholder; the heuristic stub ignores it.
     )
 
     print("=== Compression Quality Evaluation ===")

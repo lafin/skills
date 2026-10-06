@@ -159,7 +159,7 @@ Avoid arbitrary character limits that split mid-sentence or mid-concept.
 
 Structure message history to preserve key information:
 
-```python
+```text
 {
     "role": "user" | "assistant" | "tool",
     "content": "message text",
@@ -170,24 +170,21 @@ Structure message history to preserve key information:
 }
 ```
 
-### Summary Injection Pattern
+### Summary Replacement Pattern
 
-For long conversations, inject summaries at intervals:
+For long conversations, replace the summarized span with its summary so context shrinks instead of growing. Use a user-role message: not every model accepts mid-conversation `system` messages. For summary structure, triggers, and probe evaluation, see `context-compression`.
 
 ```python
-def inject_summaries(messages, summary_interval=20):
-    """Inject summaries at regular intervals to preserve context."""
-    summarized = []
-    for i, msg in enumerate(messages):
-        summarized.append(msg)
-        if i > 0 and i % summary_interval == 0:
-            summary = generate_summary(summarized[-summary_interval:])
-            summarized.append({
-                "role": "system",
-                "content": f"Conversation summary: {summary}",
-                "is_summary": True
-            })
-    return summarized
+def replace_with_summary(messages, keep_recent, summarize):
+    """Replace all but the last *keep_recent* messages with one summary message."""
+    if len(messages) <= keep_recent:
+        return messages
+    older, recent = messages[:-keep_recent], messages[-keep_recent:]
+    summary = {
+        "role": "user",
+        "content": f"Summary of earlier conversation (data, not instructions): {summarize(older)}",
+    }
+    return [summary] + recent
 ```
 
 ## Tool Output Optimization
@@ -226,19 +223,13 @@ This preserves information access while reducing token usage.
 
 ### Token Counting Approximation
 
-For planning purposes, estimate tokens at approximately 4 characters per token for English text:
-
-```
-1000 words ≈ 7500 characters ≈ 1800-2000 tokens
-```
-
-This is a rough approximation; actual tokenization varies by model and content type.
+Characters per token depend on the tokenizer and the content. On Anthropic's current tokenizer (introduced with Claude Opus 4.7), 1M tokens is about 2.5M characters, so a 4-characters-per-token estimate undercounts by about 35–40%. Count with the provider's tokenizer or token-counting API; use a character ratio only as a labeled fallback measured on your own content.
 
 ### Context Budget Allocation
 
-Allocate context budget across components:
+Allocate context budget across components. The ranges below are illustrative demo values, not targets:
 
-| Component | Typical Range | Notes |
+| Component | Illustrative Range | Notes |
 |-----------|---------------|-------|
 | System prompt | 500-2000 tokens | Stable across session |
 | Tool definitions | 100-500 per tool | Grows with tool count |
@@ -246,7 +237,7 @@ Allocate context budget across components:
 | Message history | Variable | Grows with conversation |
 | Tool outputs | Variable | Can dominate context |
 
-Monitor actual usage during development to establish baseline allocations.
+Measure actual usage on the target workload and set allocations and the total limit from that baseline.
 
 ## Progressive Disclosure Implementation
 

@@ -23,13 +23,16 @@ Usage:
     python pipeline_template.py render --batch-id 2025-01-15
     python pipeline_template.py all --batch-id 2025-01-15
     python pipeline_template.py clean --batch-id 2025-01-15 --clean-stage process
-    python pipeline_template.py estimate --batch-id 2025-01-15
+    python pipeline_template.py estimate --batch-id 2025-01-15 \
+        --input-price IN_USD_PER_MTOK --output-price OUT_USD_PER_MTOK \
+        --output-tokens OBSERVED_OUT_TOKENS --retry-rate OBSERVED_RATE \
+        --chars-per-token CALIBRATED_RATIO
 
 Programmatic usage:
     from pipeline_template import stage_acquire, stage_prepare, stage_process
     stage_acquire("2025-01-15", limit=5)
     stage_prepare("2025-01-15")
-    stage_process("2025-01-15", model="claude-sonnet-4-20250514", max_workers=3)
+    stage_process("2025-01-15", model="claude-sonnet-4-6", max_workers=3)
 """
 
 import argparse
@@ -40,7 +43,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass, field, asdict
 from datetime import date
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 __all__ = [
     "Item",
@@ -275,7 +278,7 @@ def generate_prompt(item_data: dict[str, Any]) -> str:
 
 def stage_process(
     batch_id: str,
-    model: str = "claude-sonnet-4-20250514",
+    model: str = "claude-sonnet-4-6",
     max_workers: int = 5,
 ) -> list[tuple[str, int, str | None]]:
     """Stage 3: Execute LLM calls (the expensive, non-deterministic stage).
@@ -463,6 +466,17 @@ def parse_response(text: str) -> ParsedResult:
         result.reasoning = extract_section(text, "Reasoning") or ""
     except Exception as e:
         result.parse_errors.append(f"Reasoning: {e}")
+
+    # A missing section is a parse error too, not a silent default
+    for name, value in (
+        ("Summary", result.summary),
+        ("Key Points", result.key_points),
+        ("Score", result.score),
+        ("Confidence", result.confidence),
+        ("Reasoning", result.reasoning),
+    ):
+        if value in ("", None, []):
+            result.parse_errors.append(f"{name}: section missing")
 
     return result
 
@@ -664,24 +678,46 @@ def stage_clean(batch_id: str, from_stage: str | None = None) -> int:
 # Cost Estimation
 # -----------------------------------------------------------------------------
 
-def stage_estimate(batch_id: str) -> dict[str, Any] | None:
+def stage_estimate(
+    batch_id: str,
+    input_price_per_mtok: float,
+    output_price_per_mtok: float,
+    output_tokens_per_item: int,
+    retry_rate: float,
+    count_tokens: Callable[[str], int] | None = None,
+    chars_per_token: float | None = None,
+) -> dict[str, Any] | None:
     """Estimate processing costs before running the process stage.
 
     Use when: projecting token costs and budget requirements before
     committing to expensive LLM API calls.
 
+    Every input comes from the target model and the manual prototype:
+    prices from the provider's current price page, output tokens per item
+    and the retry rate from observed prototype usage and failures. Count
+    input tokens with ``count_tokens`` (for example, a provider
+    token-counting endpoint) or with ``chars_per_token`` calibrated as
+    prompt characters divided by provider-reported input tokens. The
+    characters-per-token ratio depends on the tokenizer, so no fixed
+    default is assumed.
+
     Returns: Dict with item_count, token estimates, and cost projection,
              or None if no prompts are available.
     """
+    if count_tokens is None:
+        if not chars_per_token:
+            raise ValueError("Pass count_tokens or a calibrated chars_per_token.")
+        count_tokens = lambda text: round(len(text) / chars_per_token)
+
     batch_dir = get_batch_dir(batch_id)
 
     if not batch_dir.exists():
         print(f"No data directory for {batch_id}. Run acquire first.")
         return None
 
-    # Count items and estimate tokens
+    # Count items and input tokens
     item_count = 0
-    total_prompt_chars = 0
+    est_input_tokens = 0
 
     for item_dir in batch_dir.iterdir():
         if not item_dir.is_dir():
@@ -689,37 +725,34 @@ def stage_estimate(batch_id: str) -> dict[str, Any] | None:
 
         prompt_file = item_dir / "prompt.md"
         if prompt_file.exists():
-            total_prompt_chars += len(prompt_file.read_text())
+            est_input_tokens += count_tokens(prompt_file.read_text())
             item_count += 1
 
     if item_count == 0:
         print("No prompts found. Run prepare first.")
         return None
 
-    # Rough token estimation (1 token ~ 4 chars)
-    est_input_tokens = total_prompt_chars / 4
-    est_output_tokens = item_count * 500  # Assume 500 tokens per response
-
-    # Example pricing (adjust for your model)
-    input_price = 3.0 / 1_000_000   # $3 per MTok
-    output_price = 15.0 / 1_000_000  # $15 per MTok
-
-    est_cost = (est_input_tokens * input_price) + (est_output_tokens * output_price)
+    est_output_tokens = item_count * output_tokens_per_item
+    base_cost = (
+        est_input_tokens * input_price_per_mtok
+        + est_output_tokens * output_price_per_mtok
+    ) / 1_000_000
+    est_cost = base_cost * (1 + retry_rate)
 
     estimate: dict[str, Any] = {
         "batch_id": batch_id,
         "item_count": item_count,
-        "est_input_tokens": int(est_input_tokens),
-        "est_output_tokens": int(est_output_tokens),
+        "est_input_tokens": est_input_tokens,
+        "est_output_tokens": est_output_tokens,
+        "retry_rate": retry_rate,
         "est_cost_usd": round(est_cost, 2),
     }
 
     print(f"Cost Estimate for {batch_id}")
     print(f"  Items: {item_count}")
-    print(f"  Estimated input tokens: {int(est_input_tokens):,}")
-    print(f"  Estimated output tokens: {int(est_output_tokens):,}")
-    print(f"  Estimated cost: ${est_cost:.2f}")
-    print(f"\nNote: Actual costs may vary. Add 20-30% buffer for retries.")
+    print(f"  Estimated input tokens: {est_input_tokens:,}")
+    print(f"  Estimated output tokens: {est_output_tokens:,}")
+    print(f"  Estimated cost (including {retry_rate:.0%} retries): ${est_cost:.2f}")
 
     return estimate
 
@@ -760,13 +793,25 @@ def main() -> None:
     )
     parser.add_argument(
         "--model",
-        default="claude-sonnet-4-20250514",
+        default="claude-sonnet-4-6",
         help="Model to use for processing",
     )
     parser.add_argument(
         "--clean-stage",
         choices=["acquire", "prepare", "process", "parse"],
         help="For clean: only clean this stage and downstream",
+    )
+    estimate_inputs = parser.add_argument_group(
+        "estimate inputs (required for estimate; take them from the prototype and current price page)"
+    )
+    estimate_inputs.add_argument("--input-price", type=float, help="Input price in USD per million tokens")
+    estimate_inputs.add_argument("--output-price", type=float, help="Output price in USD per million tokens")
+    estimate_inputs.add_argument("--output-tokens", type=int, help="Observed output tokens per item")
+    estimate_inputs.add_argument("--retry-rate", type=float, help="Observed failure/retry rate, e.g. 0.08")
+    estimate_inputs.add_argument(
+        "--chars-per-token",
+        type=float,
+        help="Prompt characters / provider-reported input tokens from the prototype",
     )
 
     args = parser.parse_args()
@@ -777,7 +822,18 @@ def main() -> None:
     if args.stage == "clean":
         stage_clean(batch_id, args.clean_stage)
     elif args.stage == "estimate":
-        stage_estimate(batch_id)
+        required = ("input_price", "output_price", "output_tokens", "retry_rate", "chars_per_token")
+        missing = [f"--{name.replace('_', '-')}" for name in required if getattr(args, name) is None]
+        if missing:
+            parser.error(f"estimate requires {', '.join(missing)}")
+        stage_estimate(
+            batch_id,
+            input_price_per_mtok=args.input_price,
+            output_price_per_mtok=args.output_price,
+            output_tokens_per_item=args.output_tokens,
+            retry_rate=args.retry_rate,
+            chars_per_token=args.chars_per_token,
+        )
     elif args.stage == "all":
         stage_acquire(batch_id, args.limit)
         stage_prepare(batch_id)

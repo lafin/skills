@@ -17,6 +17,10 @@ Each skill must cover these concepts:
 
 A concept may appear under any heading, table, checklist, or concise paragraph. Reviewers assess whether a reader can find and act on it, not whether the document matches a template.
 
+## Model-neutral procedure
+
+Write the procedure, not the workaround. If a step cannot be justified without naming a model, a model version, or one host's private tool name, it does not belong in a skill; record it as an issue. Describe the capability ("run the focused test command"), not one runtime's mechanism. In prose and reference examples, use placeholders such as `JUDGE_MODEL` instead of vendor model IDs. An executable mock or template may default to a current model ID that matches its upstream.
+
 ## Routing description
 
 The frontmatter `description` is catalog metadata. It must be non-empty, no longer than 1,024 characters, and answer three questions:
@@ -26,6 +30,8 @@ The frontmatter `description` is catalog metadata. It must be non-empty, no long
 - What closest requests belong elsewhere?
 
 Do not summarize the full workflow in the description. Description changes require routing evaluation because character count is objective but trigger quality is semantic.
+
+Top-level frontmatter keys are limited to the [Agent Skills specification](https://agentskills.io/specification) fields: `name`, `description`, `license`, `compatibility`, `metadata`, and `allowed-tools`. Put vendor or runtime controls under `metadata`. The validator rejects any other top-level key.
 
 ## Progressive disclosure
 

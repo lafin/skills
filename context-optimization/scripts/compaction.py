@@ -8,8 +8,8 @@ heuristics; they do not call a tokenizer, model, or inference service.
 Public API
 ----------
 Functions:
-    estimate_token_count(text) -> int
-    estimate_message_tokens(messages) -> int
+    estimate_token_count(text, count_tokens=None) -> int
+    estimate_message_tokens(messages, count_tokens=None) -> int
     categorize_messages(messages) -> dict
     summarize_content(content, category, max_length) -> str
     design_stable_prompt(template, dynamic_values) -> str
@@ -17,14 +17,12 @@ Functions:
 
 Classes:
     ObservationStore   — Store and mask verbose tool outputs with retrievable references.
-    ContextBudget      — Token budget allocation and optimization trigger detection.
+    ContextBudget      — Token budget allocation and trigger detection at one measured_safe_limit.
 
 PRODUCTION NOTES:
-- Token estimation uses simplified heuristics (~4 chars/token for English).
-  Production systems should use model-specific tokenizers:
-  - OpenAI: tiktoken library
-  - Anthropic: anthropic tokenizer
-  - Local models: HuggingFace tokenizers
+- Characters per token depend on the tokenizer. Pass `count_tokens` backed by
+  the provider's tokenizer or token-counting API; the 4-characters-per-token
+  fallback undercounts by about 35-40% on Anthropic's current tokenizer.
 
 - Summarization functions use simple heuristics for demonstration.
   Production systems should use:
@@ -36,7 +34,7 @@ PRODUCTION NOTES:
   with actual inference infrastructure metrics.
 """
 
-from typing import List, Dict, Optional, Tuple
+from typing import Callable, List, Dict, Optional, Tuple
 import hashlib
 import re
 import time
@@ -62,30 +60,26 @@ __all__ = [
 # Token estimation
 # ---------------------------------------------------------------------------
 
-def estimate_token_count(text: str) -> int:
+def estimate_token_count(
+    text: str, count_tokens: Optional[Callable[[str], int]] = None
+) -> int:
     """
-    Estimate token count for text.
+    Return the token count for text.
 
-    Use when: a quick token budget check is needed and a model-specific
-    tokenizer is unavailable or too slow for the hot path.
-
-    Uses approximation: ~4 characters per token for English.
-
-    WARNING: This is a rough estimate. Actual tokenization varies by:
-    - Model (GPT-5.2, Claude 4.5, Gemini 3 have different tokenizers)
-    - Content type (code typically has higher token density)
-    - Language (non-English may have 2-3x higher token/char ratio)
-
-    Production usage::
-
-        import tiktoken
-        enc = tiktoken.encoding_for_model("gpt-4")
-        token_count = len(enc.encode(text))
+    Uses *count_tokens* (provider tokenizer or token-counting API) when
+    supplied. Otherwise falls back to ``len(text) // 4``, which is only a
+    labeled estimate: the ratio depends on the tokenizer, content type, and
+    language, and undercounts by about 35-40% on Anthropic's current tokenizer.
     """
-    return len(text) // 4
+    if count_tokens is not None:
+        return count_tokens(text)
+    return len(text) // 4  # Labeled fallback; real ratio depends on the tokenizer.
 
 
-def estimate_message_tokens(messages: List[Dict[str, str]]) -> int:
+def estimate_message_tokens(
+    messages: List[Dict[str, str]],
+    count_tokens: Optional[Callable[[str], int]] = None,
+) -> int:
     """
     Estimate token count for a message list.
 
@@ -95,7 +89,7 @@ def estimate_message_tokens(messages: List[Dict[str, str]]) -> int:
     total = 0
     for msg in messages:
         content = msg.get("content", "")
-        total += estimate_token_count(content)
+        total += estimate_token_count(content, count_tokens)
         # Add overhead for role/formatting
         total += 10
     return total
@@ -341,7 +335,7 @@ class ContextBudget:
 
     Example::
 
-        budget = ContextBudget(total_limit=128_000)
+        budget = ContextBudget(total_limit=128_000, measured_safe_limit=90_000)
         budget.allocate("system_prompt", 1500)
         budget.allocate("tool_definitions", 3000)
         # ... after each agent turn:
@@ -351,8 +345,9 @@ class ContextBudget:
             pass
     """
 
-    def __init__(self, total_limit: int) -> None:
+    def __init__(self, total_limit: int, measured_safe_limit: int) -> None:
         self.total_limit = total_limit
+        self.measured_safe_limit = measured_safe_limit
         self.allocated: Dict[str, int] = {
             "system_prompt": 0,
             "tool_definitions": 0,
@@ -416,10 +411,9 @@ class ContextBudget:
         """
         reasons: List[Tuple[str, object]] = []
 
-        # Check utilization
-        utilization = current_usage / self.total_limit
-        if utilization > 0.8:
-            reasons.append(("high_utilization", utilization))
+        # Check usage against the workload's measured safe limit
+        if current_usage > self.measured_safe_limit:
+            reasons.append(("over_measured_safe_limit", current_usage))
 
         # Check degradation metrics if provided
         if metrics:
@@ -541,7 +535,7 @@ if __name__ == "__main__":
     print(f"   Retrievable: {retrieved is not None}\n")
 
     # 3. Context budget
-    budget = ContextBudget(total_limit=128_000)
+    budget = ContextBudget(total_limit=128_000, measured_safe_limit=90_000)  # demo values
     budget.allocate("system_prompt", 1500)
     budget.allocate("tool_definitions", 3000)
     budget.allocate("message_history", 95_000)

@@ -61,7 +61,6 @@ until the user explicitly selects `lite`, `full`, or `ultra`.
 - State material assumptions explicitly. If multiple interpretations genuinely
   diverge, present them; do not pick one silently.
 - If a simpler approach exists, say so. Push back when warranted.
-- If something is unclear, stop. Name what's confusing. Ask.
 
 A clarifying question before implementation is cheaper than a rewrite after it.
 The exception is the lazy default: when one interpretation is obviously lazier
@@ -138,7 +137,8 @@ For multi-step work, state a brief plan, each step paired with its check:
 ```
 
 Strong success criteria let you loop independently. Weak criteria ("make it
-work") force constant clarification.
+work") force constant clarification. The check verifies the logic; it does not
+define it. Never special-case test inputs to make a check pass.
 
 Lean code without its check is unfinished. Non-trivial logic (a branch, a loop,
 a parser, a money/security path) leaves ONE runnable check behind, the smallest
@@ -180,8 +180,9 @@ explicitly requested. User insists on the full version → build it, no
 re-arguing.
 
 Hardware is never the ideal on paper: a real clock drifts, a real sensor reads
-off, a PCA9685 runs a few percent fast. Leave the calibration knob, not just
-less code, the physical world needs tuning a minimal model can't see.
+off, a PCA9685's internal oscillator lands anywhere from about 23 to 27 MHz
+around its nominal 25 MHz. Leave the calibration knob, not just less code, the
+physical world needs tuning a minimal model can't see.
 
 The bias is toward caution over speed. For trivial tasks (typos, obvious
 one-liners), use judgment rather than full rigor, the four reflexes are a

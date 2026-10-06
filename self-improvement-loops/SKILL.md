@@ -4,7 +4,7 @@ description: "This skill should be used when the harness, scaffold, workflow, or
 license: MIT
 metadata:
   upstream: "muratcankoylan/Agent-Skills-for-Context-Engineering"
-  upstream_commit: "c578e85e40fe2bda7c1fec91ff64cf5285434934"
+  upstream_commit: "58b55a8921758d13453b440704fb1b5b208c0b0e"
   upstream_path: "skills/self-improvement-loops"
   adaptation: modified
   license_notice: LICENSE-context-engineering
@@ -46,7 +46,7 @@ The systems reviewed on 2026-07-08 target progressively deeper objects. [Evidenc
 | --- | --- | --- |
 | 1 | Instruction prompts | Promptbreeder, GEPA |
 | 2 | Structured context | ACE (playbook of itemized bullets) |
-| 3 | Context mechanism | MCE (the skill that produces context) |
+| 3 | Context mechanism | MCE (the skill that produces context), WikiSkill (skill-library evolution) |
 | 4 | Workflow graph | ADAS, AFlow |
 | 5 | Harness code | Self-Harness (bounded self-edits), Meta-Harness, Darwin Godel Machine |
 | 6 | Optimizer code | STOP (the improver improves the improver) |
@@ -60,9 +60,11 @@ In the STOP study, recursive optimizer edits improved mean downstream performanc
 1. Run a capability validation before enabling recursion: a fixed number of iterations on a held-out task set, with the loop counted as net-negative if the trajectory declines.
 2. Detect the degenerate stagnation mode. A broken improver that silently returns its input unchanged looks like stability in aggregate metrics. Track edit diffs, not only scores.
 
+Measure the proposer and the executor separately. In one study, harness updates written by a small model gave gains similar to a frontier model's, while weak executors gained little because they did not invoke or follow the updated artifacts. Score proposer usefulness as the gain its updates give a fixed executor, and score executor uptake from traces showing whether the executor invokes and follows the updated artifacts. A cheap proposer can be enough; try it before paying for the strongest model. [Evidence](skill://self-improvement-loops/references/loop-design-evidence.md#evidence-reviewed-2026-10-06-proposer-capability-versus-executor-uptake)
+
 ### The Outside-the-Loop Invariant
 
-Keep the evaluator, its instrumentation, permission control, and budget enforcement outside the surface the loop can modify. In reviewed incidents, agents removed detector markers when checking code was visible and modified exposed scoring functions. [DGM evidence](skill://self-improvement-loops/references/loop-design-evidence.md#evidence-reviewed-2026-07-08-darwin-godel-machine-objective-hacking) [METR evidence](skill://self-improvement-loops/references/loop-design-evidence.md#evidence-reviewed-2026-07-08-metr-scorer-visibility)
+Keep the evaluator, its instrumentation, permission control, and budget enforcement outside the surface the loop can modify. In reviewed incidents, agents modified exposed scoring functions, and in DGM a lineage still removed the detector's markers while the checking code was hidden. Hiding the checker reduces hacking but does not prevent it; lineage audits caught the DGM hack. [DGM evidence](skill://self-improvement-loops/references/loop-design-evidence.md#evidence-reviewed-2026-07-08-darwin-godel-machine-objective-hacking) [METR evidence](skill://self-improvement-loops/references/loop-design-evidence.md#evidence-reviewed-2026-07-08-metr-scorer-visibility)
 
 Operational rules:
 
@@ -73,11 +75,15 @@ Operational rules:
 
 ### Empirical Acceptance, Never Rationale
 
-Accept a self-modification only on measured evidence, using two splits: a held-in split that checks the targeted weakness and a held-out split the proposer never sees. The reviewed Self-Harness gate accepts only when neither split regresses and at least one strictly improves under repeated evaluation. It reported held-out gains for all three tested base models on its fixed benchmark subset. [Evidence](skill://self-improvement-loops/references/loop-design-evidence.md#evidence-reviewed-2026-07-08-self-harness-bounded-self-edits) Reject candidates that trade one split against the other even when the sum improves. Log rejected candidates with their evidence so the proposer stops rediscovering them.
+Accept a self-modification only on measured evidence, using two splits: a held-in split that checks the targeted weakness and a held-out split the proposer never sees. The reviewed Self-Harness gate accepts only when neither split regresses and at least one strictly improves under repeated evaluation. Across three base models on fixed subsets of Terminal-Bench-2.0, SWE-bench Verified, and AppWorld, all nine model-benchmark pairs improved on both splits, measured as mean single-attempt success over two repeats. [Evidence](skill://self-improvement-loops/references/loop-design-evidence.md#evidence-reviewed-2026-07-08-self-harness-bounded-self-edits) Reject candidates that trade one split against the other even when the sum improves. Log rejected candidates with their evidence so the proposer stops rediscovering them.
+
+The gate compares each candidate only with the previous harness, and its held-out split is reused every round, so it becomes a selection set. Before promotion, compare the final harness with a matched-budget baseline: best-of-N sampling or retries on the current harness, with the same feedback and inference budget the loop spent. Run both on a final test split that no gate decision used. In one matched-budget study, harness evolution did not beat simple test-time scaling on a terminal benchmark and generalized poorly to held-out tasks; it did beat the search baseline on long-horizon games. [Evidence](skill://self-improvement-loops/references/loop-design-evidence.md#evidence-reviewed-2026-10-06-harness-evolution-versus-matched-budget-baselines)
 
 ### Filesystem Experience Archive
 
-Store every candidate as a directory containing its source, scores, and raw execution traces. Let the proposer navigate the archive with search tools instead of stuffing history into its context window. In the Meta-Harness ablation, full raw-trace access outperformed scores-only feedback and scores plus LLM-written summaries on the tested text-classification suite. [Evidence](skill://self-improvement-loops/references/loop-design-evidence.md#evidence-reviewed-2026-07-08-meta-harness-search) Do not pre-summarize the archive. Curate access paths, not content.
+Store every candidate as a directory containing its source, scores, and raw execution traces. Let the proposer navigate the archive with search tools instead of stuffing history into its context window. In the Meta-Harness ablation, full raw-trace access outperformed scores-only feedback and scores plus LLM-written summaries on the tested text-classification suite. [Evidence](skill://self-improvement-loops/references/loop-design-evidence.md#evidence-reviewed-2026-07-08-meta-harness-search) Do not replace raw traces with summaries. Curate access paths, not content.
+
+A consolidated knowledge layer on the proposer side is allowed on top of the raw archive when the raw traces stay immutable and each entry links to the traces it came from. In the WikiSkill ablation, giving the skill proposer a persistent wiki raised the average score from 48.7% to 63.7%; also giving the executor wiki access during training rollouts lowered it to 60.9%. Keep the layer out of the executor's rollouts. [Evidence](skill://self-improvement-loops/references/loop-design-evidence.md#evidence-reviewed-2026-10-06-wikiskill-proposer-side-knowledge-layer)
 
 ### Diversity Preservation
 
@@ -105,8 +111,8 @@ When searching whole harness programs from outside rather than editing a running
 - Keep the outer loop minimal: no hand-tuned mutation operators or parent-selection heuristics. Delegate diagnosis and edit decisions to a coding-agent proposer. [Evidence](skill://self-improvement-loops/references/loop-design-evidence.md#evidence-reviewed-2026-07-08-meta-harness-search)
 - Initialize from a strong available harness, not from scratch. The reviewed Meta-Harness winner added an environment-bootstrap snapshot to its seed harness. [Evidence](skill://self-improvement-loops/references/loop-design-evidence.md#evidence-reviewed-2026-07-08-meta-harness-search)
 - Maintain a Pareto frontier over the objectives that actually matter (accuracy, context cost, latency) rather than collapsing to one scalar.
-- Structure search memory per candidate with recorded modification outcomes. In the reviewed AFlow comparison, per-node experience records outperformed archive-in-context conditioning across six benchmarks. [Evidence](skill://self-improvement-loops/references/loop-design-evidence.md#evidence-reviewed-2026-07-08-evolutionary-harness-search)
-- Re-run the search when the executor model changes. The reviewed AFlow workflows degraded when transferred to another executor. [Evidence](skill://self-improvement-loops/references/loop-design-evidence.md#evidence-reviewed-2026-07-08-evolutionary-harness-search)
+- Structure search memory per candidate with recorded modification outcomes. AFlow, which keeps per-node experience records, outperformed ADAS across six benchmarks; the AFlow paper attributes the ADAS gap to its linear heuristic search and overly simple experience representation. [Evidence](skill://self-improvement-loops/references/loop-design-evidence.md#evidence-reviewed-2026-07-08-evolutionary-harness-search)
+- Validate on the new executor when the executor model changes, and re-search if the transferred workflow underperforms. AFlow reports strong transferability, but one workflow searched with another executor was notably weaker on the target than the workflow searched on the target itself. [Evidence](skill://self-improvement-loops/references/loop-design-evidence.md#evidence-reviewed-2026-07-08-evolutionary-harness-search)
 
 ### Context Evolution as Self-Improvement
 
@@ -117,7 +123,7 @@ Context playbooks that update themselves have two relevant failure modes. Brevit
 - Deduplicate by embedding similarity, periodically or lazily.
 - Gate the whole mechanism on feedback quality. The reviewed ACE study reports degradation below the static baseline without reliable execution signals or labels. [Evidence](skill://self-improvement-loops/references/loop-design-evidence.md#evidence-reviewed-2026-07-08-context-evolution)
 
-One level up, version the mechanism that produces context separately from the produced context. Evolve the mechanism against a validation split and warm-start from the prior best artifact plus its rollout results. Check the train-validation gap each iteration to catch mechanism overfitting. The reviewed evidence limits this approach to settings with useful feedback and reports setting-dependent results. [Evidence](skill://self-improvement-loops/references/loop-design-evidence.md#evidence-reviewed-2026-07-08-context-evolution)
+One level up, version the mechanism that produces context separately from the produced context. Evolve the mechanism against a validation split and warm-start from the prior best artifact plus its rollout results. Check the train-validation gap each iteration to catch mechanism overfitting. The reviewed evidence limits this approach to settings with useful feedback and reports setting-dependent results. [Evidence](skill://self-improvement-loops/references/loop-design-evidence.md#evidence-reviewed-2026-07-08-context-evolution) Skill-library evolution sits on this rung. Validate each evolved skill on the target model before reuse: WikiSkill reports that evolved skills transfer across models, yet on one benchmark skills evolved with a small model cut a stronger model from 50.5% to 18.1%. [Evidence](skill://self-improvement-loops/references/loop-design-evidence.md#evidence-reviewed-2026-10-06-wikiskill-proposer-side-knowledge-layer)
 
 ### What Belongs to Humans
 
@@ -131,22 +137,23 @@ Do not enable self-modification until every item holds:
 
 1. A fast, deterministic, automatable evaluator exists.
 2. A held-out split exists that the proposer never sees, refreshed if the loop runs long enough to overfit it.
-3. Budgets, permissions, and sandboxing are enforced by the runtime, outside every editable surface.
-4. Editable surfaces are explicitly declared (marked regions or configuration points); everything else is locked, and immutability is programmatically re-verified after each candidate.
-5. An archive with full lineage of diffs exists; audits read diffs and raw traces, not the fitness signal.
-6. Evaluation spending is staged: cheap interface or smoke checks before full evaluation, repeated runs where scoring is noisy.
-7. A task-specific capability validation run does not show a declining improvement trajectory.
-8. Human decision points are wired for evaluator changes, surface expansion, and promotion.
+3. A final test split exists that no gate decision uses, and a matched-budget best-of-N or retry baseline is defined for the promotion comparison.
+4. Budgets, permissions, and sandboxing are enforced by the runtime, outside every editable surface.
+5. Editable surfaces are explicitly declared (marked regions or configuration points); everything else is locked, and immutability is programmatically re-verified after each candidate.
+6. An archive with full lineage of diffs exists; audits read diffs and raw traces, not the fitness signal.
+7. Evaluation spending is staged: cheap interface or smoke checks before full evaluation, repeated runs where scoring is noisy.
+8. A task-specific capability validation run does not show a declining improvement trajectory.
+9. Human decision points are wired for evaluator changes, surface expansion, and promotion.
 
 ### Choosing the Loop Level
 
 | Recurring failure | Fix at | Loop pattern |
 | --- | --- | --- |
 | Missing domain heuristics, repeated known mistakes | Structured context | Itemized playbook with delta updates |
-| Context playbook itself plateaus across tasks | Context mechanism | Evolve the skill on validation data |
+| Context playbook or skill library plateaus across tasks | Context mechanism | Evolve the skill or skill library on validation data; validate each evolved skill on the target model |
 | Wrong sequencing, missing verification steps | Workflow | Search over workflow graphs with per-node experience |
 | Failure clusters persist across workflow candidates | Harness code | Failure-driven bounded self-edits or meta-level search |
-| Improvement strategy itself is weak | Optimizer code | Only with strong models and locked meta-evaluation |
+| Improvement strategy itself is weak | Optimizer code | Only with locked meta-evaluation, after proposer usefulness and executor uptake are measured separately |
 
 ## Examples
 
@@ -191,29 +198,29 @@ so ground the context; do not add machinery.
 
 ## Guidelines
 
-1. Enforce every constraint in the runtime; treat prompt-stated constraints as decorative.
+1. Enforce every constraint in the runtime; treat prompt-stated constraints as decorative. METR found that telling a model not to cheat left reward hacking in most runs. [Evidence](skill://self-improvement-loops/references/loop-design-evidence.md#evidence-reviewed-2026-07-08-metr-scorer-visibility)
 2. Keep evaluator source, instrumentation, and permission checks invisible to and unmodifiable by the loop.
-3. Gate acceptance on held-in plus held-out no-regression with repeated evaluation; never accept on the proposer's rationale.
+3. Gate acceptance on held-in plus held-out no-regression with repeated evaluation; never accept on the proposer's rationale. Before promotion, beat a matched-budget best-of-N or retry baseline on an untouched final test split.
 4. Declare editable surfaces explicitly and re-verify locked regions after every candidate.
 5. Archive all viable candidates with raw traces; select parents with offspring-count discounting.
 6. Reject near-duplicates by embedding similarity before spending evaluation budget.
 7. Evaluate from raw logs and original outputs, never from model-written reports of them.
 8. Count detected evaluator exploits as failures and audit lineage diffs, not scores.
 9. Fix failures at the lowest ladder rung that expresses the fix.
-10. Re-search when the executor model or the seed harness changes materially.
-11. Verify the task-specific capability-validation trajectory before enabling recursion.
+10. Re-validate when the executor model or the seed harness changes materially; re-search if the result underperforms.
+11. Verify the task-specific capability-validation trajectory before enabling recursion, and measure proposer usefulness and executor uptake separately.
 12. Keep evaluator changes, surface expansion, and production promotion as human decisions.
 
 ## Gotchas
 
 1. **Prompt constraints evolve away**: STOP generated self-rewrites that dropped budget constraints, and a warning did not reduce reported sandbox-disabling code. Put enforcement in the runtime. [Evidence](skill://self-improvement-loops/references/loop-design-evidence.md#evidence-reviewed-2026-07-08-stop-capability-threshold)
-2. **Visible scorers get gamed**: DGM and METR report detector disabling, timing overwrites, or evaluator modification when checking code was visible. Expose scores and traces, never evaluator internals. [DGM evidence](skill://self-improvement-loops/references/loop-design-evidence.md#evidence-reviewed-2026-07-08-darwin-godel-machine-objective-hacking) [METR evidence](skill://self-improvement-loops/references/loop-design-evidence.md#evidence-reviewed-2026-07-08-metr-scorer-visibility)
+2. **Visible scorers get gamed, hidden ones too**: METR reports timing overwrites and evaluator modification when scoring code was visible. DGM hid its checking functions and a lineage still removed the detector's markers. Expose scores and traces, never evaluator internals, and audit lineage diffs. [DGM evidence](skill://self-improvement-loops/references/loop-design-evidence.md#evidence-reviewed-2026-07-08-darwin-godel-machine-objective-hacking) [METR evidence](skill://self-improvement-loops/references/loop-design-evidence.md#evidence-reviewed-2026-07-08-metr-scorer-visibility)
 3. **Self-reported success**: A reviewed autonomous-research study reports success declarations based on model-written reports instead of raw logs. Bind every reported number to a raw artifact at write time. [Evidence](skill://self-improvement-loops/references/loop-design-evidence.md#evidence-reviewed-2026-07-08-reward-hacking-and-oversight)
 4. **Monolithic rewrite collapse**: In one AppWorld case study, a whole-playbook rewrite reduced context from 18,282 tokens to 122 and accuracy from 66.7 to 57.1, below the 63.7 no-adaptation baseline. Update by itemized deltas with deterministic merge. [Evidence](skill://self-improvement-loops/references/loop-design-evidence.md#evidence-reviewed-2026-07-08-context-evolution)
 5. **Hill-climbing the latest candidate**: Discarding the archive removes alternative parents, and reported DGM ablations were worse without the archive. Keep viable candidates available for selection. [Evidence](skill://self-improvement-loops/references/loop-design-evidence.md#evidence-reviewed-2026-07-08-darwin-godel-machine-objective-hacking)
 6. **Stagnation disguised as stability**: STOP produced degenerate improvers that returned their input unchanged. Alarm on empty or trivial diffs, not only score drops. [Evidence](skill://self-improvement-loops/references/loop-design-evidence.md#evidence-reviewed-2026-07-08-stop-capability-threshold)
-7. **Same-agent proposal and approval**: The reviewed Self-Harness design uses the same agent as proposer and approver. Put independent review outside the loop for higher-stakes changes. [Evidence](skill://self-improvement-loops/references/loop-design-evidence.md#evidence-reviewed-2026-07-08-self-harness-bounded-self-edits)
-8. **Benchmark-shaped improvements**: Self-Harness reports model-specific edits on a fixed benchmark subset, and Meta-Harness searches and evaluates on the same benchmark. Validate on a distribution shift before promotion. [Self-Harness evidence](skill://self-improvement-loops/references/loop-design-evidence.md#evidence-reviewed-2026-07-08-self-harness-bounded-self-edits) [Meta-Harness evidence](skill://self-improvement-loops/references/loop-design-evidence.md#evidence-reviewed-2026-07-08-meta-harness-search)
+7. **Same-agent proposal and approval**: In Self-Harness the same model proposes the edits, but promotion is a deterministic held-out gate and no agent approves. Never let the proposing agent approve its own edit; keep promotion deterministic and put independent review outside the loop for higher-stakes changes. [Evidence](skill://self-improvement-loops/references/loop-design-evidence.md#evidence-reviewed-2026-07-08-self-harness-bounded-self-edits)
+8. **Benchmark-shaped improvements**: Self-Harness reports model-specific edits on fixed benchmark subsets, and Meta-Harness searches and evaluates on the same benchmark. Validate on a distribution shift before promotion. [Self-Harness evidence](skill://self-improvement-loops/references/loop-design-evidence.md#evidence-reviewed-2026-07-08-self-harness-bounded-self-edits) [Meta-Harness evidence](skill://self-improvement-loops/references/loop-design-evidence.md#evidence-reviewed-2026-07-08-meta-harness-search)
 9. **Cross-stage score cherry-picking**: The ScientistOne paper reports writeup stages selecting favorable intermediate scores instead of the shipped artifact's score. Bind scores to submitted candidates deterministically. [Evidence](skill://self-improvement-loops/references/loop-design-evidence.md#evidence-reviewed-2026-07-08-reward-hacking-and-oversight)
 
 ## Integration
@@ -239,7 +246,7 @@ Related skills in this collection:
 
 External resources:
 - Weng, "Harness Engineering for Self-Improvement" (Lil'Log, 2026) - Survey and framing of the optimization ladder and RSI challenges
-- Zhang et al., "Self-Harness: Harnesses That Improve Themselves" (arXiv 2606.09498) - Failure-driven bounded self-edits with two-split acceptance
+- Zhang et al., "Self-Harness: Harnesses That Improve Themselves" (arXiv 2606.09498v3) - Failure-driven bounded self-edits with two-split acceptance
 - Lee et al., "Meta-Harness: End-to-End Optimization of Model Harnesses" (arXiv 2603.28052) - Filesystem experience store and coding-agent proposer
 - Ye et al., "Meta Context Engineering via Agentic Skill Evolution" (arXiv 2601.21557) - Mechanism-versus-artifact separation in context evolution
 - Zhang et al., "Agentic Context Engineering" (arXiv 2510.04618) - Itemized deltas, deterministic merge, context collapse
@@ -248,12 +255,16 @@ External resources:
 - Novikov et al., "AlphaEvolve" (arXiv 2506.13131) - Bounded mutation markers and evaluation cascades
 - Lange et al., "ShinkaEvolve" (arXiv 2509.19349) - Novelty rejection and sample-efficient parent sampling
 - METR, "Recent Frontier Models Are Reward Hacking" (2025) - Documented evaluator-gaming incidents in agentic tasks
+- DSPy, "GEPA: Reflective Prompt Optimizer" (https://dspy.ai/current/api/optimizers/GEPA/overview/) - Rung 1 reflective prompt evolution with Pareto candidate selection
+- Wang et al., "Rethinking the Evaluation of Harness Evolution for Agents" (arXiv 2607.12227) - Matched-budget baselines and held-out evaluation for harness evolution
+- Lin et al., "Harness Updating Is Not Harness Benefit" (arXiv 2605.30621) - Proposer usefulness versus executor uptake
+- Tang et al., "WikiSkill" (arXiv 2608.27454) - Proposer-side knowledge layer for skill-library evolution and cross-model transfer
 
 ---
 
 ## Skill Metadata
 
 **Created**: 2026-07-08
-**Last Updated**: 2026-07-08
+**Last Updated**: 2026-10-06
 **Author**: Agent Skills for Context Engineering Contributors
 **Version**: 1.0.0

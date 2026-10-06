@@ -47,8 +47,8 @@ A lower-precedence rule MUST NOT alter a higher-precedence property.
 
 | Profile | Use for | Rule posture |
 | --- | --- | --- |
-| Strict controlled | Safety-critical, regulated, equipment-maintenance, or translation-sensitive text; projects that explicitly require STE-like controls | Technical safeguards and declared grammar controls are errors. Apply 20-word procedural and 25-word descriptive limits, restricted voice and tense, no contractions, controlled multi-word nouns, project-approved vocabulary, and the documented word count. |
-| Engineering-default | Design documents, ADRs, PRs, issues, ordinary developer documentation, comments, and explanatory API documentation | Technical safeguards are errors. Voice, tense, length, contractions, semicolons, and similar style signals are warnings or project choices unless they obscure meaning. |
+| Strict controlled | Safety-critical, regulated, equipment-maintenance, or translation-sensitive text; projects that explicitly require STE-like controls | Technical safeguards and declared grammar controls are errors. Apply 20-word procedural and 25-word descriptive limits, restricted voice, the STE Rule 3.2 verb forms only (infinitive, imperative, simple present, simple past, simple future, past participle as an adjective) with no auxiliary-verb constructions (Rule 3.4) and no `-ing` verb forms (Rule 3.5), no contractions, no phrasal verbs, no paragraph of more than six sentences, controlled multi-word nouns, project-approved vocabulary, and the documented word count. |
+| Engineering-default | Design documents, ADRs, PRs, issues, ordinary developer documentation, comments, and explanatory API documentation | Technical safeguards are errors. Voice, tense (including perfect and progressive forms), length, contractions, semicolons, and similar style signals are warnings or project choices unless they obscure meaning. |
 
 Do not infer the strict profile from the artifact name alone. Use the project declaration or task requirement. If neither selects strict, use engineering-default.
 
@@ -58,7 +58,7 @@ For a mixed artifact, apply each card only to its matching blocks.
 
 ### Procedure and runbook
 
-Require prerequisites, imperative steps, one consequential action per step, and conditions before actions when early action can cause an error. State an observable result when success is not self-evident. Put risk information before the governed action. When authoring a procedure, state rollback or irreversibility for state-changing, destructive, costly, security-sensitive, or availability-affecting work. When rewriting source text, do not add a rollback, irreversibility, recovery-availability, or missing-recovery claim that the source does not contain unless the task explicitly requests a gap analysis. Do not require rollback text for read-only diagnostics.
+Require prerequisites, imperative steps, one consequential action per step, and conditions before actions when early action can cause an error. State an observable result when success is not self-evident. Put risk information before the governed action. A note gives information only; move any instruction, requirement, or limit out of a note and into a step or risk statement (`SEE-NOTE-01`). When authoring a procedure, state rollback or irreversibility for state-changing, destructive, costly, security-sensitive, or availability-affecting work. When rewriting source text, do not add a rollback, irreversibility, recovery-availability, or missing-recovery claim that the source does not contain unless the task explicitly requests a gap analysis. Do not require rollback text for read-only diagnostics.
 
 ### Requirement and contract
 

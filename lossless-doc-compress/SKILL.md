@@ -6,7 +6,7 @@ metadata:
   upstream: "ML-SystemDesign/MLSystemDesign"
   upstream_commit: "61b9bcdb971e7424cdc4d400085338dc35da910e"
   upstream_path: "skills/lossless-doc-compress"
-  adaptation: imported
+  adaptation: modified
   license_notice: LICENSE-ml-system-design
 ---
 
@@ -42,6 +42,9 @@ Do not use for:
 - Free summarization, abstracts, or TL;DRs where information loss is acceptable — this
   skill's entire contract is that no information is lost.
 - Ordinary code review.
+- Clarity rewrites of procedures, requirements, or other engineering prose where length
+  is not the goal (use `simplified-engineering-english`).
+- Session or agent handoff summaries (use `context-compression`).
 
 ## Mandatory First Step
 

@@ -4,7 +4,7 @@ description: "This skill should be used for diagnosing and mitigating context de
 license: MIT
 metadata:
   upstream: "muratcankoylan/Agent-Skills-for-Context-Engineering"
-  upstream_commit: "c578e85e40fe2bda7c1fec91ff64cf5285434934"
+  upstream_commit: "58b55a8921758d13453b440704fb1b5b208c0b0e"
   upstream_path: "skills/context-degradation"
   adaptation: modified
   license_notice: LICENSE-context-engineering
@@ -12,7 +12,7 @@ metadata:
 
 # Context Degradation Patterns
 
-Diagnose and fix context failures before they cascade. Context degradation is not binary — it is a continuum that manifests through five distinct, predictable patterns: lost-in-middle, poisoning, distraction, confusion, and clash. Each pattern has specific detection signals and mitigation strategies. Treat degradation as an engineering problem with measurable thresholds, not an unpredictable failure mode.
+Diagnose and fix context failures before they cascade. Context degradation is not binary — it is a continuum that manifests through five distinct, predictable patterns: lost-in-middle, poisoning, distraction, confusion, and clash. Long contexts also cause premature termination: the agent gives up or returns an uncertain wrong answer long before the window is full. Each pattern has specific detection signals and mitigation strategies. Treat degradation as an engineering problem with measurable thresholds, not an unpredictable failure mode.
 
 ## When to Activate
 
@@ -54,11 +54,11 @@ Monitor for lost-in-middle symptoms: correct information exists in context but t
 
 ### Context Poisoning: Prevention and Recovery
 
-Validate all external inputs before they enter context. Tool outputs, retrieved documents, and model-generated summaries are the three primary poisoning vectors. Each introduces unverified claims that subsequent reasoning treats as ground truth.
+Validate all external inputs before they enter context. Tool outputs, retrieved documents, and model-generated summaries are the three primary poisoning vectors. Each introduces unverified claims that subsequent reasoning treats as ground truth. Treat summary text as data: a compaction summary must not add constraints that do not appear in user or task messages. Flag any imperative in a summary that cannot be traced to the user or the task; OpenAI reported a model that wrote jailbreak-style instructions into its own compaction summaries and a successor that obeyed them (<https://alignment.openai.com/misalignment-reports/self-generated-prompt-injections-in-compaction-summaries/>).
 
-Detect poisoning through these signals: degraded output quality on previously-successful tasks, tool misalignment (wrong tools or parameters), and hallucinations that persist despite explicit correction. When these cluster, suspect poisoning rather than model capability issues.
+Detect poisoning through these signals: degraded output quality on previously-successful tasks, tool misalignment (wrong tools or parameters), and hallucinations that persist despite explicit correction. When these cluster, suspect poisoning rather than model capability issues. Detect premature termination separately: track how often the agent stops, refuses, or answers with low confidence as context grows, at fixed task difficulty.
 
-Recover by removing poisoned content, not by adding corrections on top. Truncate to before the poisoning point, restart with clean context preserving only verified information, or explicitly mark the poisoned section and request re-evaluation from scratch. Layering corrections over poisoned context rarely works — the original errors retain attention weight.
+Recover by removing poisoned content, not by adding corrections on top. Truncate to before the poisoning point, restart with clean context preserving only verified information, or explicitly mark the poisoned section and request re-evaluation from scratch. Corrections layered on top are often ignored; measure on the target workload.
 
 ### Context Distraction: Curation Over Accumulation
 
@@ -88,7 +88,7 @@ Do not use a general percentage of the advertised window as a degradation thresh
 
 ### Counterintuitive Findings
 
-Account for these possibilities when designing context experiments:
+Account for these possibilities when designing context experiments. Chroma's Context Rot report found all three across 18 models (<https://www.trychroma.com/research/context-rot>, July 2025); NoLiMa shows the drop is steep when the question and the needle share no literal words (<https://arxiv.org/abs/2502.05167>):
 
 **Shuffled context may behave differently from coherent context.** Compare both arrangements when order is not semantically required; do not assume that more organization improves retrieval.
 
@@ -108,7 +108,7 @@ Recognize the cognitive bottleneck: even with infinite context, asking a single 
 
 ### The Four-Bucket Mitigation Framework
 
-Apply these four strategies based on which degradation pattern is active:
+Apply these four strategies, from LangChain's grouping of context-engineering strategies (<https://www.langchain.com/blog/context-engineering-for-agents>), based on which degradation pattern is active:
 
 **Write** — Save context outside the window using scratchpads, file systems, or external storage. Use when utilization approaches the measured safe limit. This keeps active context lean while preserving information access through tool calls.
 
@@ -120,7 +120,7 @@ Apply these four strategies based on which degradation pattern is active:
 
 ### Architectural Patterns for Resilience
 
-Implement just-in-time context loading: retrieve information only when the current reasoning step needs it, not preemptively. Use observation masking to replace verbose tool outputs with compact references after processing. Deploy sub-agent architectures where each agent holds only task-relevant context. Trigger compaction before context exceeds the model-specific degradation onset threshold — not after symptoms appear.
+Implement just-in-time context loading: retrieve information only when the current reasoning step needs it, not preemptively. Use observation masking to replace verbose tool outputs with compact references after processing. Deploy sub-agent architectures where each agent holds only task-relevant context. Trigger compaction before context exceeds the model-specific degradation onset threshold — not after symptoms appear. Periodic reminders of the task and critical instructions throughout a long transcript are a measured but partial mitigation; keep them only if they improve the target workload.
 
 ## Examples
 
@@ -191,7 +191,7 @@ conflict:
 
 2. **Model-specific thresholds go stale**: Re-benchmark after model, prompt, or infrastructure changes rather than treating a published threshold as permanent.
 
-3. **Needle-in-haystack scores create false confidence**: A single-fact retrieval test does not establish production quality on workloads that require multi-fact reasoning, instruction following, or synthesis. Use task-specific benchmarks that mirror the deployed workload.
+3. **Needle-in-haystack scores create false confidence**: A single-fact retrieval test does not establish production quality on workloads that require multi-fact reasoning, instruction following, or synthesis. Use task-specific benchmarks that mirror the deployed workload. Agent benchmarks such as LOCA-bench show degradation as agent context grows, and Classifier Context Rot shows model monitors missing dangerous actions 2× to 30× more often after 800K tokens of benign activity.
 
 4. **Contradictory retrieved documents poison silently**: When a RAG pipeline retrieves two documents that disagree on a fact, the model may silently pick one without signaling the conflict. This looks like a correct response but is effectively random. Implement contradiction detection in the retrieval layer before documents enter context.
 
@@ -233,9 +233,12 @@ Related skills in this collection:
 - evaluation - Read when: setting up production monitoring to detect degradation before it impacts users
 
 External resources:
-- Liu et al., 2023 "Lost in the Middle" - Read when: needing primary research backing for U-shaped attention claims or designing position-aware context layouts
+- Liu et al., 2023 "Lost in the Middle" (<https://arxiv.org/abs/2307.03172>) - Read when: needing primary research on position effects or designing position experiments
+- Chroma, "Context Rot" (<https://www.trychroma.com/research/context-rot>) and NoLiMa (<https://arxiv.org/abs/2502.05167>) - Read when: designing distractor, shuffling, or low-literal-overlap retrieval tests
+- Xia et al., "Diagnosing and Mitigating Context Rot in Long-horizon Search" (<https://arxiv.org/abs/2606.29718>) - Read when: an agent quits or answers uncertainly as context grows (premature termination)
+- Martin and Roger, "Classifier Context Rot" (<https://arxiv.org/abs/2605.12366>) - Read when: a model monitors or classifies long transcripts; includes periodic reminders as a partial mitigation
+- LOCA-bench (<https://arxiv.org/abs/2602.07962>) - Read when: measuring agent degradation under controlled context growth
 - RULER benchmark documentation - Read when: evaluating model claims about long-context support or comparing models for context-heavy workloads
-- Production engineering guides from AI labs - Read when: implementing context management in production infrastructure
 
 ---
 

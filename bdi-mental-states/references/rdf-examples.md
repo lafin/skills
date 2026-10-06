@@ -163,17 +163,26 @@ ex:WorldState_arrived_on_time a bdi:WorldState ;
 # TEMPORAL INTERVALS
 # ============================================================
 
+# hasStartTime/hasEndTime point to TimeInstant IRIs; the literal sits on bdi:time.
+
 ex:TimeInterval_morning_commute a bdi:TimeInterval ;
-    bdi:hasStartTime "2026-01-04T08:30:00"^^xsd:dateTime ;
-    bdi:hasEndTime "2026-01-04T09:00:00"^^xsd:dateTime .
+    bdi:hasStartTime ex:TimeInstant_0830 ;
+    bdi:hasEndTime ex:TimeInstant_0900 .
 
 ex:TimeInterval_planning_phase a bdi:TimeInterval ;
-    bdi:hasStartTime "2026-01-04T08:31:00"^^xsd:dateTime ;
-    bdi:hasEndTime "2026-01-04T08:34:00"^^xsd:dateTime .
+    bdi:hasStartTime ex:TimeInstant_0831 ;
+    bdi:hasEndTime ex:TimeInstant_0834 .
 
 ex:TimeInterval_execution a bdi:TimeInterval ;
-    bdi:hasStartTime "2026-01-04T08:35:00"^^xsd:dateTime ;
-    bdi:hasEndTime "2026-01-04T08:52:00"^^xsd:dateTime .
+    bdi:hasStartTime ex:TimeInstant_0835 ;
+    bdi:hasEndTime ex:TimeInstant_0852 .
+
+ex:TimeInstant_0830 a bdi:TimeInstant ; bdi:time "2026-01-04T08:30:00"^^xsd:dateTime .
+ex:TimeInstant_0831 a bdi:TimeInstant ; bdi:time "2026-01-04T08:31:00"^^xsd:dateTime .
+ex:TimeInstant_0834 a bdi:TimeInstant ; bdi:time "2026-01-04T08:34:00"^^xsd:dateTime .
+ex:TimeInstant_0835 a bdi:TimeInstant ; bdi:time "2026-01-04T08:35:00"^^xsd:dateTime .
+ex:TimeInstant_0852 a bdi:TimeInstant ; bdi:time "2026-01-04T08:52:00"^^xsd:dateTime .
+ex:TimeInstant_0900 a bdi:TimeInstant ; bdi:time "2026-01-04T09:00:00"^^xsd:dateTime .
 ```
 
 ## Multi-Agent Coordination Example

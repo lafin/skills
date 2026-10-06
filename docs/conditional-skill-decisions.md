@@ -148,6 +148,20 @@ Reconsider only when recorded routing misses, evaluator failures, user correctio
 
 A one-off performance complaint, a generic lifecycle checklist, or a workflow already owned by an existing skill does not meet the gate.
 
+## Self-managed context
+
+**Decision: DEFER import of upstream `self-managed-context` (Agent Skills for Context Engineering v2.6.0, commit `58b55a8921758d13453b440704fb1b5b208c0b0e`).**
+
+Evidence reviewed on 2026-10-06:
+
+- The upstream skill is 276 lines and about 3,460 words, near the Agent Skills ~5k-token body recommendation, plus about 23 KB of references.
+- Its results rest on one paper, Context Language Models (<https://arxiv.org/abs/2609.37725>, 2026-09-29). Headline numbers match the paper's abstract; no independent replication exists.
+- OMP exposes no model-editable live context, so no local task needs the skill.
+
+Its three general rules now live in existing owners: edit-position cost under prefix caching (`context-optimization`), deterministic budget readouts on models without injected token awareness (`context-optimization`), and summary text as untrusted data (`context-compression`, `context-degradation`).
+
+Reconsider when a target host exposes model-editable context, or when an independent replication of the CLM results is published. Treat any later import as a new-skill admission under `docs/skill-set-improvement-plan.md` section 12.4.
+
 ## Evidence status
 
 Repository-backed case definitions and complete home-profile captures now exist for the security audit and debugging baseline. The canonical routing development baseline and treatment completed with `102/102` critical passes each in `evals/results/catalog-routing-home-v1`; the security current-owner audit passed `18/18` in `evals/results/conditional-security/home-v4-treatment`; and the skills-disabled debugging baseline passed `18/18` in `evals/results/conditional-debugging/home-v13-baseline`. Security remains deferred because the current owners cover the audited boundaries, and debugging remains deferred because its proposal threshold is not met. No incident demand log, immutable external publication, or holdout-grade treatment evidence is claimed.

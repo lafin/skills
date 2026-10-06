@@ -91,6 +91,14 @@ class ValidateSkillsTest(unittest.TestCase):
         self.assertIn("[metadata-description-length]", result.stdout)
         self.assertIn("1,024 characters", result.stdout)
 
+    def test_rejects_vendor_key_at_top_level_but_allows_spec_keys(self) -> None:
+        self.rewrite_skill("license: MIT\n", "license: MIT\ncompatibility: Requires git\nallowed-tools: Read\nmodel: some-model\n")
+        result = self.run_validator()
+        self.assertEqual(1, result.returncode)
+        self.assertIn("alpha/SKILL.md:7: [frontmatter-key] observed='model'", result.stdout)
+        self.assertNotIn("compatibility", result.stdout)
+        self.assertNotIn("allowed-tools", result.stdout)
+
     def test_warns_without_failure_when_skill_exceeds_500_lines(self) -> None:
         path = self.root / "alpha" / "SKILL.md"
         path.write_text(

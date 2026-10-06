@@ -125,7 +125,7 @@ def parse_grades(text: str) -> dict[str, dict]:
 
 ### Lessons Learned
 
-1. **Manual validation first**: The 5-minute copy-paste test prevented hours of wasted development.
+1. **Manual validation first**: A copy-paste test on one representative input came before any pipeline code.
 
 2. **File system as state**: Each article directory contains all intermediate outputs, making debugging trivial.
 
@@ -226,7 +226,7 @@ Same query after: 141 seconds, 19 steps, 67k tokens, succeeded.
 
 ## Case Study 3: Manus Context Engineering
 
-**Source**: Peak Ji's blog "Context Engineering for AI Agents: Lessons from Building Manus"
+**Sources**: Yichao "Peak" Ji, ["Context Engineering for AI Agents: Lessons from Building Manus"](https://manus.im/blog/Context-Engineering-for-AI-Agents-Lessons-from-Building-Manus) (Manus blog, July 18, 2025), and Lance Martin's [notes on a later talk with Peak Ji](http://rlancemartin.github.io/2025/10/15/manus) (October 15, 2025). Claims below are from the Manus blog unless marked as from Lance Martin's notes.
 
 ### Problem Statement
 
@@ -236,9 +236,9 @@ Build a general-purpose consumer agent that can accomplish complex tasks across 
 
 KV-cache hit rate is the single most important metric for production agents. It directly affects both latency and cost.
 
-- Claude Sonnet cached: $0.30/MTok
-- Claude Sonnet uncached: $3.00/MTok
-- 10x cost difference
+- Claude Sonnet cached input: $0.30/MTok (July 2025 price quoted in the Manus blog)
+- Claude Sonnet uncached input: $3.00/MTok (same date)
+- Cache hits cost 10× less or more, depending on model; check the provider's current price page
 
 With an average input-to-output ratio of 100:1 in agentic workloads, optimizing for cache hits dominates the cost equation.
 
@@ -266,9 +266,11 @@ Compression strategies should be restorable:
 
 **4. Recitation for Attention**
 
-Manus creates a todo.md file and updates it step-by-step. This is not just organization - it pushes the global plan into the model's recent attention span.
+Manus created a todo.md file and updated it step-by-step. This is not just organization - it pushes the global plan into the model's recent attention span.
 
 By constantly rewriting objectives at the end of context, the agent avoids "lost in the middle" issues and maintains goal alignment.
+
+Superseded: Lance Martin's notes report that Manus later dropped `todo.md`, because roughly one-third of all actions went to updating the list, and moved planning to a dedicated planner agent that calls executor sub-agents.
 
 **5. Keep Errors In Context**
 
@@ -278,7 +280,7 @@ Erasing failures removes evidence the model needs to adapt.
 
 ### Multi-Agent for Context Isolation
 
-The primary goal of sub-agents in Manus is context isolation, not role division. For tasks requiring discrete work:
+Source: Lance Martin's notes. The primary goal of sub-agents in Manus is context isolation, not role division. For tasks requiring discrete work:
 - Planner assigns tasks to sub-agents with their own context windows
 - Simple tasks: pass instructions via function call
 - Complex tasks: share full context with sub-agent
@@ -287,7 +289,7 @@ Sub-agents have a submit_results tool with constrained output schema. Constraine
 
 ### Layered Action Space
 
-Rather than binding every utility as a tool:
+Rather than binding every utility as a tool (source: Lance Martin's notes):
 - Small set (<20) of atomic functions: Bash, filesystem access, code execution
 - Most actions offload to sandbox layer
 - MCP tools exposed through CLI, executed via Bash tool
@@ -296,7 +298,7 @@ This reduces tool definition tokens and prevents model confusion from overlappin
 
 ### Iteration Expectation
 
-Manus has refactored their agent framework five times since launch. The Bitter Lesson suggests structures added for current limitations become constraints as models improve.
+The Manus blog (July 2025) says the team rebuilt its agent framework four times. Lance Martin's notes (October 2025) quote Peak Ji as saying Manus had been refactored five times since its March launch. The Bitter Lesson suggests structures added for current limitations become constraints as models improve.
 
 Test across model strengths to verify your harness is not limiting performance. Simple, unopinionated designs adapt better to model improvements.
 

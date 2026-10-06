@@ -3,8 +3,9 @@ Sandbox Manager for Hosted Agent Infrastructure.
 
 Status: Template
 Replacement points: Implement Sandbox I/O and snapshots, image creation,
-provider lifecycle operations, and the GitHub token provider for the selected
-sandbox infrastructure. The demo uses placeholder identities and credentials.
+provider lifecycle operations, and the credential-injecting git proxy outside
+the sandbox for the selected infrastructure. The demo uses placeholder
+identities.
 
 Use when: building background coding agents that need sandboxed execution
 environments with pre-built images, warm pools, and session snapshots.
@@ -19,7 +20,7 @@ Adapt for your specific infrastructure (Modal, Fly.io, etc.).
 """
 
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional, Callable, Any
 from enum import Enum
 import asyncio
@@ -93,11 +94,11 @@ class Sandbox:
     # Event handlers
     on_state_change: Optional[Callable[[SandboxState], None]] = None
 
-    async def execute_command(self, command: str) -> dict[str, Any]:
-        """Execute a command in the sandbox.
+    async def execute_command(self, *argv: str) -> dict[str, Any]:
+        """Execute a command in the sandbox as argv, without a shell.
 
-        Use when: running shell commands (git, build tools, tests)
-        inside the isolated environment.
+        Use when: running git, build tools, or tests inside the isolated
+        environment. Pass user-controlled values as separate arguments.
 
         Returns:
             dict with keys "stdout", "stderr", "exit_code".
@@ -160,7 +161,7 @@ class RepositoryImage:
 
     def is_stale(self, max_age: timedelta = timedelta(minutes=30)) -> bool:
         """Check if image is older than max age."""
-        return datetime.utcnow() - self.built_at > max_age
+        return datetime.now(timezone.utc) - self.built_at > max_age
 
 
 class ImageBuilder:
@@ -170,8 +171,7 @@ class ImageBuilder:
     pre-bakes development environments for fast sandbox spin-up.
     """
 
-    def __init__(self, github_app_token_provider: Callable[[], str]) -> None:
-        self.token_provider = github_app_token_provider
+    def __init__(self) -> None:
         self.images: dict[str, RepositoryImage] = {}
 
     async def build_image(self, repo_url: str) -> RepositoryImage:
@@ -182,13 +182,13 @@ class ImageBuilder:
         """
         print(f"Building image for {repo_url}...")
 
-        # Get fresh token for clone
-        token = self.token_provider()
-
-        # These operations run in build environment
+        # These operations run in build environment. The clone URL carries no
+        # credential: a token in the URL persists in .git/config and therefore
+        # in every image and snapshot. Route git traffic through a proxy
+        # outside the sandbox that injects a short-lived, branch-scoped token.
         build_steps: list[str] = [
             # Clone repository
-            f"git clone https://x-access-token:{token}@github.com/{repo_url} /workspace",
+            f"git clone https://github.com/{repo_url} /workspace",
 
             # Install dependencies
             "cd /workspace && npm install",
@@ -214,7 +214,7 @@ class ImageBuilder:
             repo_url=repo_url,
             image_id=await self._finalize_image(),
             commit_sha=commit_sha,
-            built_at=datetime.utcnow()
+            built_at=datetime.now(timezone.utc)
         )
 
         self.images[repo_url] = image
@@ -288,7 +288,7 @@ class WarmPoolManager:
 
     def _is_valid(self, warm: WarmSandbox) -> bool:
         """Check if a warm sandbox is still valid."""
-        age: timedelta = datetime.utcnow() - warm.created_at
+        age: timedelta = datetime.now(timezone.utc) - warm.created_at
         if age > self.max_age:
             return False
 
@@ -333,7 +333,7 @@ class WarmPoolManager:
         warm = WarmSandbox(
             sandbox=sandbox,
             repo_url=repo_url,
-            created_at=datetime.utcnow(),
+            created_at=datetime.now(timezone.utc),
             image_version=image.image_id,
             sync_complete=False
         )
@@ -345,8 +345,8 @@ class WarmPoolManager:
 
     async def _sync_to_latest(self, warm: WarmSandbox) -> None:
         """Sync sandbox to latest commit on base branch."""
-        await warm.sandbox.execute_command("git fetch origin main")
-        await warm.sandbox.execute_command("git reset --hard origin/main")
+        await warm.sandbox.execute_command("git", "fetch", "origin", "main")
+        await warm.sandbox.execute_command("git", "reset", "--hard", "origin/main")
         warm.sync_complete = True
 
     async def _create_sandbox_from_image(self, image: RepositoryImage) -> Sandbox:
@@ -356,10 +356,10 @@ class WarmPoolManager:
         lives behind the Sandbox I/O methods.
         """
         return Sandbox(
-            id=f"sb_{image.image_id}_{int(datetime.utcnow().timestamp() * 1000)}",
+            id=f"sb_{image.image_id}_{int(datetime.now(timezone.utc).timestamp() * 1000)}",
             config=SandboxConfig(repo_url=image.repo_url, base_image=image.image_id),
             state=SandboxState.READY,
-            created_at=datetime.utcnow(),
+            created_at=datetime.now(timezone.utc),
         )
 
 
@@ -374,11 +374,10 @@ class SandboxManager:
     def __init__(
         self,
         repositories: list[str],
-        github_app_token_provider: Callable[[], str],
         build_interval: timedelta = timedelta(minutes=30)
     ) -> None:
         self.repositories = repositories
-        self.image_builder = ImageBuilder(github_app_token_provider)
+        self.image_builder = ImageBuilder()
         self.warm_pool = WarmPoolManager(self.image_builder)
         self.build_interval = build_interval
         self.active_sessions: dict[str, Sandbox] = {}
@@ -407,20 +406,18 @@ class SandboxManager:
     ) -> Sandbox:
         """Start a new session for a user.
 
-        Use when: a user submits a prompt. Tries warm pool first,
-        then snapshot restore, then cold start as fallback.
+        Use when: a user submits a prompt. A follow-up with a snapshot
+        restores that snapshot; a warm sandbox would lose the session's
+        work. New sessions try the warm pool, then cold start.
         """
-        # Try to get from warm pool first
-        warm: Optional[WarmSandbox] = await self.warm_pool.get_warm_sandbox(repo_url)
-
-        if warm:
+        if snapshot_id:
+            # Restore from previous session snapshot
+            sandbox = await self._restore_from_snapshot(repo_url, snapshot_id)
+        elif warm := await self.warm_pool.get_warm_sandbox(repo_url):
             sandbox = warm.sandbox
             # Wait for sync if not complete
             if not warm.sync_complete:
                 await self._wait_for_sync(warm)
-        elif snapshot_id:
-            # Restore from previous session snapshot
-            sandbox = await self._restore_from_snapshot(snapshot_id)
         else:
             # Cold start from latest image
             sandbox = await self._cold_start(repo_url)
@@ -429,7 +426,7 @@ class SandboxManager:
         await self._configure_for_user(sandbox, user)
 
         # Track session
-        session_id: str = f"{user.id}_{datetime.utcnow().isoformat()}"
+        session_id: str = f"{user.id}_{datetime.now(timezone.utc).isoformat()}"
         self.active_sessions[session_id] = sandbox
 
         return sandbox
@@ -475,22 +472,28 @@ class SandboxManager:
         """Configure sandbox for a specific user."""
         sandbox.current_user = user
 
-        # Set git identity
-        await sandbox.execute_command(
-            f'git config user.name "{user.name}"'
-        )
-        await sandbox.execute_command(
-            f'git config user.email "{user.email}"'
-        )
+        # Set git identity as argv so a display name cannot inject shell
+        await sandbox.execute_command("git", "config", "user.name", user.name)
+        await sandbox.execute_command("git", "config", "user.email", user.email)
 
     async def _wait_for_sync(self, warm: WarmSandbox) -> None:
         """Wait for sync to complete."""
         while not warm.sync_complete:
             await asyncio.sleep(0.1)
 
-    async def _restore_from_snapshot(self, snapshot_id: str) -> Sandbox:
-        """Restore a sandbox from a snapshot."""
-        pass
+    async def _restore_from_snapshot(self, repo_url: str, snapshot_id: str) -> Sandbox:
+        """Restore a sandbox from a snapshot.
+
+        Construction is plain bookkeeping; a provider such as Modal restores by
+        creating a sandbox from the snapshot image.
+        """
+        return Sandbox(
+            id=f"sb_{snapshot_id}_{int(datetime.now(timezone.utc).timestamp() * 1000)}",
+            config=SandboxConfig(repo_url=repo_url, base_image=snapshot_id),
+            state=SandboxState.READY,
+            created_at=datetime.now(timezone.utc),
+            snapshot_id=snapshot_id,
+        )
 
     async def _cold_start(self, repo_url: str) -> Sandbox:
         """Start a sandbox from cold (no warm pool available)."""
@@ -510,8 +513,7 @@ class AgentSession:
 
     def __init__(self, sandbox: Sandbox) -> None:
         self.sandbox = sandbox
-        self.sync_complete: bool = False
-        self.pending_writes: list[tuple[str, str]] = []
+        self._synced = asyncio.Event()
 
     async def read_file(self, path: str) -> str:
         """Read a file -- allowed even before sync completes.
@@ -525,39 +527,20 @@ class AgentSession:
     async def write_file(self, path: str, content: str) -> None:
         """Write a file -- blocks until sync is complete.
 
-        Use when: agent needs to modify source code. Queues the write
-        and waits for git sync to finish to prevent conflicts.
+        Use when: agent needs to modify source code. Waits for the sync
+        event, then writes exactly once, in call order.
         """
-        if not self.sync_complete:
-            # Queue the write
-            self.pending_writes.append((path, content))
-            await self._wait_for_sync()
-
+        await self._synced.wait()
         await self.sandbox.write_file(path, content)
 
     def mark_sync_complete(self) -> None:
         """Called when git sync is complete."""
-        self.sync_complete = True
-
-    async def _wait_for_sync(self) -> None:
-        """Wait for sync to complete, then flush pending writes."""
-        while not self.sync_complete:
-            await asyncio.sleep(0.1)
-
-        # Flush pending writes
-        for path, content in self.pending_writes:
-            await self.sandbox.write_file(path, content)
-        self.pending_writes.clear()
+        self._synced.set()
 
 
 if __name__ == "__main__":
     async def _demo() -> None:
         """Demonstrate sandbox manager usage end-to-end."""
-
-        def get_github_token() -> str:
-            """Get GitHub App installation token."""
-            # Implementation: call GitHub API to get installation token
-            return "ghs_xxxx"
 
         # Initialize manager with target repositories
         manager = SandboxManager(
@@ -566,7 +549,6 @@ if __name__ == "__main__":
                 "myorg/backend",
                 "myorg/shared-libs"
             ],
-            github_app_token_provider=get_github_token
         )
 
         # Start background build loop

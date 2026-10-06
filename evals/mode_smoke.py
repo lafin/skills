@@ -36,6 +36,11 @@ MODE_TASKS = (
     ),
 )
 MODES = ("lite", "full", "ultra", "off")
+HISTORY_PROMPTS = [
+    message
+    for mode in MODES
+    for message in (f"/leancode {mode}", f"Reply exactly {mode.upper()}_DONE")
+]
 
 
 def load_capture_module():
@@ -53,6 +58,7 @@ def rpc_command(args: argparse.Namespace) -> list[str]:
         args.omp,
         "--mode=rpc",
         "--no-rules",
+        "--no-extensions",
         "--no-session",
         "--no-skills",
         "--no-tools",
@@ -61,6 +67,7 @@ def rpc_command(args: argparse.Namespace) -> list[str]:
         f"--model={args.model}",
         f"--thinking={args.thinking}",
         f"--max-time={args.max_time}",
+        f"--extension={ROOT / 'evals/leancode_context_probe.ts'}",
         f"--extension={ROOT / '.omp/hooks/pre/leancode.ts'}",
     ]
     command.extend(f"--config={path}" for path in args.config)
@@ -205,13 +212,20 @@ def capture_process(
         {"id": f"{label}-{index}", "type": "prompt", "message": message}
         for index, message in enumerate(messages, 1)
     ]
-    code, stdout, stderr, events, parse_errors, terminal = rpc_lifecycle_capture(
-        rpc_command(args),
-        ROOT,
-        requests,
-        capture.seconds(args.max_time) + 30,
-        capture.capture_environment(),
-    )
+    with tempfile.TemporaryDirectory() as probe_dir:
+        probe_path = Path(probe_dir) / "context.jsonl"
+        code, stdout, stderr, events, parse_errors, terminal = rpc_lifecycle_capture(
+            rpc_command(args),
+            ROOT,
+            requests,
+            capture.seconds(args.max_time) + 30,
+            {**capture.capture_environment(), "LEANCODE_CONTEXT_PROBE": str(probe_path)},
+        )
+        context_events = (
+            [json.loads(line) for line in probe_path.read_text(encoding="utf-8").splitlines()]
+            if probe_path.exists()
+            else []
+        )
     ui = [record for event in events if (record := ui_record(event)) is not None]
     responses = [
         {
@@ -230,6 +244,7 @@ def capture_process(
         "exit_code": code,
         "raw_stdout": stdout,
         "raw_stderr": stderr,
+        "context_events": context_events,
         "event_parse_errors": parse_errors,
         "terminal_state": terminal,
         "ui": ui,
@@ -351,6 +366,7 @@ def main() -> int:
         ["Reply exactly RESTART_DONE"],
         "restart",
     )
+    history = capture_process(capture, args, HISTORY_PROMPTS, "history")
     mode_behaviors: list[dict[str, Any]] = []
     for task_id, task in MODE_TASKS:
         for mode in MODES:
@@ -384,6 +400,13 @@ def main() -> int:
         "reload_preserved_off": lifecycle_notifications[4:5]
         == ["leancode: off (use lite|full|ultra|off)"],
         "quoted_marker_preserved": MARKER_PROMPT in lifecycle_user_texts,
+        "history_process_passed": process_passed(history, args.model),
+        "context_never_contains_prior_reminder": len(history["context_events"]) >= len(MODES)
+        and all(
+            not event["reminderIndexes"]
+            for run in (lifecycle, restarted, history, *(item["run"] for item in mode_behaviors))
+            for event in run["context_events"]
+        ),
     }
     if mode_behaviors:
         checks.update(
@@ -457,7 +480,7 @@ def main() -> int:
             }
             for item in mode_behaviors
         ],
-        "runs": [lifecycle, restarted, *(item["run"] for item in mode_behaviors)],
+        "runs": [lifecycle, restarted, history, *(item["run"] for item in mode_behaviors)],
     }
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")

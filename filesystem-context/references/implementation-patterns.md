@@ -241,6 +241,7 @@ class CoordinatorWorkspace:
 Load skill content on demand.
 
 ```python
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import List, Optional
 import yaml
@@ -542,7 +543,7 @@ Track these metrics to validate filesystem patterns:
 3. **Offload savings**: tokens saved by writing to files vs keeping in context
 4. **Retrieval precision**: percentage of loaded content actually used
 
-Target benchmarks:
+Illustrative targets (not sourced benchmarks; set your own from a baseline run):
 - Static context ratio < 20%
 - Offload savings > 50% for tool-heavy workflows
 - Retrieval precision > 70% (loaded content is relevant)

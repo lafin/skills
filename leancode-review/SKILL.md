@@ -49,13 +49,15 @@ considered whether all these validation rules are needed at this stage?"
 
 ## Scoring
 
-End with the only metric that matters: `net: -<N> lines possible.`
+End with `net: -<N> lines possible.`
 
 If there is nothing to cut, say `Lean already. Ship.` and stop.
 
 ## Boundaries
 
 Complexity and scope creep only, correctness bugs, security holes, and
-performance go to a normal review pass, not this one. A single smoke test or
-`assert`-based self-check is the leancode minimum, not bloat, never flag it for
-deletion. Does not apply the fixes, only lists them.
+performance go to a normal review pass, not this one. Never flag for deletion:
+a smoke test or `assert`-based self-check (the leancode minimum, not bloat),
+validation at trust boundaries, error handling that prevents data loss,
+security or accessibility code, or anything the request required. Does not
+apply the fixes, only lists them.

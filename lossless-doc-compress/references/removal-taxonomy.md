@@ -10,9 +10,10 @@ Removable only when the span carries no information (see `fidelity-rules.md`).
 
 - **filler** — words and empty transitions that add no meaning: "it is important to note
   that", "as mentioned above", "needless to say", "in order to", "the fact that".
-- **hedging** — qualifiers that qualify nothing: "basically", "essentially", "arguably",
-  "it seems that", "sort of", "quite". (A hedge that carries a real uncertainty — "we are
-  not yet confident this generalizes" — is a KEEP, not a hedge to cut.)
+- **hedging** — qualifiers that qualify nothing: "basically", "arguably", "it seems
+  that", "sort of". (A hedge that carries a real uncertainty — "we are not yet confident
+  this generalizes" — is a KEEP, not a hedge to cut. A word that sets approximation or
+  degree — "essentially identical", "quite" — is also a KEEP.)
 - **slop** — generic LLM scaffolding with no document-specific content: "In today's
   fast-paced world…", "It is worth mentioning that…", "In conclusion, …", ceremonial
   intros and outros that restate the obvious.

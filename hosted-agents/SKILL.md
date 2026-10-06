@@ -4,7 +4,7 @@ description: "This skill should be used when designing hosted or background agen
 license: MIT
 metadata:
   upstream: "muratcankoylan/Agent-Skills-for-Context-Engineering"
-  upstream_commit: "c578e85e40fe2bda7c1fec91ff64cf5285434934"
+  upstream_commit: "58b55a8921758d13453b440704fb1b5b208c0b0e"
   upstream_path: "skills/hosted-agents"
   adaptation: modified
   license_notice: LICENSE-context-engineering
@@ -58,10 +58,13 @@ Take filesystem snapshots at key points to enable instant restoration for follow
 - When agent finishes making changes (session snapshot)
 - Before sandbox exit for potential follow-up
 
+A follow-up prompt that carries a session snapshot restores that snapshot, even when a warm sandbox is available; a warm sandbox starts from the base image and loses the session's work. Snapshots expire: on Modal, filesystem snapshots default to 30 days and memory snapshots to 7 days, and starting from an expired snapshot raises `NotFoundError`. Record the snapshot's expiry with the session and fall back to a fresh image plus the pushed branch.
+
 **Git Configuration for Background Agents**
 Configure git identity explicitly in every sandbox because background agents are not tied to a specific user during image builds:
-- Generate GitHub app installation tokens for repository access during clone
-- Set git config `user.name` and `user.email` when committing and pushing changes
+- Never place credentials in sandbox images, snapshots, environment variables, or clone URLs; a token in a clone URL persists in `.git/config` and from there in every image and snapshot built from it
+- Route git and package-registry traffic through a proxy outside the sandbox that injects a short-lived credential scoped to the session's repository and branch (GitHub App installation tokens expire after one hour)
+- Set git config `user.name` and `user.email` as separate argv values, never by interpolating names into a shell string
 - Use the prompting user's identity for commits, not the app identity
 
 **Warm Pool Strategy**
@@ -167,10 +170,12 @@ Use GitHub authentication to open PRs on behalf of the user (not the app) becaus
 
 **Sandbox-to-API Flow**
 Follow this sequence because it keeps sandbox permissions minimal while letting the API handle sensitive operations:
-1. Sandbox pushes changes (updating git user config)
+1. Sandbox pushes changes through the credential-injecting proxy, which permits pushes only to the session branch
 2. Sandbox sends event to API with branch name and session ID
 3. API uses user's GitHub token to create PR
 4. GitHub webhooks notify API of PR events
+
+Restrict sandbox egress with the platform's allowlist (for example Modal `outbound_domain_allowlist` or `block_network`) rather than a command denylist; blocking `curl` does not stop `python` or `node` from opening sockets.
 
 ### Client Implementations
 
@@ -265,12 +270,13 @@ If the task is "make the agent loop run for days with locked rubrics and PR appr
 
 1. **Cold start latency**: Measure sandbox spin-up time and the user's tolerated wait. Use warm pools or predictive warm-up when cold starts exceed that target.
 2. **Image staleness**: Infrequent image rebuilds can leave agents with outdated dependencies or code. Derive the rebuild cadence from the staleness target, monitor image age, and alert on failed builds.
-3. **Sandbox cost runaway**: Long-running agents without timeout or budget caps accumulate unexpected costs. Set workload-specific timeout and per-session cost ceilings.
-4. **Auth token expiration mid-session**: Long tasks fail when GitHub tokens expire partway through. Implement token refresh logic and check token validity before sensitive operations like PR creation.
+3. **Sandbox cost runaway**: Long-running agents without timeout or budget caps accumulate unexpected costs. Set workload-specific timeout and per-session cost ceilings. Platform defaults differ: a Modal sandbox lives 5 minutes unless `timeout` is set, up to a 24-hour cap.
+4. **Auth token expiration mid-session**: Long tasks fail when GitHub tokens expire partway through; installation tokens last one hour. Mint tokens in the proxy outside the sandbox, refresh them there, and check validity before sensitive operations like PR creation.
 5. **Git config in sandboxes**: Missing `user.name` or `user.email` causes commit failures in background agents. Always set git identity explicitly during sandbox configuration, never assume it carries over from the image.
-6. **State loss on sandbox recycle**: Agents lose completed work if the sandbox is recycled or times out before results are extracted. Always snapshot before termination and extract artifacts (branches, PRs, files) before letting the sandbox die.
+6. **State loss on sandbox recycle**: Agents lose completed work if the sandbox is recycled or times out before results are extracted, or if a follow-up is served from a warm sandbox instead of the session snapshot. Always snapshot before termination, extract artifacts (branches, PRs, files) before letting the sandbox die, and treat snapshots as expiring (Modal: 30 days filesystem, 7 days memory).
 7. **Oversubscribing warm pools**: Maintaining too many warm sandboxes wastes money during low-traffic periods. Scale pool size based on traffic patterns and time-of-day; use autoscaling rather than fixed pool sizes.
 8. **Missing output extraction**: Agents complete work inside the sandbox but results never get pulled out to the user. Build explicit extraction steps (push branch, create PR, return file contents) into the session teardown flow.
+9. **Credentials baked into snapshots**: A token passed into the sandbox lands in `.git/config`, shell history, or environment and is copied into every image and snapshot. Keep credentials in a proxy outside the sandbox, scoped to the session branch.
 
 ## Integration
 
@@ -292,9 +298,9 @@ Runnable script:
 ### `sandbox_manager.py`
 
 - **Status:** Template.
-- **Boundary:** Demonstrates hosted-sandbox lifecycle structure with placeholder identities and credentials. Provider I/O, snapshots, image creation, restore, timeout enforcement, and token-backed authorization are not implemented, so it does not create a real sandbox or establish production isolation, persistence, authorization, or availability.
-- **Replacement points:** Implement sandbox I/O and snapshots, image creation and restore, provider lifecycle and timeout operations, synchronization signaling, and the GitHub token provider for the selected infrastructure before production use. A caller that writes through `AgentSession` must call `mark_sync_complete()` after repository synchronization or replace that manual signal with provider state.
-- **Run:** From the repository root, run `python hosted-agents/scripts/sandbox_manager.py`. The bundled demonstration accepts no arguments or real credentials and uses placeholder repositories and tokens.
+- **Boundary:** Demonstrates hosted-sandbox lifecycle structure with placeholder identities. Provider I/O, snapshots, image creation, restore, timeout enforcement, and the credential proxy are not implemented, so it does not create a real sandbox or establish production isolation, persistence, authorization, or availability.
+- **Replacement points:** Implement sandbox I/O and snapshots, image creation and restore, provider lifecycle and timeout operations, synchronization signaling, and the credential-injecting git proxy outside the sandbox before production use. A caller that writes through `AgentSession` must call `mark_sync_complete()` after repository synchronization or replace that manual signal with provider state.
+- **Run:** From the repository root, run `python hosted-agents/scripts/sandbox_manager.py`. The bundled demonstration accepts no arguments or real credentials and uses placeholder repositories and identities.
 - **Output:** Writes human-readable simulated image/session lifecycle messages and a placeholder snapshot value to standard output. After replacement, library methods must return the `Sandbox`, `RepositoryImage`, session, command-result, file-content, and snapshot values documented by their type annotations.
 - **Failure:** The demo exits non-zero on an uncaught Python or asynchronous lifecycle error; `start_session` can also raise `ValueError` when no image exists. The background build loop instead prints provider failures and continues. Repair the named provider replacement point, ensure an image is available, and connect repository synchronization to `mark_sync_complete()` before retrying queued writes.
 
@@ -305,9 +311,12 @@ Related skills in this collection:
 
 External resources:
 - [Ramp](https://builders.ramp.com/post/why-we-built-our-background-agent) - Read when: evaluating whether to build vs. buy background agent infrastructure
-- [Modal Sandboxes](https://modal.com/docs/guide/sandbox) - Read when: choosing a cloud sandbox provider or comparing isolation models
+- [Modal Sandboxes](https://modal.com/docs/guide/sandboxes) - Read when: choosing a cloud sandbox provider or comparing isolation models
+- [Modal Sandbox Snapshots](https://modal.com/docs/guide/sandbox-snapshots) - Read when: setting snapshot retention or handling expired snapshots
+- [Modal Sandbox Networking](https://modal.com/docs/guide/sandbox-networking) - Read when: configuring egress allowlists
+- [Claude Code sandboxing](https://www.anthropic.com/engineering/claude-code-sandboxing) - Read when: designing a credential proxy outside the sandbox
 - [Cloudflare Durable Objects](https://developers.cloudflare.com/durable-objects/) - Read when: designing per-session state management with WebSocket hibernation
-- [OpenCode](https://github.com/sst/opencode) - Read when: selecting a server-first agent framework or studying plugin architectures
+- [OpenCode](https://github.com/anomalyco/opencode) - Read when: selecting a server-first agent framework or studying plugin architectures
 
 ---
 

@@ -209,70 +209,45 @@ class PropertyGraph:
         
         return edge_id
     
-    def query(self, cypher_like: str, params: Dict = None) -> List[Dict]:
+    def query(self, pattern: Dict) -> List[Dict]:
+        """Match edges against a dict pattern.
+
+        Same form as scripts/memory_store.py, for example
+        {"type": "LIVES_AT", "source_label": "User", "target_label": "Address"}.
+        Omitted keys match anything. In production, use a graph database.
         """
-        Simple query matching.
-        
-        Supports patterns like:
-        MATCH (e)-[r]->(o) WHERE e.id = $id RETURN r
-        """
-        # In production, use actual graph database
-        # This is a simplified pattern matcher
         results = []
-        
-        if cypher_like.startswith("MATCH"):
-            # Parse basic pattern
-            pattern = self._parse_pattern(cypher_like)
-            results = self._match_pattern(pattern, params or {})
-        
-        return results
-    
-    def _parse_pattern(self, query: str) -> Dict:
-        """Parse simplified MATCH pattern."""
-        # Simplified parser for demonstration
-        return {
-            "source_label": self._extract_label(query, "source"),
-            "rel_type": self._extract_type(query),
-            "target_label": self._extract_label(query, "target"),
-            "where": self._extract_where(query)
-        }
-    
-    def _match_pattern(self, pattern: Dict, params: Dict) -> List[Dict]:
-        """Match pattern against graph."""
-        results = []
-        
+
         for edge in self.edges:
-            # Match relationship type
-            if pattern["rel_type"] and edge["type"] != pattern["rel_type"]:
+            if "type" in pattern and edge["type"] != pattern["type"]:
                 continue
-            
+
             source = self.nodes.get(edge["source"], {})
             target = self.nodes.get(edge["target"], {})
-            
-            # Match labels
-            if pattern["source_label"] and source.get("label") != pattern["source_label"]:
+
+            if "source_label" in pattern and source.get("label") != pattern["source_label"]:
                 continue
-            if pattern["target_label"] and target.get("label") != pattern["target_label"]:
+            if "target_label" in pattern and target.get("label") != pattern["target_label"]:
                 continue
-            
-            # Match where clause
-            if pattern["where"] and not self._match_where(edge, source, target, params):
-                continue
-            
+
             results.append({
                 "source": source,
                 "relationship": edge,
                 "target": target
             })
-        
+
         return results
+
+    def _get_edge(self, edge_id: str) -> Dict:
+        """Return the edge dict with this ID."""
+        return next(edge for edge in self.edges if edge["id"] == edge_id)
 ```
 
 ## Temporal Knowledge Graph
 
 ```python
 from datetime import datetime
-from typing import Optional
+from typing import Dict, List, Optional
 
 class TemporalKnowledgeGraph(PropertyGraph):
     def __init__(self):
@@ -306,35 +281,18 @@ class TemporalKnowledgeGraph(PropertyGraph):
         
         return edge_id
     
-    def query_at_time(self, query: str, query_time: datetime) -> List[Dict]:
-        """Query graph state at specific time."""
-        # Find edges valid at query time
-        valid_edges = []
-        for edge in self.edges:
+    def query_at_time(self, query: Dict, query_time: datetime) -> List[Dict]:
+        """Query graph state at specific time; `query` uses the dict pattern form."""
+        results = []
+        for result in self.query(query):
+            edge = result["relationship"]
             valid_from = datetime.fromisoformat(edge.get("valid_from", "1970-01-01"))
             valid_until = edge.get("valid_until")
-            
+
             if valid_from <= query_time:
                 if valid_until is None or datetime.fromisoformat(valid_until) > query_time:
-                    valid_edges.append(edge)
-        
-        # Match against pattern
-        pattern = self._parse_pattern(query)
-        results = []
-        
-        for edge in valid_edges:
-            if pattern["rel_type"] and edge["type"] != pattern["rel_type"]:
-                continue
-            
-            source = self.nodes.get(edge["source"], {})
-            target = self.nodes.get(edge["target"], {})
-            
-            results.append({
-                "source": source,
-                "relationship": edge,
-                "target": target
-            })
-        
+                    results.append(result)
+
         return results
     
     def _time_range_key(self, start: datetime, end: Optional[datetime]) -> str:
@@ -358,27 +316,22 @@ class MemoryConsolidator:
         total_memories = len(self.graph.nodes) + len(self.graph.edges)
         return total_memories > self.consolidation_threshold
     
-    def consolidate(self):
-        """Run consolidation process."""
-        # Step 1: Identify duplicate or merged facts
-        duplicates = self.find_duplicates()
-        
-        # Step 2: Merge related facts
-        for group in duplicates:
-            self.merge_fact_group(group)
-        
-        # Step 3: Update validity periods
-        self.update_validity_periods()
-        
-        # Step 4: Rebuild indexes
-        self.rebuild_indexes()
+    def consolidate(self, as_of: datetime):
+        """Invalidate superseded facts as of `as_of`; never delete edges.
+
+        Edges stay in place, so the indexes stay valid and query_at_time
+        can still reconstruct past states.
+        """
+        for group in self.find_duplicates():
+            self.merge_fact_group(group, as_of)
     
     def find_duplicates(self) -> List[List]:
-        """Find groups of potentially duplicate facts."""
-        # Group by subject and predicate
+        """Find groups of currently valid edges with the same subject and predicate."""
         groups = {}
         
         for edge in self.graph.edges:
+            if edge.get("valid_until") is not None:
+                continue  # already invalidated
             key = (edge["source"], edge["type"])
             if key not in groups:
                 groups[key] = []
@@ -387,19 +340,18 @@ class MemoryConsolidator:
         # Return groups with multiple edges
         return [edges for edges in groups.values() if len(edges) > 1]
     
-    def merge_fact_group(self, edges: List[Dict]):
-        """Merge group of duplicate edges."""
+    def merge_fact_group(self, edges: List[Dict], as_of: datetime):
+        """Keep the most confident edge valid; close the validity of the rest."""
         if len(edges) == 1:
             return
         
-        # Keep most recent/relevant
         keeper = max(edges, key=lambda e: e.get("properties", {}).get("confidence", 0))
         
-        # Merge metadata
         for edge in edges:
             if edge["id"] != keeper["id"]:
                 self.merge_properties(keeper, edge)
-                self.graph.edges.remove(edge)
+                edge["valid_until"] = as_of.isoformat()
+                edge["properties"]["superseded_by"] = keeper["id"]
     
     def merge_properties(self, target: Dict, source: Dict):
         """Merge properties from source into target."""
@@ -488,66 +440,85 @@ class MemoryContextIntegrator:
 ```python
 from mem0 import Memory
 
+# Mem0 OSS v3 API (Python package mem0ai 2.x), docs checked 2026-10-06.
 # Initialize with default config (uses local storage)
 m = Memory()
 
-# Store memories with user scoping
-m.add("Prefers Python 3.12 with type hints", user_id="dev-alice")
-m.add("Working on microservices migration", user_id="dev-alice")
+# add() takes messages and entity IDs as keyword arguments. It is add-only:
+# a later preference does not replace an earlier one.
+m.add([{"role": "user", "content": "I prefer Python 3.12 with type hints"}], user_id="dev-alice")
+m.add([{"role": "user", "content": "I'm working on a microservices migration"}], user_id="dev-alice")
 
-# Search with natural language
-results = m.search("What language does the user prefer?", user_id="dev-alice")
+# search() takes entity IDs inside filters; top-level user_id raises ValueError
+results = m.search("What language does the user prefer?", filters={"user_id": "dev-alice"})
 
-# Batch operations
+# Several turns in one call
 m.add([
-    "Sprint goal: complete auth service",
-    "Blocked on database schema review"
+    {"role": "user", "content": "Sprint goal: complete the auth service"},
+    {"role": "user", "content": "I'm blocked on the database schema review"},
 ], user_id="dev-alice")
 ```
 
 ### Graphiti (Zep's Open-Source Temporal KG Engine)
 
 ```python
+import asyncio
+from datetime import datetime, timezone
+
 from graphiti_core import Graphiti
 from graphiti_core.nodes import EpisodeType
 
-# Initialize with Neo4j backend
-graphiti = Graphiti("bolt://localhost:7687", "neo4j", "password")
 
-# Add episodes (conversations, events)
-await graphiti.add_episode(
-    name="user_conversation_42",
-    episode_body="Alice mentioned she moved to Berlin in January.",
-    source=EpisodeType.message,
-    source_description="Chat with Alice"
-)
+async def main():
+    # Initialize with Neo4j backend
+    graphiti = Graphiti("bolt://localhost:7687", "neo4j", "password")
 
-# Search combines semantic, keyword, and graph traversal
-results = await graphiti.search("Where does Alice live?")
+    # Add episodes (conversations, events); reference_time is required
+    await graphiti.add_episode(
+        name="user_conversation_42",
+        episode_body="Alice mentioned she moved to Berlin in January.",
+        source=EpisodeType.message,
+        source_description="Chat with Alice",
+        reference_time=datetime.now(timezone.utc),
+    )
+
+    # Search combines semantic, keyword, and graph traversal
+    return await graphiti.search("Where does Alice live?")
+
+
+results = asyncio.run(main())
 ```
 
 ### Cognee (Open-Source Knowledge Engine for AI Memory)
 
 ```python
+import asyncio
+
 import cognee
-from cognee.modules.search.types import SearchType
+from cognee import SearchType
 
-# ECL pipeline: add → cognify → memify → search
-await cognee.add("./docs/")
-await cognee.add("any-data")
-await cognee.cognify()
-await cognee.memify()
 
-# Graph-aware retrieval (default: GRAPH_COMPLETION)
-results = await cognee.search(
-    query_text="any query to search in memory",
-    query_type=SearchType.GRAPH_COMPLETION,
-)
+async def main():
+    # Cognee v1.0 API (Python package cognee 1.x), docs checked 2026-10-06.
+    # remember() ingests, builds the graph, and runs improve() enrichment.
+    # The older add → cognify → memify pipeline is legacy; improve() replaces memify().
+    await cognee.remember("any-data")
+    await cognee.improve()
 
-# Raw chunks when agent reasons over text itself
-chunks = await cognee.search(
-    query_text="any query to search in memory",
-    query_type=SearchType.CHUNKS,
-)
+    # Default query_type is HYBRID_COMPLETION: passages plus graph neighbourhoods
+    results = await cognee.search(
+        query_text="any query to search in memory",
+        query_type=SearchType.HYBRID_COMPLETION,
+    )
+
+    # Raw chunks when agent reasons over text itself
+    chunks = await cognee.search(
+        query_text="any query to search in memory",
+        query_type=SearchType.CHUNKS,
+    )
+    return results, chunks
+
+
+results, chunks = asyncio.run(main())
 ```
 

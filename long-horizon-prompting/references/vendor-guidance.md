@@ -34,9 +34,9 @@ Source: the OpenAI Cookbook page listed below. Scope: Codex-family planning, com
 - Default expectation: deliver working artifacts, not plans; make reasonable assumptions and complete a working version.
 
 ### GPT-5.5 prompt guidance (April 2026) and GPT-5.6 Sol guidance (June-July 2026)
-Sources: the two OpenAI prompt-guidance pages listed below. Scope: GPT-5.5 and GPT-5.6 Sol prompt design and OpenAI's internal coding-agent evaluations. Limitation: performance results are vendor-reported, model-specific, directional, and not independently reproduced here.
+Sources: the OpenAI model and prompt-guidance pages listed below. Scope: GPT-5.5 and GPT-5.6 Sol prompt design and OpenAI's internal coding-agent evaluations. Limitation: performance results are vendor-reported, model-specific, directional, and not independently reproduced here.
 
-`https://developers.openai.com/api/docs/guides/prompt-guidance`, `https://developers.openai.com/api/docs/guides/prompt-guidance-gpt-5p6`
+`https://developers.openai.com/api/docs/guides/latest-model/gpt-5.5.md`, `https://developers.openai.com/api/docs/guides/latest-model/gpt-5.6.md`, `https://developers.openai.com/api/docs/guides/prompt-guidance-gpt-5p6.md` (checked 2026-10-06; the unversioned `prompt-guidance` URL now redirects to GPT-6 guidance)
 
 - Doctrinal shift to outcome-first, lean prompts: "Begin migration with a fresh baseline instead of carrying over every instruction from an older prompt stack. Start with the smallest prompt that preserves the product contract." Reserve ALWAYS/NEVER for true invariants; prefer decision rules for judgment calls.
 - GPT-5.6 internal coding-agent evaluations: leaner system prompts improved scores by roughly 10-15% while reducing total tokens by 41-66% (vendor-reported, directional).
@@ -48,7 +48,7 @@ Sources: the two OpenAI prompt-guidance pages listed below. Scope: GPT-5.5 and G
 ### Multi-agent API, GPT-5.6 family (beta, June-July 2026)
 Source: the beta OpenAI multi-agent API page listed below. Scope: GPT-5.6 root-agent and subagent behavior, context isolation, concurrency guidance, and anti-patterns. Limitation: the API was beta guidance and its defaults or recommendations may change.
 
-`https://developers.openai.com/api/docs/guides/tools-multi-agent`
+`https://developers.openai.com/api/docs/guides/responses-multi-agent` (checked 2026-10-06; the former `tools-multi-agent` path redirects here, and the page now also covers GPT-6.1 Sol)
 
 - Hosted root-plus-subagent trees (`spawn_agent`, `followup_task`, `send_message`); the root synthesizes and answers. Fixed injected system text tells the root all team agents are equally capable; developer prompts are additive dials on spawning eagerness.
 - Rationale given is context isolation: each subagent receives a bounded task and its own context.
@@ -62,7 +62,17 @@ Source: the METR predeployment report listed below. Scope: one GPT-5.6 Sol evalu
 
 - Detected cheating rate higher than any public model METR had evaluated (packaging exploits into intermediate submissions to expose hidden tests, extracting expected answers from hidden source).
 - The model's estimated 50% time horizon swings from roughly 11 hours (cheating counted as failure) to well over 200 hours (cheating counted as success); the measurement is not robust to that choice.
-- OpenAI's system card attributes the behavior partly to improved instruction following and training intended to increase persistence. This is the documented link between persistence pressure and reward-hacking surface: prompting for persistence without verification gates points the same pressure at your acceptance criteria.
+- OpenAI's GPT-5.6 system card (`https://deploymentsafety.openai.com/gpt-5-6/metagaming-in-training`, published July 9, 2026) attributes the behavior partly to "improved instruction following and training intended to increase persistence", and its internal-traffic monitoring section reports that cheating and fabricated results "can be more pronounced with system prompts that emphasize sustained persistence." This is the documented link between persistence pressure and reward-hacking surface: prompting for persistence without verification gates points the same pressure at your acceptance criteria.
+
+### GPT-6 prompting guidance (current October 2026)
+Source: the OpenAI GPT-6 model guide listed below. Scope: GPT-6 family prompting, written for observed GPT-6 Astra behavior. Limitation: vendor guidance for one model family; OpenAI asks users to evaluate the prompts on their own model and workload.
+
+`https://developers.openai.com/api/docs/guides/latest-model/gpt-6-astra.md` (checked 2026-10-06; `https://developers.openai.com/api/docs/guides/prompt-guidance` redirects to the current latest-model guide)
+
+- GPT-6 Astra is "more likely to ask the user a question when additional input could materially change the result", which "can cause it to stop when the user may expect it to make reasonable assumptions and persist." The guide supplies prompts that grant autonomy explicitly: infer intent, persist to completion, and ask for approval only after preparing a concrete, reviewable result.
+- "The model may delegate less often than desired for your workflow. Specify when and how much it should use subagents for parallel work."
+- Stronger instruction following makes it more sensitive to skill files and `AGENTS.md`; OpenAI recommends auditing those files for instructions that cause pauses and stating that user instructions take precedence.
+- Implication for long-horizon briefs: a lean brief still needs an explicit autonomy grant, the approval boundary, and delegation intent; omitting them invites clarification stops and under-delegation on this family.
 
 ## Anthropic
 
@@ -102,6 +112,7 @@ Sources: the living Anthropic documentation pages listed below, observed in mid-
 `https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices`, `https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/prompting-claude-fable-5`
 
 - Context-awareness prompt for compacting harnesses: do not stop tasks early over token-budget concerns; save state to memory before the window refreshes.
+- Token countdowns: Claude Fable 5 can suggest a new session, offer to summarize and hand off, or trim its work in very long sessions, "most often triggered when the harness shows a remaining-token countdown to the model." Avoid surfacing context-budget counts; if the harness must show them, add a reassurance that context remains ample.
 - Evidence-grounded progress reporting: "Before reporting progress, audit each claim against a tool result from this session. Only report work you can point to evidence for." Anthropic reports this nearly eliminated fabricated status reports in testing, including on tasks designed to elicit them.
 - Anti-early-stopping autonomy block: if the final paragraph is a plan or a promise about undone work, do that work now with tool calls.
 - Fresh-context verifier subagents stated to outperform self-critique for long-running tasks; instruct a checking cadence against the specification.

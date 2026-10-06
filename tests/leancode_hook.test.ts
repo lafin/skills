@@ -2,10 +2,9 @@ import { describe, expect, test } from "bun:test";
 import leancode, { leancodeReminder } from "../.omp/hooks/pre/leancode";
 
 const MARKER = "[omp:leancode-state]";
-const LEGACY_FULL_REMINDER =
-  "<system-reminder>[omp:leancode-state] Leancode is ACTIVE at full intensity. Apply the four reflexes. Prefer reuse, stdlib, and native features; use the shortest working diff and explanation; leave one runnable check. Code first, then at most three lines. Full text: skill://leancode</system-reminder>";
-const LEGACY_ULTRA_REMINDER =
-  "<system-reminder>[omp:leancode-state] Leancode is ACTIVE at ultra intensity. Apply the four reflexes as a YAGNI extremist: delete before adding, ship the smallest working solution, and challenge excess requirements. Code first, then at most three lines. Full text: skill://leancode</system-reminder>";
+// Unattributed reminders from hook versions before the report-precedence clause.
+const legacyReminder = (mode: Parameters<typeof leancodeReminder>[0]) =>
+  leancodeReminder(mode).replace("; an explicitly requested report or format wins.", ".");
 
 type Callback = (...args: unknown[]) => Promise<unknown>;
 
@@ -127,7 +126,7 @@ describe("leancode hook state", () => {
     });
     const legacy = {
       role: "user",
-      content: [{ type: "text", text: LEGACY_ULTRA_REMINDER }],
+      content: [{ type: "text", text: legacyReminder("ultra") }],
       timestamp: 3,
     };
 
@@ -159,7 +158,7 @@ describe("leancode hook state", () => {
     const copy = {
       role: "user",
       attribution: "user",
-      content: [{ type: "text", text: LEGACY_FULL_REMINDER }],
+      content: [{ type: "text", text: legacyReminder("full") }],
       timestamp: 1,
     };
 
@@ -167,7 +166,7 @@ describe("leancode hook state", () => {
     const result = await hook.apply([copy]);
 
     expect(result.messages).toContain(copy);
-    expect(markedTexts(result.messages)).toEqual([LEGACY_FULL_REMINDER, leancodeReminder("full")]);
+    expect(markedTexts(result.messages)).toEqual([legacyReminder("full"), leancodeReminder("full")]);
   });
 
   test("preserves an unattributed user message that only resembles a reminder", async () => {

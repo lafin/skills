@@ -317,7 +317,7 @@ Add focused behavior cases for the four routing gaps immediately after their rou
 | `latent-briefing` | checks whether representation-level access exists, selects the method only when feasible, and gives an ordinary-context alternative otherwise | claims KV/activation compaction through an API that exposes only text |
 | `long-horizon-prompting` | emits a launch brief with a precise success predicate, non-counting outcomes, persistence rules, stop/return conditions, approach registry, and adversarial audit | returns a generic checklist or omits the completion contract |
 | `lossless-doc-compress` | preserves all facts, numbers, qualifiers, decisions, caveats, and obligation strength while producing a categorized removal log | silently changes or deletes information |
-| `leancode-debt` | extracts only syntactically valid debt markers, including ceiling and revisit conditions, without editing source | treats ordinary TODOs as lean debt or modifies implementation |
+| `leancode-debt` | extracts every `lean-debt:` marker with its ceiling and revisit trigger, flags incomplete markers `no-ceiling` or `no-trigger`, and edits no source | treats ordinary TODOs as lean debt or modifies implementation |
 
 ### 8.3 Wave 2: high-confusion core
 
@@ -440,7 +440,7 @@ Description changes require routing evaluation. Character count is an objective 
 
 ### 10.4 Cross-skill asset migration
 
-Six current asset links make three skills depend on `project-development/references/case-studies.md`: `evaluation` has one, `multi-agent-patterns` has three, and `tool-design` has two. A standalone install of any of those skills loses cited evidence.
+Status (2026-10-06): complete. No `skill://project-development/references/...` link remains in `evaluation`, `multi-agent-patterns`, or `tool-design`, and the validator rejects cross-skill asset URIs (`cross-skill-asset`). The original requirement was: six asset links made three skills depend on `project-development/references/case-studies.md`: `evaluation` had one, `multi-agent-patterns` three, and `tool-design` two. A standalone install of any of those skills lost cited evidence.
 
 For each link, copy only the needed evidence into an owning skill-local reference, including the original source URL and date, or remove the claim. Do not create a root-shared evidence file. Bare references to another skill owner may remain, but a path such as `skill://other-skill/references/file.md` may not.
 
@@ -726,7 +726,7 @@ Do not add an always-on `using-agent-skills` skill or session hook. Upstream iss
 
 Keep references local to each skill. Upstream issue [#361](https://github.com/addyosmani/agent-skills/issues/361) demonstrates that root-shared references break independent skill installation. Duplication is acceptable when it preserves an install boundary; shared source should exist only when packaging materializes each complete skill.
 
-The current repository has six cross-skill asset links from `evaluation`, `multi-agent-patterns`, and `tool-design` into `project-development/references/case-studies.md`. Migrate those links under Workstream E and fail future cross-skill asset URIs in validation. Preserve each evidence claim's original source and date. Bare references that route a reader to an adjacent skill remain valid.
+The six cross-skill asset links from `evaluation`, `multi-agent-patterns`, and `tool-design` into `project-development/references/case-studies.md` were migrated under Workstream E (complete as of 2026-10-06), and validation fails future cross-skill asset URIs. Preserve each evidence claim's original source and date. Bare references that route a reader to an adjacent skill remain valid.
 
 ### 15.3 Multi-host packaging
 
@@ -862,7 +862,7 @@ For each pilot, change `a` freezes the non-active development and holdout evalua
 | `docs/skill-anatomy.md` | Add | flexible anatomy and progressive disclosure | contributor review |
 | all 25 existing skill directories | Audit; update only recorded gaps | anatomy conformance and script convention where applicable | recorded catalog-wide manual review |
 | `README.md` | Update | contributor links, inventory, generated evidence status | skill validator |
-| `evaluation/SKILL.md`, `multi-agent-patterns/SKILL.md`, `tool-design/SKILL.md` | Update | remove six cross-skill asset dependencies without losing cited evidence | skill validator and standalone-install review |
+| `evaluation/SKILL.md`, `multi-agent-patterns/SKILL.md`, `tool-design/SKILL.md` | Done (2026-10-06) | remove six cross-skill asset dependencies without losing cited evidence | skill validator and standalone-install review |
 | `scripts/validate_skills.py` | Update | objective name, description, body-size, and cross-skill asset rules | validator tests |
 | `tests/test_validate_skills.py` | Update | new hard-error, portability, and warning boundaries | focused unit tests |
 | release reports and result manifests | Update | durable artifact links; immutable result manifests with evaluated baseline and treatment revisions and resolved roots, comparison-contract hashes, effective timeouts and equality, and completed gate inputs; release-report eligibility and rollback-invalidation dispositions | reproducibility review |

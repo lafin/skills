@@ -321,8 +321,8 @@ def detect_location_inconsistency(graph: Graph) -> list[str]:
         # Check temporal overlap
         ?belief1 bdi:hasValidity ?interval1 .
         ?belief2 bdi:hasValidity ?interval2 .
-        ?interval1 bdi:hasStartTime ?start1 ; bdi:hasEndTime ?end1 .
-        ?interval2 bdi:hasStartTime ?start2 ; bdi:hasEndTime ?end2 .
+        ?interval1 bdi:hasStartTime/bdi:time ?start1 ; bdi:hasEndTime/bdi:time ?end1 .
+        ?interval2 bdi:hasStartTime/bdi:time ?start2 ; bdi:hasEndTime/bdi:time ?end2 .
         FILTER(?start1 < ?end2 && ?start2 < ?end1)
     }
     """
@@ -338,7 +338,7 @@ def detect_location_inconsistency(graph: Graph) -> list[str]:
 
 ## JADE/JADEX Integration
 
-Map BDI ontology to JADE/JADEX agent platform structures.
+Map BDI ontology to JADE/JADEX agent platform structures. These mappings are illustrative sketches, not tested integrations; check them against the JADE/JADEX APIs you deploy.
 
 ### JADE Agent Structure
 
@@ -441,7 +441,7 @@ public class OntologyBackedGoal {
                 ?plan bdi:addresses <%s> .
                 ?intention bdi:isSupportedBy ?belief .
                 ?belief bdi:hasValidity ?interval .
-                ?interval bdi:hasEndTime ?end .
+                ?interval bdi:hasEndTime/bdi:time ?end .
                 FILTER(?end < NOW())
             }
             """.formatted(goalUri);
@@ -456,8 +456,12 @@ public class OntologyBackedGoal {
 ### Triple Store Configuration
 
 ```python
-from rdflib import Graph
+from datetime import datetime
+
+from rdflib import RDF, RDFS, XSD, Graph, Literal, Namespace, URIRef
 from rdflib.plugins.stores.sparqlstore import SPARQLUpdateStore
+
+BDI = Namespace("https://w3id.org/fossr/ontology/bdi/")
 
 class BDIMentalStateStore:
     def __init__(self, endpoint: str):
@@ -474,18 +478,21 @@ class BDIMentalStateStore:
         self.graph.add((URIRef(belief_uri), BDI.refersTo, URIRef(belief_data['world_state'])))
         self.graph.add((URIRef(agent_uri), BDI.hasMentalState, URIRef(belief_uri)))
         
-        # Add temporal validity
-        interval_uri = f"{belief_uri}/validity"
-        self.graph.add((URIRef(belief_uri), BDI.hasValidity, URIRef(interval_uri)))
-        self.graph.add((URIRef(interval_uri), BDI.hasStartTime, 
-                        Literal(belief_data['start_time'], datatype=XSD.dateTime)))
-        self.graph.add((URIRef(interval_uri), BDI.hasEndTime,
-                        Literal(belief_data['end_time'], datatype=XSD.dateTime)))
+        # Add temporal validity: interval -> TimeInstant IRIs -> bdi:time literal
+        interval_uri = URIRef(f"{belief_uri}/validity")
+        self.graph.add((URIRef(belief_uri), BDI.hasValidity, interval_uri))
+        for prop, key in ((BDI.hasStartTime, 'start_time'), (BDI.hasEndTime, 'end_time')):
+            instant_uri = URIRef(f"{interval_uri}/{key}")
+            self.graph.add((interval_uri, prop, instant_uri))
+            self.graph.add((instant_uri, RDF.type, BDI.TimeInstant))
+            self.graph.add((instant_uri, BDI.time,
+                            Literal(belief_data[key], datatype=XSD.dateTime)))
     
     def get_active_beliefs(self, agent_uri: str, at_time: datetime) -> list:
         """Query beliefs active at specific time."""
         query = """
         PREFIX bdi: <https://w3id.org/fossr/ontology/bdi/>
+        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
         PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
         
         SELECT ?belief ?label WHERE {
@@ -493,8 +500,8 @@ class BDIMentalStateStore:
             ?belief a bdi:Belief ;
                     rdfs:label ?label ;
                     bdi:hasValidity ?interval .
-            ?interval bdi:hasStartTime ?start ;
-                      bdi:hasEndTime ?end .
+            ?interval bdi:hasStartTime/bdi:time ?start ;
+                      bdi:hasEndTime/bdi:time ?end .
             FILTER(?start <= "%s"^^xsd:dateTime && ?end >= "%s"^^xsd:dateTime)
         }
         """ % (agent_uri, at_time.isoformat(), at_time.isoformat())

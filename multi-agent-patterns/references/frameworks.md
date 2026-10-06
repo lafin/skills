@@ -4,198 +4,155 @@ This document provides implementation details for multi-agent architectures acro
 
 ## Supervisor Pattern
 
-### LangGraph Supervisor Implementation
+### LangChain Subagents (Supervisor)
 
-Implement a supervisor that routes to worker nodes:
-
-```python
-from typing import TypedDict, Union
-from langgraph.graph import StateGraph, END
-
-class AgentState(TypedDict):
-    task: str
-    current_agent: str
-    task_output: dict
-    messages: list
-
-def supervisor_node(state: AgentState) -> AgentState:
-    """
-    Supervisor decides which worker to invoke next.
-    
-    Returns routing decision and updates state.
-    """
-    task = state["task"]
-    messages = state.get("messages", [])
-    
-    # Determine next agent based on task and history
-    if "research" in task.lower():
-        next_agent = "researcher"
-    elif "write" in task.lower() or "create" in task.lower():
-        next_agent = "writer"
-    elif "review" in task.lower() or "analyze" in task.lower():
-        next_agent = "reviewer"
-    else:
-        next_agent = "coordinator"
-    
-    return {
-        "task": task,
-        "current_agent": next_agent,
-        "task_output": {},
-        "messages": messages + [{"supervisor": f"Routing to {next_agent}"}]
-    }
-
-def researcher_node(state: AgentState) -> AgentState:
-    """Research worker that gathers information."""
-    # Perform research task
-    output = perform_research(state["task"])
-    
-    return {
-        "task": state["task"],
-        "current_agent": "researcher",
-        "task_output": output,
-        "messages": state["messages"] + [{"researcher": "Research complete"}]
-    }
-
-def writer_node(state: AgentState) -> AgentState:
-    """Writer worker that creates content based on research."""
-    output = create_content(state["task"], state["task_output"])
-    
-    return {
-        "task": state["task"],
-        "current_agent": "writer",
-        "task_output": output,
-        "messages": state["messages"] + [{"writer": "Content created"}]
-    }
-
-def build_supervisor_graph():
-    """Build the supervisor workflow graph."""
-    workflow = StateGraph(AgentState)
-    
-    # Add nodes
-    workflow.add_node("supervisor", supervisor_node)
-    workflow.add_node("researcher", researcher_node)
-    workflow.add_node("writer", writer_node)
-    
-    # Add edges
-    workflow.add_edge("supervisor", "researcher")
-    workflow.add_edge("researcher", "supervisor")
-    workflow.add_edge("supervisor", "writer")
-    workflow.add_edge("writer", "supervisor")
-    
-    # Set entry point
-    workflow.set_entry_point("supervisor")
-    
-    return workflow.compile()
-```
-
-### AutoGen Supervisor
-
-Implement supervisor using GroupChat pattern:
+The `langgraph-supervisor` package is no longer actively maintained. LangChain's [migration guide](https://docs.langchain.com/oss/python/migrate/langgraph-supervisor) replaces `create_supervisor` with a main `create_agent` that calls each worker through a tool. The supervisor stops when its model answers without a tool call, so no hand-written loop edges are needed.
 
 ```python
-from autogen import AssistantAgent, UserProxyAgent, GroupChat
+from langchain.agents import create_agent
+from langchain.tools import tool
 
-# Define specialized agents
-researcher = AssistantAgent(
-    name="researcher",
-    system_message="""You are a research specialist.
-    Your goal is to gather accurate, comprehensive information
-    on topics assigned by the supervisor. Always cite sources
-    and note confidence levels.""",
-    llm_config=llm_config
+MODEL = "MODEL"  # placeholder: a "provider:model" string or a chat model instance
+
+research_agent = create_agent(
+    model=MODEL, tools=[], system_prompt="You are a research specialist. Cite sources."
+)
+writer_agent = create_agent(
+    model=MODEL, tools=[], system_prompt="You write content from the research notes you receive."
 )
 
-writer = AssistantAgent(
-    name="writer",
-    system_message="""You are a content creation specialist.
-    Your goal is to create well-structured content based on
-    research provided by the supervisor. Follow style guidelines
-    and ensure factual accuracy.""",
-    llm_config=llm_config
-)
+@tool("research", description="Gather and cite sources for a question.")
+def call_research(query: str) -> str:
+    result = research_agent.invoke({"messages": [{"role": "user", "content": query}]})
+    return result["messages"][-1].content  # return only the final message
 
-# Define supervisor
-supervisor = AssistantAgent(
-    name="supervisor",
-    system_message="""You are the project supervisor.
-    Your goal is to coordinate researchers and writers to
-    complete tasks efficiently.
-    
-    Process:
-    1. Break down the task into research and writing phases
-    2. Route to appropriate specialists
-    3. Synthesize results into final output
-    4. Ensure quality before completing""",
-    llm_config=llm_config
-)
+@tool("write", description="Draft content from research notes.")
+def call_writer(notes: str) -> str:
+    result = writer_agent.invoke({"messages": [{"role": "user", "content": notes}]})
+    return result["messages"][-1].content
 
-# Configure group chat
-group_chat = GroupChat(
-    agents=[supervisor, researcher, writer],
-    messages=[],
-    max_round=20
-)
-
-manager = GroupChatManager(
-    groupchat=group_chat,
-    llm_config=llm_config
+supervisor = create_agent(
+    model=MODEL,
+    tools=[call_research, call_writer],
+    system_prompt="Delegate research, then writing. Answer the user when the draft is done.",
 )
 ```
 
-## Swarm Pattern Implementation
+### Porting from AutoGen
 
-### LangGraph Swarms
+AutoGen is in maintenance mode: it receives no new features, and new users should start with [Microsoft Agent Framework](https://github.com/microsoft/agent-framework) ([AutoGen README](https://github.com/microsoft/autogen)). Agent Framework provides graph-based workflows with sequential, concurrent, handoff, and group-collaboration patterns. Port `GroupChat` code with the [AutoGen migration guide](https://learn.microsoft.com/en-us/agent-framework/migration-guide/from-autogen/).
 
-Implement peer-to-peer handoffs:
+## Handoff (Swarm) Pattern Implementation
+
+### LangGraph Handoffs with `Command.PARENT`
+
+Each agent is a node in a parent graph. A handoff tool returns `Command(goto=..., graph=Command.PARENT)` to move control to another node, and passes the triggering `AIMessage` with a matching `ToolMessage` so the receiver sees valid history. A conditional edge ends the run when the active agent answers without a tool call. Source: [LangChain handoffs](https://docs.langchain.com/oss/python/langchain/multi-agent/handoffs).
 
 ```python
-def create_agent(name, system_prompt, tools):
-    """Create an agent node for the swarm."""
-    
-    def agent_node(state):
-        # Process current state with agent
-        response = invoke_agent(name, system_prompt, state["input"], tools)
-        
-        # Check for handoff
-        if "handoff" in response:
-            return {"next_agent": response["handoff"], "output": response["output"]}
-        else:
-            return {"next_agent": END, "output": response["output"]}
-    
-    return agent_node
+from langchain.agents import AgentState, create_agent
+from langchain.messages import AIMessage, ToolMessage
+from langchain.tools import ToolRuntime, tool
+from langgraph.graph import END, START, StateGraph
+from langgraph.types import Command
+from typing_extensions import NotRequired
 
-def build_swarm():
-    """Build a peer-to-peer agent swarm."""
-    workflow = StateGraph(State)
-    
-    # Create agents
-    triage = create_agent("triage", TRIAGE_PROMPT, [search, read])
-    research = create_agent("research", RESEARCH_PROMPT, [search, browse, read])
-    analysis = create_agent("analysis", ANALYSIS_PROMPT, [calculate, compare])
-    writing = create_agent("writing", WRITING_PROMPT, [write, edit])
-    
-    # Add to graph
-    workflow.add_node("triage", triage)
-    workflow.add_node("research", research)
-    workflow.add_node("analysis", analysis)
-    workflow.add_node("writing", writing)
-    
-    # Define handoff edges
-    workflow.add_edge("triage", "research")
-    workflow.add_edge("triage", "analysis")
-    workflow.add_edge("research", "writing")
-    workflow.add_edge("analysis", "writing")
-    
-    workflow.set_entry_point("triage")
-    
-    return workflow.compile()
+MODEL = "MODEL"  # placeholder: a "provider:model" string or a chat model instance
+
+class SwarmState(AgentState):
+    active_agent: NotRequired[str]
+
+def make_handoff(target: str):
+    @tool(f"transfer_to_{target}", description=f"Hand the conversation to the {target} agent.")
+    def handoff(runtime: ToolRuntime) -> Command:
+        last_ai = next(m for m in reversed(runtime.state["messages"]) if isinstance(m, AIMessage))
+        ack = ToolMessage(content=f"Transferred to {target}", tool_call_id=runtime.tool_call_id)
+        return Command(
+            goto=target,
+            update={"active_agent": target, "messages": [last_ai, ack]},
+            graph=Command.PARENT,
+        )
+    return handoff
+
+AGENTS = {
+    "triage": create_agent(
+        model=MODEL, tools=[make_handoff("research")], state_schema=SwarmState,
+        system_prompt="Classify the request. Hand research questions to research.",
+    ),
+    "research": create_agent(
+        model=MODEL, tools=[make_handoff("triage")], state_schema=SwarmState,
+        system_prompt="Answer research questions. Hand anything else back to triage.",
+    ),
+}
+
+def route(state: SwarmState) -> str:
+    last = state["messages"][-1]
+    if isinstance(last, AIMessage) and not last.tool_calls:
+        return END  # the active agent answered; stop
+    return state.get("active_agent", "triage")
+
+builder = StateGraph(SwarmState)
+for name, agent in AGENTS.items():
+    builder.add_node(name, agent)
+    builder.add_conditional_edges(name, route, [*AGENTS, END])
+builder.add_conditional_edges(START, lambda s: s.get("active_agent", "triage"), list(AGENTS))
+swarm = builder.compile()
+```
+
+### OpenAI Agents SDK Handoffs
+
+The [OpenAI Agents SDK](https://openai.github.io/openai-agents-python/handoffs/) exposes each handoff to the model as a `transfer_to_<agent_name>` tool. Pass an `Agent` directly, or wrap it in `handoff()` to set `input_filter` (what history the receiver sees) or `on_handoff`.
+
+```python
+from agents import Agent, handoff
+from agents.extensions import handoff_filters
+
+billing_agent = Agent(name="Billing agent", instructions="Resolve billing questions.")
+refund_agent = Agent(name="Refund agent", instructions="Process refund requests.")
+
+triage_agent = Agent(
+    name="Triage agent",
+    instructions="Route each request to the right specialist.",
+    handoffs=[billing_agent, handoff(refund_agent, input_filter=handoff_filters.remove_all_tools)],
+)
+# Run with: Runner.run_sync(triage_agent, "I was charged twice.")
+```
+
+### Claude Agent SDK Subagents
+
+The [Claude Agent SDK](https://code.claude.com/docs/en/agent-sdk/subagents) defines subagents with `AgentDefinition` and invokes them through the `Agent` tool. A subagent starts with a fresh context; the only parent input is the `Agent` tool's prompt, and only its final message returns to the parent.
+
+```python
+import asyncio
+from claude_agent_sdk import AgentDefinition, ClaudeAgentOptions, query
+
+options = ClaudeAgentOptions(
+    allowed_tools=["Read", "Grep", "Glob", "Agent"],
+    agents={
+        "code-reviewer": AgentDefinition(
+            description="Security code reviewer. Use for security reviews.",
+            prompt="You review code for security issues and report findings with file paths.",
+            tools=["Read", "Grep", "Glob"],  # read-only
+        ),
+    },
+)
+
+async def main():
+    async for message in query(prompt="Use the code-reviewer agent on the auth module", options=options):
+        if hasattr(message, "result"):
+            print(message.result)
+
+if __name__ == "__main__":
+    asyncio.run(main())
 ```
 
 ## Hierarchical Pattern Implementation
 
-### CrewAI-Style Hierarchy
+### Generic Manager-Worker Sketch
+
+This is plain Python, not the CrewAI API; the helper functions are placeholders. For CrewAI's hierarchical process, see the [CrewAI documentation](https://docs.crewai.com/).
 
 ```python
+# Pseudocode: generic manager-worker sketch; helper functions are placeholders.
 class ManagerAgent:
     def __init__(self, name, system_prompt, llm):
         self.name = name
@@ -290,31 +247,42 @@ def delegate_with_instructions(task_spec, subagent):
 ### File System Coordination
 
 ```python
+import json
+import os
+
 class FileSystemCoordination:
     def __init__(self, workspace_path):
         self.workspace = workspace_path
+        self.lock_dir = os.path.join(workspace_path, "locks")
+        os.makedirs(self.lock_dir, exist_ok=True)
     
     def write_shared_state(self, key, value):
         """Write state accessible to all agents."""
-        path = f"{self.workspace}/{key}.json"
+        path = os.path.join(self.workspace, f"{key}.json")
         with open(path, 'w') as f:
             json.dump(value, f)
         return path
     
     def read_shared_state(self, key):
         """Read state written by any agent."""
-        path = f"{self.workspace}/{key}.json"
+        path = os.path.join(self.workspace, f"{key}.json")
         with open(path, 'r') as f:
             return json.load(f)
     
     def acquire_lock(self, resource, agent_id):
-        """Prevent concurrent access to shared resources."""
-        lock_path = f"{self.workspace}/locks/{resource}.lock"
-        if os.path.exists(lock_path):
+        """Create the lock file atomically; fail if another agent holds it."""
+        lock_path = os.path.join(self.lock_dir, f"{resource}.lock")
+        try:
+            fd = os.open(lock_path, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+        except FileExistsError:
             return False
-        with open(lock_path, 'w') as f:
+        with os.fdopen(fd, 'w') as f:
             f.write(agent_id)
         return True
+    
+    def release_lock(self, resource):
+        """Release a lock held by this agent."""
+        os.remove(os.path.join(self.lock_dir, f"{resource}.lock"))
 ```
 
 ## Consensus Mechanisms

@@ -2,81 +2,66 @@
 
 This document provides technical details on diagnosing and measuring context degradation.
 
-## Attention Distribution Analysis
+## Position and Length Sensitivity
 
-### U-Shaped Curve Measurement
+### Behavioral Recall Probe
 
-Measure attention distribution across context positions:
+Closed model APIs do not expose attention weights, and position effects vary by model and task. Measure recall behaviorally: insert a known fact at several positions in filler of several lengths, ask for it, and record accuracy per cell.
 
 ```python
-def measure_attention_distribution(model, context_tokens, query):
+def probe_recall_by_position(call_model, fact, question, expected, filler,
+                             lengths, positions, trials=5):
     """
-    Measure how attention varies across context positions.
-    
-    Returns distribution showing attention weight by position.
+    Measure recall of *fact* by context length and relative position.
+
+    Args:
+        call_model: Callable(prompt: str) -> str for the target model.
+        filler: Long task-representative text; sliced to each length.
+        lengths: Context sizes to test, in characters.
+        positions: Relative insertion points in [0, 1].
+        trials: Repeats per cell, to separate noise from degradation.
+
+    Returns:
+        Dict mapping (length, position) to recall accuracy in [0, 1].
     """
-    attention_by_position = []
-    
-    for position in range(len(context_tokens)):
-        # Measure model's attention to this position
-        attention = get_attention_weights(model, context_tokens, query, position)
-        attention_by_position.append({
-            "position": position,
-            "attention": attention,
-            "is_beginning": position < len(context_tokens) * 0.1,
-            "is_end": position > len(context_tokens) * 0.9,
-            "is_middle": True  # Will be overwritten
-        })
-    
-    # Classify positions
-    for item in attention_by_position:
-        if item["is_beginning"] or item["is_end"]:
-            item["region"] = "attention_favored"
-        else:
-            item["region"] = "attention_degraded"
-    
-    return attention_by_position
+    results = {}
+    for length in lengths:
+        haystack = filler[:length]
+        for position in positions:
+            cut = int(len(haystack) * position)
+            prompt = f"{haystack[:cut]}\n{fact}\n{haystack[cut:]}\n\n{question}"
+            hits = sum(expected in call_model(prompt) for _ in range(trials))
+            results[(length, position)] = hits / trials
+    return results
 ```
 
 ### Lost-in-Middle Detection
 
-Detect when critical information falls in degraded attention regions:
+Compare each cell with the short-context baseline instead of labeling fixed regions as favored:
 
 ```python
-def detect_lost_in_middle(critical_positions, attention_distribution):
+def detect_position_loss(results, baseline_length, max_drop):
     """
-    Check if critical information is in attention-favored positions.
-    
-    Args:
-        critical_positions: List of positions containing critical info
-        attention_distribution: Output from measure_attention_distribution
-    
-    Returns:
-        Dictionary with detection results and recommendations
+    Flag (length, position) cells whose recall falls more than *max_drop*
+    below the same position at *baseline_length*.
+
+    *max_drop* comes from the variance of repeated baseline runs, not a
+    universal constant.
     """
-    results = {
-        "at_risk": [],
-        "safe": [],
-        "recommendations": []
-    }
-    
-    for pos in critical_positions:
-        region = attention_distribution[pos]["region"]
-        if region == "attention_degraded":
-            results["at_risk"].append(pos)
-        else:
-            results["safe"].append(pos)
-    
-    # Generate recommendations
-    if results["at_risk"]:
-        results["recommendations"].extend([
-            "Move critical information to attention-favored positions",
-            "Use explicit markers to highlight critical information",
-            "Consider splitting context to reduce middle section"
-        ])
-    
-    return results
+    at_risk = []
+    for (length, position), recall in results.items():
+        baseline = results[(baseline_length, position)]
+        if baseline - recall > max_drop:
+            at_risk.append({"length": length, "position": position,
+                            "baseline": baseline, "recall": recall})
+    best_position = max(
+        {p for (_, p) in results},
+        key=lambda p: sum(r for (_, q), r in results.items() if q == p),
+    )
+    return {"at_risk": at_risk, "best_measured_position": best_position}
 ```
+
+Place critical information at the best measured position, and set the compaction trigger below the shortest length with an at-risk cell.
 
 ## Context Poisoning Detection
 
@@ -199,21 +184,26 @@ Implement continuous monitoring of context health:
 
 ```python
 class ContextHealthMonitor:
-    def __init__(self, model, context_window_limit):
-        self.model = model
-        self.limit = context_window_limit
+    def __init__(self, measured_safe_limit, position_results, baseline_length, max_drop):
+        # All four come from a measured baseline on the target model and workload.
+        self.limit = measured_safe_limit
+        self.position_results = position_results  # from probe_recall_by_position
+        self.baseline_length = baseline_length
+        self.max_drop = max_drop
         self.metrics = []
     
-    def assess_health(self, context, task):
+    def assess_health(self, context_tokens, context, task):
         """
         Assess overall context health for current task.
         
-        Returns composite score and component metrics.
+        *context_tokens* comes from the provider's usage fields or
+        token-counting API. Returns composite score and component metrics.
         """
         metrics = {
-            "token_count": len(context),
-            "utilization_ratio": len(context) / self.limit,
-            "attention_distribution": measure_attention_distribution(self.model, context, task),
+            "token_count": context_tokens,
+            "utilization_ratio": context_tokens / self.limit,
+            "attention_distribution": detect_position_loss(
+                self.position_results, self.baseline_length, self.max_drop),
             "relevance_scores": score_context_relevance(context, task),
             "age_tokens": count_recent_tokens(context)
         }
@@ -256,16 +246,22 @@ class ContextHealthMonitor:
 
 ### Alert Thresholds
 
-Configure appropriate alert thresholds:
+Derive alert thresholds from a measured baseline, not fixed percentages of the window:
 
 ```python
-CONTEXT_ALERTS = {
-    "utilization_warning": 0.7,      # 70% of context limit
-    "utilization_critical": 0.9,     # 90% of context limit
-    "attention_degraded_ratio": 0.3, # 30% in middle region
-    "relevance_threshold": 0.3,      # Below 30% relevance
-    "consecutive_warnings": 3        # Three warnings triggers alert
-}
+def build_context_alerts(measured_safe_limit, warning_margin, baseline_relevance_p10):
+    """
+    *measured_safe_limit*: largest context size with no at-risk probe cell.
+    *warning_margin*: fraction below that limit at which to warn, chosen from
+    how fast context grows per turn on the workload.
+    *baseline_relevance_p10*: 10th-percentile relevance on accepted runs.
+    """
+    return {
+        "utilization_warning": measured_safe_limit * (1 - warning_margin),
+        "utilization_critical": measured_safe_limit,
+        "relevance_threshold": baseline_relevance_p10,
+        "consecutive_warnings": 3  # Debounce; tune from baseline noise
+    }
 ```
 
 ## Recovery Procedures

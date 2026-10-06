@@ -26,6 +26,8 @@ Examples bridge the gap between abstract description and actual usage. Include e
 
 Good examples are specific rather than generic. Instead of "Use an ID like '123'", use "Use format: 'CUST-######' (e.g., 'CUST-000001')". Instead of "Provide a date", use "Format: 'YYYY-MM-DD' (e.g., '2024-01-15')".
 
+Add examples where the schema cannot express usage: nested objects, correlated optional parameters, and domain ID formats. Anthropic reported that tool use examples raised accuracy from 72% to 90% on complex parameter handling in its internal testing; treat that number as vendor-scoped and measure on your own tools ([source](https://www.anthropic.com/engineering/advanced-tool-use)).
+
 ## Naming Conventions
 
 ### Parameter Naming
@@ -62,6 +64,17 @@ Design error messages with agent recovery as the primary consideration. Include 
         "resolution": "Provide a customer ID matching pattern CUST-######",
         "retryable": true
     }
+}
+```
+
+### MCP Error Channel
+
+In MCP (specification revision [2026-07-28](https://modelcontextprotocol.io/specification/2026-07-28/server/tools#error-handling)), return input-validation, API, and business-logic failures as a tool result with `isError: true`, with the actionable message in the content. Clients should pass these results to the model so it can self-correct. Reserve JSON-RPC protocol errors for unknown tools, malformed requests, and server faults; models are less likely to recover from them.
+
+```json
+{
+    "content": [{"type": "text", "text": "Customer ID 'CUST-123' does not match CUST-######. Example: CUST-000001."}],
+    "isError": true
 }
 ```
 
@@ -114,7 +127,9 @@ Use concise format for quick verification or simple lookups, when only confirmat
 
 ### Managing Tool Proliferation
 
-As agent systems grow, tool collections tend to proliferate. More tools can enable more capabilities but create selection challenges. Research shows that tool description overlap causes model confusion. The key insight is that if a human engineer cannot definitively say which tool should be used in a given situation, an agent cannot be expected to do better.
+As agent systems grow, tool collections tend to proliferate. More tools can enable more capabilities but create selection challenges. Anthropic reports that wrong tool selection and incorrect parameters are the most common failures in large catalogs, especially when tools have similar names ([source](https://www.anthropic.com/engineering/advanced-tool-use)). The key insight is that if a human engineer cannot definitively say which tool should be used in a given situation, an agent cannot be expected to do better.
+
+Size alone is not a reason to merge. When the catalog is large because it covers many distinct capabilities, consider deferred loading or a tool-search tool first: keep the three to five most-used tools loaded and let the agent search for the rest. Anthropic reported an 85% token reduction and higher MCP-evaluation accuracy with its Tool Search Tool on its own models; those results are vendor-scoped. Search matches names and descriptions, so clear descriptions still matter.
 
 ### Consolidation Guidelines
 

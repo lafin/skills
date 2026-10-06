@@ -222,7 +222,9 @@ The gate fails on a critical regression, no deterministic improvement in develop
 `mode_smoke.py` drives the real OMP RPC adapter with the production hook. It
 checks `lite`, `full`, `ultra`, and `off`, in-process persistence, extension
 reload persistence, new-process reset to `full`, quoted-marker preservation,
-the requested model identity, and optional same-task behavior.
+that no earlier hook reminder reaches the `context` event (recorded by
+`evals/leancode_context_probe.ts`), the requested model identity, and optional
+same-task behavior.
 The artifact binds the OMP executable, version, hook, smoke script, runner,
 config overlays, and redacted effective profile configuration:
 

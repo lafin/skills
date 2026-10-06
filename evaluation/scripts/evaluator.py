@@ -168,15 +168,21 @@ class AgentEvaluator:
                 "level": self._score_to_level(score),
             }
 
-        # Calculate weighted overall
-        overall: float = sum(
-            s["score"] * self.rubric[k].weight for k, s in scores.items()
+        # Weighted average over dimensions with evidence; unknown dimensions
+        # do not count. With no evidence at all, the output cannot pass.
+        scored = {k: s for k, s in scores.items() if s["score"] is not None}
+        total_weight: float = sum(self.rubric[k].weight for k in scored)
+        overall: float = (
+            sum(s["score"] * self.rubric[k].weight for k, s in scored.items())
+            / total_weight
+            if total_weight
+            else 0.0
         )
 
         result: Dict[str, Any] = {
             "overall_score": overall,
             "dimension_scores": scores,
-            "passed": overall >= 0.7,
+            "passed": bool(scored) and overall >= 0.7,
             "timestamp": time.time(),
         }
 
@@ -190,11 +196,13 @@ class AgentEvaluator:
         output: str,
         ground_truth: Optional[Dict[str, Any]] = None,
         tool_calls: Optional[List[Dict[str, Any]]] = None,
-    ) -> float:
+    ) -> Optional[float]:
         """Evaluate a single dimension.
 
         Use when: extending the evaluator with custom dimension logic.
-        In production, replace heuristics with LLM judgment or human evaluation.
+        Returns None (unknown) when the inputs give no evidence for the
+        dimension. In production, replace heuristics with LLM judgment or
+        human evaluation.
         """
         output_lower: str = output.lower()
         task_type: str = task.get("type", "")
@@ -202,14 +210,14 @@ class AgentEvaluator:
         if dimension.name == "factual_accuracy":
             if ground_truth:
                 return self._check_factual_accuracy(output, ground_truth)
-            return 0.7  # Default assumption
+            return None
 
         elif dimension.name == "completeness":
             required: List[str] = task.get("requirements", [])
             if required:
                 covered = sum(1 for r in required if r.lower() in output_lower)
                 return covered / len(required)
-            return 0.8
+            return None
 
         elif dimension.name == "citation_accuracy":
             if task.get("requires_citations"):
@@ -223,12 +231,12 @@ class AgentEvaluator:
                 elif any(marker in output_lower for marker in ["according to", "cited in", "reported by"]):
                     return 0.7
                 return 0.4
-            return 0.8  # Citations not required
+            return None  # Citations not required
 
         elif dimension.name == "source_quality":
             quality_markers = ["according to", "reported by", "data from", "study"]
             quality_count = sum(1 for m in quality_markers if m in output_lower)
-            return min(1.0, 0.5 + quality_count * 0.1)
+            return min(1.0, quality_count * 0.25) if quality_count else None
 
         elif dimension.name == "tool_efficiency":
             if tool_calls:
@@ -240,25 +248,26 @@ class AgentEvaluator:
                     return 0.7
                 else:
                     return 0.4
-            return 0.8  # No tool calls needed or recorded
+            return None  # No tool calls recorded
 
-        return 0.5  # Default
+        return None
 
     def _check_factual_accuracy(
         self, output: str, ground_truth: Dict[str, Any]
-    ) -> float:
+    ) -> Optional[float]:
         """Check output against ground truth.
 
-        Use when: ground truth key_claims are available for comparison.
+        Use when: ground truth has an ``answer`` or ``key_claims``.
         """
-        if not ground_truth:
-            return 0.7
+        output_lower: str = output.lower()
+        answer = ground_truth.get("answer")
+        if answer:
+            return 1.0 if str(answer).lower() in output_lower else 0.0
 
         key_claims: List[str] = ground_truth.get("key_claims", [])
         if not key_claims:
-            return 0.7
+            return None
 
-        output_lower: str = output.lower()
         matched: int = sum(1 for claim in key_claims if claim.lower() in output_lower)
 
         if matched == len(key_claims):
@@ -280,8 +289,10 @@ class AgentEvaluator:
         }
         return estimates.get(task_type, 1)
 
-    def _score_to_level(self, score: float) -> str:
+    def _score_to_level(self, score: Optional[float]) -> str:
         """Convert numeric score to level name."""
+        if score is None:
+            return "unknown"
         if score >= 0.9:
             return "excellent"
         elif score >= 0.7:
@@ -467,6 +478,8 @@ class EvaluationRunner:
 
         for result in self.results:
             for dim_name, score in result["evaluation"]["dimension_scores"].items():
+                if score["score"] is None:
+                    continue
                 dimension_totals[dim_name]["total"] += score["score"]
                 dimension_totals[dim_name]["count"] += 1
 

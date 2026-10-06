@@ -12,12 +12,7 @@ const ACTIVE_INSTRUCTIONS: Record<Exclude<Level, "off">, string> = {
   full: "Apply the four reflexes. Prefer reuse, stdlib, and native features; use the shortest working diff and explanation; leave one runnable check.",
   ultra: "Apply the four reflexes as a YAGNI extremist: delete before adding, ship the smallest working solution, and challenge excess requirements.",
 };
-const LEGACY_REMINDERS: Record<string, true> = {
-  [`${STATE_PREFIX}Leancode is ACTIVE at lite intensity. Apply the four reflexes. Build exactly what was asked; name the leaner alternative in one line and let the user decide. Code first, then at most three lines.${STATE_SUFFIX}`]: true,
-  [`${STATE_PREFIX}Leancode is ACTIVE at full intensity. Apply the four reflexes. Prefer reuse, stdlib, and native features; use the shortest working diff and explanation; leave one runnable check. Code first, then at most three lines.${STATE_SUFFIX}`]: true,
-  [`${STATE_PREFIX}Leancode is ACTIVE at ultra intensity. Apply the four reflexes as a YAGNI extremist: delete before adding, ship the smallest working solution, and challenge excess requirements. Code first, then at most three lines.${STATE_SUFFIX}`]: true,
-  [`${STATE_PREFIX}Leancode is OFF. Do not apply leancode instructions. This current state overrides older leancode reminders. Re-enable with /leancode lite, /leancode full, or /leancode ultra.${STATE_SUFFIX}`]: true,
-};
+const REPORT_PRECEDENCE = "; an explicitly requested report or format wins.";
 
 let level: Level = DEFAULT_LEVEL;
 
@@ -25,9 +20,14 @@ export function leancodeReminder(level: Level): string {
   const instruction =
     level === "off"
       ? "Leancode is OFF. Do not apply leancode instructions. This current state overrides older leancode reminders. Re-enable with /leancode lite, /leancode full, or /leancode ultra."
-      : `Leancode is ACTIVE at ${level} intensity. ${ACTIVE_INSTRUCTIONS[level]} Code first, then at most three lines.`;
+      : `Leancode is ACTIVE at ${level} intensity. ${ACTIVE_INSTRUCTIONS[level]} Code first, then at most three lines${REPORT_PRECEDENCE}`;
   return `${STATE_PREFIX}${instruction}${STATE_SUFFIX}`;
 }
+
+// Unattributed reminders written by hook versions before attribution and the report-precedence clause.
+const LEGACY_REMINDERS: Record<string, true> = Object.fromEntries(
+  (Object.keys(LEVELS) as Level[]).map(mode => [leancodeReminder(mode).replace(REPORT_PRECEDENCE, "."), true]),
+);
 
 function isLevel(value: string): value is Level {
   return Object.hasOwn(LEVELS, value);

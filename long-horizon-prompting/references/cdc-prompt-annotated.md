@@ -2,12 +2,12 @@
 
 ## Run provenance (published 2026-07-10; checked 2026-07-11)
 
-Sources: OpenAI's published prompt and proof PDFs linked below. Scope: the prompt text and publisher-reported run metadata. Limitation: the run duration is not independently verified, and the proof had no independent peer review or formalization at the check date; no public ablation establishes which prompt elements affected the result.
+Sources: OpenAI's published prompt and proof PDFs, OpenAI's Lean repository, and two arXiv expositions linked below. Scope: the prompt text and publisher-reported run metadata. Limitation: the run duration is not independently verified, and no public ablation establishes which prompt elements affected the result.
 
 - On 2026-07-10 OpenAI published a candidate proof of the Cycle Double Cover Conjecture attributed to GPT-5.6 Sol Ultra, together with the full prompt used. Prompt PDF: `https://cdn.openai.com/pdf/04d1d1e4-bc75-476a-97cf-49055cd98d31/cdc_prompt.pdf`. Proof PDF: `https://cdn.openai.com/pdf/04d1d1e4-bc75-476a-97cf-49055cd98d31/cdc_proof.pdf`.
 - The run used the "multiagent v2" feature with up to 64 concurrent agents and reportedly completed in under one hour, well below the prompt's stated eight-hour effort floor.
 - The proof's statement of AI use says the proof "is entirely due to GPT 5.6 Sol Ultra and the writeup with Codex (with GPT 5.6 Sol)".
-- The proof had no independent peer review, no formalization in Lean or Coq, and no arXiv posting at publication time. The validated artifact of interest in this skill is the prompt structure, not the theorem. Treat the mathematical claim as unverified until the community check completes.
+- At publication the proof had no independent peer review, no formalization in Lean or Coq, and no arXiv posting. Update (checked 2026-10-06): OpenAI's `cdc-lean` repository (`https://github.com/openai/cdc-lean`) kernel-checks an unconditional cycle double cover theorem for finite loopless bridgeless multigraphs, and two arXiv expositions restate the proof (Geelen, arXiv 2607.15399; Oum, arXiv 2607.16356). The artifact of interest in this skill remains the prompt structure, not the theorem.
 - No public ablation isolates which prompt elements contributed to the result. The per-element evidence in `research-evidence.md` comes from independent academic work, not from this run.
 
 The full prompt text follows, in blocks, each followed by annotation.

@@ -19,7 +19,7 @@ class CompressionEvaluatorTests(unittest.TestCase):
     def test_json_ground_truth_terms_score_when_response_mentions_artifacts(
         self,
     ) -> None:
-        evaluator = COMPRESSION_EVALUATOR.CompressionEvaluator()
+        evaluator = COMPRESSION_EVALUATOR.CompressionEvaluator(judge_model="JUDGE_MODEL")
 
         rich_score = evaluator._heuristic_score(
             {"id": "artifact_files_modified"},
@@ -36,7 +36,7 @@ class CompressionEvaluatorTests(unittest.TestCase):
         self.assertGreaterEqual(rich_score, 4.0)
 
     def test_plain_text_ground_truth_still_uses_substring_match(self) -> None:
-        evaluator = COMPRESSION_EVALUATOR.CompressionEvaluator()
+        evaluator = COMPRESSION_EVALUATOR.CompressionEvaluator(judge_model="JUDGE_MODEL")
 
         exact_score = evaluator._heuristic_score(
             {"id": "continuity_work_state"},
@@ -50,6 +50,10 @@ class CompressionEvaluatorTests(unittest.TestCase):
         )
 
         self.assertGreater(exact_score, missing_score)
+
+    def test_judge_model_is_required(self) -> None:
+        with self.assertRaises(TypeError):
+            COMPRESSION_EVALUATOR.CompressionEvaluator()
 
 
 if __name__ == "__main__":

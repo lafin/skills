@@ -4,7 +4,7 @@ description: "This skill should be used for improving context efficiency: contex
 license: MIT
 metadata:
   upstream: "muratcankoylan/Agent-Skills-for-Context-Engineering"
-  upstream_commit: "c578e85e40fe2bda7c1fec91ff64cf5285434934"
+  upstream_commit: "58b55a8921758d13453b440704fb1b5b208c0b0e"
   upstream_path: "skills/context-optimization"
   adaptation: modified
   license_notice: LICENSE-context-engineering
@@ -34,7 +34,7 @@ Do not activate this skill for adjacent work owned by other skills:
 
 Apply four primary strategies in this priority order:
 
-1. **KV-cache optimization** — Reorder and stabilize prompt structure so the inference engine reuses cached Key/Value tensors. This is the cheapest optimization when the runtime supports prefix caching: low quality risk, immediate cost and latency savings. Apply it first when stable prefixes exist.
+1. **KV-cache optimization** — Reorder and stabilize prompt structure so the inference engine or provider prompt cache reuses the computed prefix. This is the cheapest optimization when the runtime supports prefix caching: low quality risk, immediate cost and latency savings. Apply it first when stable prefixes exist.
 
 2. **Observation masking** — When tool outputs occupy a large share of the measured context, replace processed outputs with compact references. The original content remains retrievable if needed downstream.
 
@@ -48,15 +48,9 @@ The governing principle: context quality matters more than quantity. Every optim
 
 ### Compaction Strategies
 
-Trigger compaction before context pressure causes missed instructions or truncation: summarize the current context, then reinitialize with the summary. This distills the window's contents for continuation. Prioritize whichever measured category consumes the most tokens rather than assuming tool outputs always dominate. Never compress the system prompt — it anchors model behavior and its removal can change model behavior.
+Trigger compaction at the workload's `measured_safe_limit`, before context pressure causes missed instructions or truncation. Apply masking first, then compact whichever measured category consumes the most tokens rather than assuming tool outputs always dominate. Never compress the system prompt. Set token-reduction and quality-loss targets from a measured task baseline.
 
-Preserve different elements by message type:
-
-- **Tool outputs**: Extract key findings, metrics, error codes, and conclusions. Strip verbose raw output, stack traces (unless debugging is ongoing), and boilerplate headers.
-- **Conversational turns**: Retain decisions, commitments, user preferences, and context shifts. Remove filler, pleasantries, and exploratory back-and-forth that led to a conclusion already captured.
-- **Retrieved documents**: Keep claims, facts, and data points relevant to the active task. Remove supporting evidence and elaboration that served a one-time reasoning purpose.
-
-Set token-reduction and quality-loss targets from a measured task baseline. Audit every aggressive summary for critical information loss.
+What a summary must preserve, how to structure it, and how to probe it belong to `context-compression`.
 
 ### Observation Masking
 
@@ -68,18 +62,26 @@ Mask observations selectively based on recency and ongoing relevance — not uni
 
 Measure masking by reduced observation tokens and retained task quality. Keep the full content externally and a reference ID in context so the agent can request the original when needed.
 
+Prefer native clearing when the provider offers it: Anthropic's tool-result clearing (`clear_tool_uses_20250919`, <https://platform.claude.com/docs/en/build-with-claude/context-editing>) clears old tool results once context passes a configured threshold. Clear in large batches, because each clear invalidates the cache from the cleared point onward; `clear_at_least` sets the minimum cleared per activation.
+
 ### KV-Cache Optimization
 
 Maximize prefix cache hits by structuring prompts so that stable content occupies the prefix and dynamic content appears at the end. KV-cache stores Key and Value tensors computed during inference; when consecutive requests share an identical prefix, the cached tensors are reused, saving both cost and latency.
 
 Apply this ordering in every prompt:
-1. System prompt (most stable — never changes within a session)
-2. Tool definitions (stable across requests)
+1. Tool definitions (Anthropic and OpenAI render tools before the system prompt)
+2. System prompt (most stable — never changes within a session)
 3. Frequently reused templates and few-shot examples
 4. Conversation history (grows but shares prefix with prior turns)
 5. Current query and dynamic content (least stable — always last)
 
-Design prompts for cache stability: remove timestamps, session counters, and request IDs from the system prompt. Move dynamic metadata into a separate user message or tool result where it does not break the prefix. Even a single whitespace change in the prefix invalidates the entire cached block downstream of that change.
+Design prompts for cache stability: remove timestamps, session counters, and request IDs from the system prompt. Move dynamic metadata into a separate user message or tool result where it does not break the prefix. Even a single whitespace change in the prefix invalidates the entire cached block downstream of that change. The same rule prices any compaction or masking edit applied to earlier history: its cost is the text that follows it, so batch such edits and prefer them near the end of the context.
+
+Provider cache rules (Anthropic <https://platform.claude.com/docs/en/build-with-claude/prompt-caching>, OpenAI <https://developers.openai.com/api/docs/guides/prompt-caching>, Gemini <https://ai.google.dev/gemini-api/docs/caching>):
+- Changing tool definitions invalidates the cache for everything after them.
+- To limit tools for one request, use `tool_choice` or `allowed_tools` instead of removing definitions.
+- The cache TTL sets the idle budget between agent turns; a turn that starts after expiry rebuilds the prefix.
+- Each provider has a minimum cacheable prefix length; shorter prefixes are not cached.
 
 Measure cache hit rate, cached-token cost, and latency for each stable workload instead of applying a universal target.
 
@@ -96,9 +98,11 @@ This approach achieves separation of concerns — detailed search context stays 
 Allocate explicit token budgets across context categories before the session begins: system prompt, tool definitions, retrieved documents, message history, tool outputs, and a reserved buffer. Monitor usage against budget continuously and trigger optimization when a category exceeds its measured allocation.
 
 Use trigger-based optimization rather than periodic optimization. Monitor these signals:
-- Token utilization approaches the runtime's measured safe limit — trigger compaction
+- Token utilization reaches the runtime's `measured_safe_limit` — trigger compaction
 - Attention degradation indicators (repetition, missed instructions) — trigger masking + compaction
 - Quality score drops below baseline — audit context composition before optimizing
+
+Read utilization from a deterministic source. Some models receive an injected token budget from the API; others do not (<https://platform.claude.com/docs/en/build-with-claude/context-windows>). On those, the harness supplies the count from response usage fields or the token-counting API rather than asking the model to estimate it.
 
 ## Practical Guidance
 
@@ -129,7 +133,7 @@ Iterate on strategies based on measured results. If an optimization technique do
 
 **Example 1: Compaction Trigger**
 ```python
-if context_tokens / context_limit > 0.8:
+if context_tokens > measured_safe_limit:
     context = compact_context(context)
 ```
 
@@ -157,7 +161,7 @@ budgets:
   reserved_buffer: 15%
 triggers:
   tool_outputs_over_budget: mask resolved observations
-  total_context_over_70_percent: compact message history
+  total_context_over_measured_safe_limit: compact message history
   repeated_irrelevant_retrievals: tighten retrieval scope
 ```
 
@@ -178,15 +182,13 @@ triggers:
 
 2. **Timestamps in system prompts destroy cache hit rates**: Including `Current date: {today}` or similar dynamic content in the system prompt forces a full cache miss on every new day (or every request, if using time-of-day). Move dynamic metadata into a user message or a separate tool result appended after the stable prefix.
 
-3. **Compaction under pressure loses critical state**: A model performing compaction near its context limit can omit task goals, user constraints, or nuanced state. Trigger compaction before the limit. If compaction must happen late, use a separate model call with a clean context containing only the material to summarize.
+3. **Compaction under pressure loses critical state**: A model performing compaction near its context limit can omit task goals, user constraints, or nuanced state. Trigger compaction at the measured safe limit, not the window limit. If compaction must happen late, use a separate model call with a clean context containing only the material to summarize; `context-compression` covers validating the summary afterward.
 
 4. **Masking error outputs breaks debugging loops**: Over-aggressive masking hides error messages, stack traces, and failure details that the agent needs in subsequent turns to diagnose and fix issues. During active debugging, preserve error-related observations until the issue is resolved.
 
 5. **Partitioning overhead can exceed savings**: Each sub-agent requires its own system prompt, tool definitions, and coordination messages. Estimate total tokens for the coordinator and all sub-agents before committing to partitioning.
 
 6. **Cache miss cost spikes after deployment changes**: Reordering tools, rewording the system prompt, or changing few-shot examples between deployments invalidates the changed prefix. Roll out prompt changes gradually and monitor cache hit rate during deployment windows.
-
-7. **Compaction creates false confidence in stale summaries**: Once context is compacted, the summary looks authoritative but may reflect outdated state. If the task has evolved since compaction (new user requirements, corrected assumptions), the summary silently carries forward stale information. After compaction, re-validate the summary against the current task goal before proceeding.
 
 ## Integration
 
@@ -211,8 +213,8 @@ Runnable script:
 ### `compaction.py`
 
 - **Status:** Example.
-- **Boundary:** Uses illustrative token, summary, and cache heuristics without a tokenizer, model, or inference service. It does not prove quality, savings, or cache behavior in production.
-- **Run:** From the repository root, run `python context-optimization/scripts/compaction.py`. The demo accepts no arguments or credentials and uses built-in text and budget data.
+- **Boundary:** Uses illustrative token, summary, and cache heuristics without a tokenizer, model, or inference service. Token counts use a caller-supplied `count_tokens` function, or a labeled 4-characters-per-token fallback. It does not prove quality, savings, or cache behavior in production.
+- **Run:** From the repository root, run `python context-optimization/scripts/compaction.py`. The demo accepts no arguments or credentials and uses built-in text and budget data. `ContextBudget` takes one trigger threshold, `measured_safe_limit`.
 - **Output:** Writes human-readable token estimates, masking and retrieval status, budget advice, prompt stabilization, and a summary to standard output. Library callers receive strings, tuples, and dictionaries from the exported functions and classes.
 - **Failure:** The demo exits non-zero only on an uncaught Python error. Repair the reported import, invalid argument, or input-type error; an optimization recommendation is report data, not a process failure.
 

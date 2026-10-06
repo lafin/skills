@@ -15,7 +15,7 @@ if a rewrite would lose any, it belongs as a FLAG instead (see `fidelity-rules.m
 ## Hedging That Qualifies Nothing
 
 - "This is basically a ranking problem." → "This is a ranking problem."
-- "The results are essentially identical." → "The results are identical."
+- "We basically retry once." → "We retry once."
 - "We arguably need a fallback." → "We need a fallback." (If the doubt is real, keep it as
   a stated uncertainty instead — see counter-examples.)
 - "It seems that throughput drops under load." → "Throughput drops under load." (Only if
@@ -56,3 +56,7 @@ Not everything soft is removable. These carry information — leave them:
   number. KEEP both the number and the caveat.
 - "Historically, this approach failed for sparse users." — "historically" anchors a
   factual claim. KEEP.
+- "The results are essentially identical." — "essentially" marks approximate equality;
+  "identical" would claim exact equality. KEEP, or FLAG if the author may know the
+  results are exactly equal.
+- "The cache is quite effective." — "quite" sets a degree. KEEP.

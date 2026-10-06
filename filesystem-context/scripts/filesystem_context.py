@@ -69,7 +69,7 @@ class ScratchPadManager:
         Use when: deciding whether content should be offloaded before
         writing it to disk.
         """
-        return len(content) // 4
+        return len(content) // 4  # Labeled fallback; real ratio depends on the tokenizer.
 
     def should_offload(self, content: str) -> bool:
         """Return True if *content* exceeds the configured token threshold.

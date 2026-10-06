@@ -30,6 +30,7 @@ IMPORT_REPLACEMENTS = {"pyyaml": {"yaml"}}
 SKILL_NAME_RE = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*")
 MAX_DESCRIPTION_LENGTH = 1_024
 MAX_SKILL_LINES = 500
+ALLOWED_FRONTMATTER_KEYS = frozenset({"name", "description", "license", "compatibility", "metadata", "allowed-tools"})
 
 
 @dataclass(frozen=True, order=True)
@@ -128,6 +129,8 @@ def validate_metadata(path: Path, root: Path, issues: list[Issue]) -> None:
         )
     if metadata is None:
         return
+    for key in sorted(set(metadata) - ALLOWED_FRONTMATTER_KEYS, key=str):
+        add(issues, root, path, key_line(text, str(key)), "frontmatter-key", key, "Move vendor or runtime keys under metadata; top-level keys follow the Agent Skills specification." )
     expected_name = path.parent.name
     name = metadata.get("name")
     if not isinstance(name, str) or not SKILL_NAME_RE.fullmatch(name):

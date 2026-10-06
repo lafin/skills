@@ -8,7 +8,15 @@ Imported material keeps its source notice below.
 
 Source: https://github.com/muratcankoylan/Agent-Skills-for-Context-Engineering
 
-Fetched commit: `c578e85e40fe2bda7c1fec91ff64cf5285434934`
+Fetched commit: `58b55a8921758d13453b440704fb1b5b208c0b0e` (upstream v2.6.0,
+synced 2026-10-06). The original import used
+`c578e85e40fe2bda7c1fec91ff64cf5285434934`. Between the two commits, upstream
+changed 12 of the 17 imported skills not at all. From the remaining changes,
+this repository adopted the retired-model-ID fix in
+`project-development/scripts/pipeline_template.py` and the prefix-cache edit
+cost sentence in `context-optimization`. It did not import the new
+`self-managed-context` skill or the routing lines that point to it; see
+[conditional skill decisions](docs/conditional-skill-decisions.md#self-managed-context).
 
 Copyright (c) 2025 Context Engineering Agent Skills Contributors. Imported
 materials are provided under the MIT License; see
@@ -28,8 +36,8 @@ The following local skills contain material from the named source snapshots:
 
 | Local skill | Source path | Source commit | Adaptation |
 |---|---|---|---|
-| `lossless-doc-compress` | `skills/lossless-doc-compress` | `61b9bcdb971e7424cdc4d400085338dc35da910e` | Imported |
-| `ml-system-design-review` | `skills/ml-system-design-review` | `90830cd7e52dc2cd6ff2a0d69d96f042759d3430` | Modified metadata |
+| `lossless-doc-compress` | `skills/lossless-doc-compress` | `61b9bcdb971e7424cdc4d400085338dc35da910e` | Modified (hedging examples, self-check, templates, exclusions; 2026-10-06) |
+| `ml-system-design-review` | `skills/ml-system-design-review` | `90830cd7e52dc2cd6ff2a0d69d96f042759d3430` | Modified (metadata; rubric and pass^k additions, 2026-10-06) |
 | `ai-stage-gate` | `skills/ai-stage-gate` | `e439d91dbbd6a303115e42a6b9545563a7c4641f` | Modified metadata |
 
 The upstream repository distributes these skills under the MIT License. Keep

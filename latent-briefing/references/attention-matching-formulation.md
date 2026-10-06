@@ -4,7 +4,7 @@ This note expands the compact treatment in the main skill: the AM objective, wha
 
 ## Evidence scope
 
-This note was checked on 2026-09-09 against [Fast KV Compaction via Attention Matching](https://arxiv.org/abs/2602.16284) and the [Ramp Labs Latent Briefing announcement](https://x.com/RampLabs/status/2042660310851449223). The paper supports the Attention Matching formulation. The announcement is the source for applying task-conditioned scoring and a shared mask to orchestrator-worker transfer.
+This note was checked on 2026-10-06 against [Fast KV Compaction via Attention Matching](https://arxiv.org/abs/2602.16284) and the Ramp Labs writeup [Latent Briefing](https://labs.ramp.com/research/latent-briefing-kv-cache/index.md) (Ben Geist, 2026-04-10). The paper supports the Attention Matching formulation. The writeup is the source for applying task-conditioned scoring and a shared mask to orchestrator-worker transfer; its reported results and limits are in [the evidence note](ramp-evidence.md).
 
 This repository did not reproduce the reported system or benchmark its quality, latency, or retention rate. Treat the sections below as a formulation and implementation assumptions, not as local efficacy evidence.
 
@@ -56,10 +56,10 @@ That batching benefit is one of the main reasons Latent Briefing is interesting 
 Instead of keeping a fixed number of tokens per head, Latent Briefing can threshold the aggregated per-position score distribution:
 
 ```text
-keep position i if score[i] > median(score) + k * MAD(score)
+keep position i if score[i] > median(score) + tau * MAD(score)
 ```
 
-This makes retention rate adaptive to the shape of the scores for the current task. Higher `k` means more aggressive compaction.
+This makes retention rate adaptive to the shape of the scores for the current task. Higher `tau` means more aggressive compaction. A negative `tau` puts the cutoff below the median, so more than half of the positions are kept.
 
 ## Practical Assumptions
 

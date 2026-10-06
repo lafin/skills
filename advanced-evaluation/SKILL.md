@@ -4,7 +4,7 @@ description: "This skill should be used for advanced LLM evaluation: LLM-as-judg
 license: MIT
 metadata:
   upstream: "muratcankoylan/Agent-Skills-for-Context-Engineering"
-  upstream_commit: "c578e85e40fe2bda7c1fec91ff64cf5285434934"
+  upstream_commit: "58b55a8921758d13453b440704fb1b5b208c0b0e"
   upstream_path: "skills/advanced-evaluation"
   adaptation: modified
   license_notice: LICENSE-context-engineering
@@ -41,7 +41,7 @@ Select between two primary approaches based on whether ground truth exists:
 
 **Direct Scoring** — Use when objective criteria exist (factual accuracy, instruction following, toxicity). A single LLM rates one response on a defined scale. Validate reliability against human judgments for the target criteria, and watch for score calibration drift and inconsistent scale interpretation.
 
-**Pairwise Comparison** — Use for subjective preferences (tone, style, persuasiveness). An LLM compares two responses and selects the better one. Validate agreement with human preference on the target task, and control for position and length effects.
+**Pairwise Comparison** — Use for one-off subjective preferences (tone, style, persuasiveness). An LLM compares two responses and selects the better one. Validate agreement with human preference on the target task, and control for position and length effects. Pairwise verdicts are easier to game: generators that embed distractor features flipped about 35% of pairwise preferences versus 9% of absolute scores ([Tripathi et al., 2025](https://arxiv.org/abs/2504.14716)). When a system is optimized against the judge, prefer absolute or rubric scoring, or add distractor-controlled pairs.
 
 ### The Bias Landscape
 
@@ -51,7 +51,7 @@ Treat these as candidate failure modes to test in each evaluation system:
 
 **Length Bias**: A judge may favor a response because it is longer. Prompt the judge to ignore length and test with length-controlled pairs.
 
-**Self-Enhancement Bias**: A model may favor its own outputs. Compare results with a different judge model.
+**Self-Enhancement Bias and Preference Leakage**: A judge may favor its own outputs and outputs from related models. Use a judge that shares no model, lineage, or family with the generator or with the model that produced the generator's synthetic training data ([Li et al., 2025](https://arxiv.org/abs/2502.01534)).
 
 **Verbosity Bias**: A judge may reward unnecessary detail. Use criteria-specific rubrics that penalize irrelevant detail.
 
@@ -93,7 +93,7 @@ Weight: [Relative importance, 0-1]
 You are an expert evaluator assessing response quality.
 
 ## Task
-Evaluate the following response against each criterion.
+Evaluate the following response against the criterion.
 
 ## Original Prompt
 {prompt}
@@ -102,12 +102,11 @@ Evaluate the following response against each criterion.
 {response}
 
 ## Criteria
-{for each criterion: name, description, weight}
+{one criterion: name, description, weight}
 
 ## Instructions
-For each criterion:
 1. Find specific evidence in the response
-2. Score according to the rubric (1-{max} scale)
+2. Score according to the rubric (1-{max} scale), or return UNKNOWN when the response and context give too little information to score
 3. Justify your score with evidence
 4. Suggest one specific improvement
 
@@ -115,7 +114,7 @@ For each criterion:
 Respond with structured JSON containing scores, justifications, and summary.
 ```
 
-Require evidence before the score in scoring prompts so the judge must anchor its decision in observable output features before emitting a number.
+Require evidence before the score in scoring prompts so the judge must anchor its decision in observable output features before emitting a number. When criteria interact (for example, accuracy and completeness on the same claims), grade each criterion in a separate judge call so one verdict cannot anchor another. Treat UNKNOWN as a missing score, not as a low or passing score.
 
 ### Pairwise Comparison Implementation
 
@@ -158,7 +157,7 @@ You are an expert evaluator comparing two AI responses.
 JSON with per-criterion comparison, overall winner, confidence (0-1), and reasoning.
 ```
 
-**Confidence Calibration** — Map confidence to position consistency:
+**Confidence Calibration** — Map confidence to position consistency. These rules are illustrative; calibrate confidence against human labels before using it to gate decisions:
 - Both passes agree: confidence = average of individual confidences
 - Passes disagree: confidence = 0.5, verdict = TIE
 
@@ -196,8 +195,10 @@ Is there an objective ground truth?
 |   Examples: factual accuracy, instruction following, format compliance
 |
 +-- No -> Is it a preference or quality judgment?
-    +-- Yes -> Pairwise Comparison
-    |   Examples: tone, style, persuasiveness, creativity
+    +-- Yes -> Is the system being optimized against this judge?
+    |   +-- No -> Pairwise Comparison (one-off comparisons)
+    |   |   Examples: tone, style, persuasiveness, creativity
+    |   +-- Yes -> Absolute or rubric scoring, or distractor-controlled pairs
     |
     +-- No -> Consider reference-based evaluation
         Examples: summarization (compare to source), translation (compare to reference)
@@ -345,9 +346,9 @@ strictness: "balanced"
 
 3. **Match scale granularity to rubric specificity** - Don't use 1-10 without detailed level descriptions
 
-4. **Separate objective and subjective criteria** - Use direct scoring for objective, pairwise for subjective
+4. **Separate objective and subjective criteria** - Use direct scoring for objective criteria and pairwise for one-off subjective comparisons; prefer absolute or rubric scoring when a system is optimized against the judge
 
-5. **Include confidence scores** - Calibrate to position consistency and evidence strength
+5. **Include confidence scores** - Calibrate them against human labels; position consistency and evidence strength are inputs, not proof
 
 6. **Define edge cases explicitly** - Ambiguous situations cause the most evaluation variance
 
@@ -410,11 +411,6 @@ External research:
 - [Judging LLM-as-a-Judge (Zheng et al., 2023)](https://arxiv.org/abs/2306.05685) - Read when: understanding position bias and MT-Bench methodology
 - [G-Eval: NLG Evaluation using GPT-4 (Liu et al., 2023)](https://arxiv.org/abs/2303.16634) - Read when: implementing chain-of-thought evaluation scoring
 - [Large Language Models are not Fair Evaluators (Wang et al., 2023)](https://arxiv.org/abs/2305.17926) - Read when: diagnosing systematic bias in evaluation outputs
-
-Related skills in this collection:
-- evaluation - Foundational evaluation concepts
-- context-fundamentals - Context structure for evaluation prompts
-- tool-design - Building evaluation tools
 
 ---
 
