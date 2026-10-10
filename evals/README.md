@@ -48,9 +48,9 @@ the same guard. They do not bypass it.
 Use one exact model name and the contract's profile, config, tool list,
 thinking level, attempt count, system prompt hash, and timeout policy for both
 conditions. Use a dedicated authenticated profile with no configured MCP
-servers. The profile must register this repository root under
+servers. The profile must register this repository's `skills/` directory under
 `skills.customDirectories`; immutable runs add a generated overlay that
-replaces it with the selected archived root. `--tools ''` disables built-in
+replaces it with the selected archived catalog. `--tools ''` disables built-in
 tools. Repository cases require an explicit editing-tool allowlist.
 
 Development remains compatible with explicit case paths:

@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import leancode, { leancodeReminder } from "../.omp/hooks/pre/leancode";
+import leancode, { leancodeReminder } from "../hooks/pre/leancode";
 
 const MARKER = "[omp:leancode-state]";
 // Unattributed reminders from hook versions before the report-precedence clause.
@@ -217,7 +217,7 @@ describe("leancode hook state", () => {
     expect(markedTexts((await firstProcess.apply([])).messages)[0]).toContain("Leancode is OFF");
 
     // A distinct module instance has the same clean state as a restarted process.
-    const restartedModule = await import("../.omp/hooks/pre/leancode.ts?restart-default");
+    const restartedModule = await import("../hooks/pre/leancode.ts?restart-default");
     const restartedProcess = loadHook(restartedModule.default);
     await restartedProcess.start();
     expect(restartedProcess.statuses).toEqual([["leancode", "lean:full"]]);

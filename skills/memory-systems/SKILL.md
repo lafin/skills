@@ -226,7 +226,7 @@ Runnable script:
 
 - **Status:** Example.
 - **Boundary:** Uses deterministic pseudo-random stub vectors and in-memory storage; consolidation is not implemented, `retrieve_memories(..., time_filter=...)` does not apply its time filter, and no embedding model is called. It does not persist data or prove semantic or temporal retrieval quality.
-- **Run:** From the repository root, run `python memory-systems/scripts/memory_store.py`. The demo accepts no arguments or credentials, uses built-in facts, and requires NumPy.
+- **Run:** From the repository root, run `python skills/memory-systems/scripts/memory_store.py`. The demo accepts no arguments or credentials, uses built-in facts, and requires NumPy.
 - **Output:** Writes a human-readable boundary notice, retrieval matches and scores, and entity-context counts to standard output. Library callers receive indexes, dictionaries, lists, and graph records from the exported stores.
 - **Failure:** The demo exits non-zero on an uncaught Python error or missing NumPy dependency. Graph operations also raise `ValueError` for unknown nodes; install the declared dependency or create the referenced nodes before retrying.
 

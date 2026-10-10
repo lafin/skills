@@ -39,7 +39,7 @@ Each case defines its response fields, observable success, prohibited outcomes, 
 
 ### Required live audit
 
-Use authenticated OMP profile `home` from an isolated config root that contains this repository in `skills.customDirectories` and has no MCP servers. Use the same exact model, profile, config overlays, tool list, thinking level, and attempt count for both conditions. Do not reuse output directories.
+Use authenticated OMP profile `home` from an isolated config root that contains this repository's `skills/` directory in `skills.customDirectories` and has no MCP servers. Use the same exact model, profile, config overlays, tool list, thinking level, and attempt count for both conditions. Do not reuse output directories.
 
 ```sh
 MODEL='openai-codex/gpt-5.6-sol'

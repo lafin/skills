@@ -105,7 +105,7 @@ def sha256_file(path: Path) -> str:
 
 
 def current_skills(root: Path) -> set[str]:
-    return {path.parent.name for path in root.glob("*/SKILL.md") if path.is_file()}
+    return {path.parent.name for path in root.glob("skills/*/SKILL.md") if path.is_file()}
 
 
 def _git(root: Path, *args: str) -> subprocess.CompletedProcess[str]:
@@ -123,20 +123,22 @@ def revision_skills(root: Path, revision: str) -> set[str]:
         raise ValueError(
             f"evals/suites.json:base_catalog_revision: {revision!r} is not a resolvable immutable commit; pin a full 40-character local commit"
         )
-    completed = _git(root, "ls-tree", "-d", "--name-only", revision)
+    # Revisions pinned before the skills/ move keep skills at the repository root.
+    prefix = "skills/" if _git(root, "cat-file", "-e", f"{revision}:skills").returncode == 0 else ""
+    completed = _git(root, "ls-tree", "-d", "--name-only", f"{revision}:{prefix}")
     if completed.returncode:
         raise ValueError(f"evals/suites.json:base_catalog_revision: cannot list roots at {revision}: {completed.stderr.strip()}")
     result: set[str] = set()
     for name in completed.stdout.splitlines():
-        check = _git(root, "cat-file", "-e", f"{revision}:{name}/SKILL.md")
+        check = _git(root, "cat-file", "-e", f"{revision}:{prefix}{name}/SKILL.md")
         if check.returncode == 0:
             result.add(name)
     return result
 
 
 def root_matches_revision(root: Path, name: str, revision: str) -> bool:
-    tracked = _git(root, "diff", "--quiet", revision, "--", name)
-    untracked = _git(root, "ls-files", "--others", "--exclude-standard", "--", name)
+    tracked = _git(root, "diff", "--quiet", revision, "--", f"skills/{name}")
+    untracked = _git(root, "ls-files", "--others", "--exclude-standard", "--", f"skills/{name}")
     return tracked.returncode == 0 and not untracked.stdout.strip()
 
 

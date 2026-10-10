@@ -263,7 +263,10 @@ def load_prompts(path: Path | None) -> list[dict[str, str]]:
 
 
 def compare(args: argparse.Namespace) -> dict[str, Any]:
-    roots = {"baseline": args.baseline_root.resolve(), "treatment": args.treatment_root.resolve()}
+    roots = {
+        "baseline": RUNNER.skill_root(args.baseline_root.resolve()),
+        "treatment": RUNNER.skill_root(args.treatment_root.resolve()),
+    }
     inventories = {
         arm: [record["name"].removeprefix("skill:") for record in repository_catalog(root)]
         for arm, root in roots.items()

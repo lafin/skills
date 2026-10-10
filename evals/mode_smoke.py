@@ -68,7 +68,7 @@ def rpc_command(args: argparse.Namespace) -> list[str]:
         f"--thinking={args.thinking}",
         f"--max-time={args.max_time}",
         f"--extension={ROOT / 'evals/leancode_context_probe.ts'}",
-        f"--extension={ROOT / '.omp/hooks/pre/leancode.ts'}",
+        f"--extension={ROOT / 'hooks/pre/leancode.ts'}",
     ]
     command.extend(f"--config={path}" for path in args.config)
     return command
@@ -446,8 +446,8 @@ def main() -> int:
             },
             "omp_version": omp_version.strip(),
             "hook": {
-                "path": str(ROOT / ".omp/hooks/pre/leancode.ts"),
-                "sha256": capture.sha256_file(ROOT / ".omp/hooks/pre/leancode.ts"),
+                "path": str(ROOT / "hooks/pre/leancode.ts"),
+                "sha256": capture.sha256_file(ROOT / "hooks/pre/leancode.ts"),
             },
             "mode_smoke_sha256": capture.sha256_file(Path(__file__)),
             "run_py_sha256": capture.sha256_file(ROOT / "evals/run.py"),

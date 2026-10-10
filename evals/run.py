@@ -513,6 +513,12 @@ def summarize_events(events: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
+def skill_root(root: Path) -> Path:
+    # Catalog revisions pinned before the skills/ move keep skills at the repository root.
+    nested = root / "skills"
+    return nested if nested.is_dir() else root
+
+
 def repository_catalog(cwd: Path) -> list[str]:
     catalog = sorted(path.parent.name for path in cwd.glob("*/SKILL.md"))
     if not catalog:
@@ -734,7 +740,7 @@ def effective_config(args: argparse.Namespace) -> dict[str, Any]:
         raise ValueError(
             f"profile {args.profile!r} must configure skills.customDirectories as an array"
         )
-    catalog_root = getattr(args, "catalog_root", args.cwd)
+    catalog_root = getattr(args, "catalog_root", skill_root(args.cwd))
     configured_roots = [
         str(Path(path).resolve())
         for path in custom_directories or []
@@ -745,7 +751,7 @@ def effective_config(args: argparse.Namespace) -> dict[str, Any]:
             f"profile {args.profile!r} must register evaluated catalog root "
             f"{catalog_root} in skills.customDirectories"
         )
-    if catalog_root != args.cwd and configured_roots != [str(catalog_root)]:
+    if catalog_root != skill_root(args.cwd) and configured_roots != [str(catalog_root)]:
         raise ValueError(
             "effective skills.customDirectories must contain only the isolated "
             f"catalog root {catalog_root}; remove working-tree and extra roots"
@@ -865,7 +871,7 @@ def materialize_catalog(repo_root: Path, revision: str, role: str) -> tuple[temp
     return temporary, {
         "role": role,
         "revision": resolved,
-        "root": str(catalog_root),
+        "root": str(skill_root(catalog_root)),
         "tree": tree or "",
     }
 
@@ -1162,13 +1168,13 @@ def main() -> int:
             evaluated_catalog = {
                 "role": "working-tree",
                 "revision": commit or "",
-                "root": str(args.cwd),
+                "root": str(skill_root(args.cwd)),
                 "tree": git_value(args.cwd, "rev-parse", "HEAD^{tree}") or "",
             }
             catalog_records.append(evaluated_catalog)
             holdout_catalogs = None
         args.catalog_root = Path(evaluated_catalog["root"])
-        if args.catalog_root != args.cwd:
+        if evaluated_catalog["role"] != "working-tree":
             args.config.append(catalog_config(args.catalog_root))
         catalog = repository_catalog(args.catalog_root)
         fixtures = {

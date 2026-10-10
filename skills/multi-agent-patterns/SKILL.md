@@ -258,7 +258,7 @@ Runnable script:
 
 - **Status:** Example.
 - **Boundary:** Uses synchronous rule-based simulations. Weighted consensus sums confidence values without an expertise factor, and `transfer_with_state` has no built-in receiver acknowledgment. It invokes no agents, models, or remote workers, so it does not validate a deployed coordination system.
-- **Run:** From the repository root, run `python multi-agent-patterns/scripts/coordination.py`. The demo accepts no arguments or credentials and uses built-in workers, handoffs, votes, and failures.
+- **Run:** From the repository root, run `python skills/multi-agent-patterns/scripts/coordination.py`. The demo accepts no arguments or credentials and uses built-in workers, handoffs, votes, and failures.
 - **Output:** Writes a human-readable sequence covering communication, worker registration, handoff acceptance, weighted consensus, and circuit-breaker behavior to standard output. Library callers receive dataclasses and dictionaries from the exported coordination classes.
 - **Failure:** The demo exits non-zero only on an uncaught Python error. Library calls raise `ValueError` for unknown workers or topics and when no worker is available; handoff transfer returns `False` without an externally supplied acknowledgment, while invalid vote submissions can be ignored. Register the referenced objects, validate voters and selections before submission, and provide a receiver acknowledgment before retrying.
 

@@ -104,7 +104,7 @@ class RepositoryFixture:
     def __init__(self, root: Path):
         self.root = root
         for skill in ("alpha", "beta"):
-            path = root / skill
+            path = root / "skills" / skill
             path.mkdir(parents=True)
             (path / "SKILL.md").write_text(f"---\nname: {skill}\ndescription: {skill}\n---\n", encoding="utf-8")
         (root / "evals/cases").mkdir(parents=True)
@@ -281,8 +281,8 @@ class EvaluationValidationTest(unittest.TestCase):
         self.assert_invalid("already present at base_catalog_revision")
 
     def test_cleared_candidate_requires_new_skill_behavior_holdout(self) -> None:
-        (self.root / "gamma").mkdir()
-        (self.root / "gamma/SKILL.md").write_text("---\nname: gamma\ndescription: gamma\n---\n")
+        (self.root / "skills/gamma").mkdir()
+        (self.root / "skills/gamma/SKILL.md").write_text("---\nname: gamma\ndescription: gamma\n---\n")
         for split in ("development", "holdout"):
             entry = self.fixture.manifest["case_files"][0 if split == "development" else 1]
             rows = [route(f"{split}-alpha", split, "alpha", "gamma"), route(f"{split}-gamma", split, "gamma", "alpha"), route(f"{split}-beta-a", split, "beta", "alpha"), route(f"{split}-alpha-b", split, "alpha", "beta")]

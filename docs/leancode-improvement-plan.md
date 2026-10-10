@@ -18,7 +18,7 @@ Do not change the production skill until a valid baseline exists. Current eviden
 | Component | Path | Current role |
 | --- | --- | --- |
 | Main skill | `leancode/SKILL.md` | Defines the four reflexes, the `lite`, `full`, `ultra`, and `off` modes, output policy, and examples. |
-| Runtime hook | `.omp/hooks/pre/leancode.ts` | Persists the selected mode for one OMP process and injects one owned reminder. |
+| Runtime hook | `hooks/pre/leancode.ts` | Persists the selected mode for one OMP process and injects one owned reminder. |
 | Hook tests | `tests/leancode_hook.test.ts` | Tests mode parsing, transitions, marker ownership, migration, and process reset behavior. |
 | Behavior cases | `evals/cases/behavior.jsonl` | Tests policy recognition through written decision records. |
 | Repository cases | `evals/cases/repository-development.jsonl` and `evals/cases/repository-holdout.jsonl` | Test end-to-end implementation in isolated fixture worktrees. |
@@ -106,7 +106,7 @@ Recommended efficiency threshold for prompt-only cleanup: at least 10% lower ski
 
 ### 4.1 Freeze the Baseline
 
-Before editing `leancode/SKILL.md` or `.omp/hooks/pre/leancode.ts`:
+Before editing `leancode/SKILL.md` or `hooks/pre/leancode.ts`:
 
 1. Record the current commit.
 2. Pin the exact model snapshot.
@@ -439,7 +439,7 @@ Exit gate: all fixtures run in baseline and no case depends only on source-text 
 Files:
 
 - `leancode/SKILL.md`;
-- `.omp/hooks/pre/leancode.ts` only for reminder alignment;
+- `hooks/pre/leancode.ts` only for reminder alignment;
 - relevant behavior cases.
 
 Work:
@@ -457,7 +457,7 @@ Exit gate: the combined candidate has zero critical regressions and improves or 
 
 Files:
 
-- `.omp/hooks/pre/leancode.ts`;
+- `hooks/pre/leancode.ts`;
 - `tests/leancode_hook.test.ts`;
 - lifecycle test or smoke script under existing test conventions.
 

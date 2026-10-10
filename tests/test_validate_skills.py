@@ -17,7 +17,7 @@ class ValidateSkillsTest(unittest.TestCase):
             "# Skills\n\n## Leancode\n\n- `alpha` — fixture.\n\n## Credentials\n",
             encoding="utf-8",
         )
-        skill = self.root / "alpha"
+        skill = self.root / "skills" / "alpha"
         (skill / "references").mkdir(parents=True)
         (skill / "references" / "evidence.md").write_text(
             "# Evidence\n\n## Supported claim\n",
@@ -49,7 +49,7 @@ class ValidateSkillsTest(unittest.TestCase):
         )
 
     def rewrite_skill(self, old: str, new: str) -> None:
-        path = self.root / "alpha" / "SKILL.md"
+        path = self.root / "skills" / "alpha" / "SKILL.md"
         path.write_text(path.read_text(encoding="utf-8").replace(old, new), encoding="utf-8")
 
     def test_valid_fixture_exits_zero(self) -> None:
@@ -65,8 +65,8 @@ class ValidateSkillsTest(unittest.TestCase):
         self.assertIn("Set name: alpha", result.stdout)
 
     def test_rejects_invalid_directory_name(self) -> None:
-        invalid = self.root / "Alpha_Skill"
-        (self.root / "alpha").rename(invalid)
+        invalid = self.root / "skills" / "Alpha_Skill"
+        (self.root / "skills" / "alpha").rename(invalid)
         result = self.run_validator()
         self.assertEqual(1, result.returncode)
         self.assertIn("[skill-directory-name]", result.stdout)
@@ -95,23 +95,23 @@ class ValidateSkillsTest(unittest.TestCase):
         self.rewrite_skill("license: MIT\n", "license: MIT\ncompatibility: Requires git\nallowed-tools: Read\nmodel: some-model\n")
         result = self.run_validator()
         self.assertEqual(1, result.returncode)
-        self.assertIn("alpha/SKILL.md:7: [frontmatter-key] observed='model'", result.stdout)
+        self.assertIn("skills/alpha/SKILL.md:7: [frontmatter-key] observed='model'", result.stdout)
         self.assertNotIn("compatibility", result.stdout)
         self.assertNotIn("allowed-tools", result.stdout)
 
     def test_warns_without_failure_when_skill_exceeds_500_lines(self) -> None:
-        path = self.root / "alpha" / "SKILL.md"
+        path = self.root / "skills" / "alpha" / "SKILL.md"
         path.write_text(
             path.read_text(encoding="utf-8") + "".join(f"Body line {line}\n" for line in range(501)),
             encoding="utf-8",
         )
         result = self.run_validator()
         self.assertEqual(0, result.returncode, result.stdout)
-        self.assertIn("warning: alpha/SKILL.md:501: [skill-length]", result.stdout)
+        self.assertIn("warning: skills/alpha/SKILL.md:501: [skill-length]", result.stdout)
         self.assertTrue(result.stdout.endswith("validation passed\n"))
 
     def test_rejects_cross_skill_asset_but_allows_local_asset_and_bare_owner(self) -> None:
-        beta = self.root / "beta"
+        beta = self.root / "skills" / "beta"
         (beta / "references").mkdir(parents=True)
         (beta / "references" / "evidence.md").write_text("# Evidence\n", encoding="utf-8")
         (beta / "SKILL.md").write_text(

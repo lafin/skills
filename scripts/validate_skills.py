@@ -204,7 +204,7 @@ def readme_inventory(root: Path, skill_names: set[str], issues: list[Issue]) -> 
         if re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", name):
             listed[name] = line_number(text, match.start() + code_match.start())
     for name in sorted(set(listed) - skill_names):
-        add(issues, root, readme, listed[name], "readme-skill-exists", name, f"Create {name}/SKILL.md or remove {name} from the skill inventory." )
+        add(issues, root, readme, listed[name], "readme-skill-exists", name, f"Create skills/{name}/SKILL.md or remove {name} from the skill inventory." )
     for name in sorted(skill_names - set(listed)):
         add(issues, root, readme, 1, "readme-skill-listed", name, f"Add {name} to the README skill inventory." )
 
@@ -259,15 +259,16 @@ def validate_skill_uri(source: Path, uri: str, line: int, root: Path, issues: li
     parsed = urlsplit(uri)
     skill_name = unquote(parsed.netloc)
     asset = unquote(parsed.path.lstrip("/"))
-    target = root / skill_name / (asset or "SKILL.md")
+    skills = root / "skills"
+    target = skills / skill_name / (asset or "SKILL.md")
     try:
-        source_parts = source.relative_to(root).parts
+        source_parts = source.relative_to(skills).parts
     except ValueError:
         source_parts = ()
-    owner = source_parts[0] if len(source_parts) > 1 and (root / source_parts[0] / "SKILL.md").is_file() else None
+    owner = source_parts[0] if len(source_parts) > 1 and (skills / source_parts[0] / "SKILL.md").is_file() else None
     if asset and owner:
         try:
-            target.resolve().relative_to((root / owner).resolve())
+            target.resolve().relative_to((skills / owner).resolve())
         except ValueError:
             add(
                 issues,
@@ -287,15 +288,18 @@ def resolve_internal_path(source: Path, value: str, root: Path, skill_names: set
         return None
     value = re.sub(r":\d+(?::\d+)?$", "", value.split("#", 1)[0])
     first = value.split("/", 1)[0]
-    root_relative = value.startswith(("researcher/", "docs/", "evals/", ".omp/", ".github/")) or first in skill_names
+    in_skills = first == "skills" and value.split("/")[1:2] and value.split("/")[1] in skill_names
+    root_relative = bool(in_skills) or value.startswith(("researcher/", "docs/", "evals/", "hooks/", "agents/", "commands/", "extensions/", "presets/", ".github/")) or first in skill_names
     if value in {"README.md", "ATTRIBUTION.md"} or value.startswith("LICENSE"):
         root_relative = True
     if not root_relative and not value.startswith(("references/", "scripts/", "tests/")):
         return None
+    if first in skill_names:
+        return root / "skills" / value.lstrip("/")
     if root_relative:
         return root / value.lstrip("/")
     current = source.parent
-    skill_root = next((parent for parent in (source.parent, *source.parents) if parent.parent == root), current)
+    skill_root = next((parent for parent in (source.parent, *source.parents) if parent.parent == root / "skills"), current)
     candidate = current / value
     return candidate if candidate.exists() else skill_root / value
 
@@ -390,7 +394,7 @@ def validate_python(root: Path, issues: list[Issue]) -> None:
 def validate(root: Path) -> list[Issue]:
     root = root.resolve()
     issues: list[Issue] = []
-    skill_files = sorted(path for path in root.glob("*/SKILL.md") if not path.parent.name.startswith("."))
+    skill_files = sorted(path for path in root.glob("skills/*/SKILL.md") if not path.parent.name.startswith("."))
     skill_names = {path.parent.name for path in skill_files}
     readme_inventory(root, skill_names, issues)
     for path in skill_files:

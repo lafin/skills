@@ -13,10 +13,10 @@ Use [Skill anatomy](docs/skill-anatomy.md) as a content contract. It is not a re
 
 ## Skill layout and metadata
 
-A root skill uses this layout:
+A skill lives under `skills/` with this layout:
 
 ```text
-<lower-case-kebab-name>/
+skills/<lower-case-kebab-name>/
   SKILL.md
   references/  # only when needed
   scripts/     # only when needed
@@ -95,7 +95,7 @@ Before requesting review:
    python3 scripts/validate_skills.py
    python3 evals/validate.py
    python3 -m unittest discover -s tests
-   python3 -m unittest discover -s context-compression/tests
+   python3 -m unittest discover -s skills/context-compression/tests
    bun test tests/leancode_hook.test.ts
    ```
 

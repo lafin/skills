@@ -35,6 +35,6 @@ jobs:
       - name: Run Python tests
         run: |
           python3 -m unittest discover -s tests
-          python3 -m unittest discover -s context-compression/tests
+          python3 -m unittest discover -s skills/context-compression/tests
       - name: Run hook test
         run: bun test tests/leancode_hook.test.ts

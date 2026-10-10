@@ -270,7 +270,7 @@ Runnable script:
 
 - **Status:** Example.
 - **Boundary:** Uses a deterministic heuristic judge, mock responses, simplified token estimates, and pattern-based fact extraction. It calls no model API and does not prove semantic preservation.
-- **Run:** From the repository root, run `python context-compression/scripts/compression_evaluator.py`. The demo accepts no arguments or credentials and uses built-in history and compressed context.
+- **Run:** From the repository root, run `python skills/context-compression/scripts/compression_evaluator.py`. The demo accepts no arguments or credentials and uses built-in history and compressed context.
 - **Output:** Writes a human-readable evaluation count, average score, dimension averages, strongest and weakest dimensions, and recommendations to standard output. `evaluate_compression_quality` returns the same summary as a dictionary.
 - **Failure:** The demo exits non-zero only on an uncaught Python error. Repair the reported import or input-shape error; low scores and recommendations are report data, not process failures.
 

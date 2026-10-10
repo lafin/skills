@@ -13,7 +13,7 @@ synced 2026-10-06). The original import used
 `c578e85e40fe2bda7c1fec91ff64cf5285434934`. Between the two commits, upstream
 changed 12 of the 17 imported skills not at all. From the remaining changes,
 this repository adopted the retired-model-ID fix in
-`project-development/scripts/pipeline_template.py` and the prefix-cache edit
+`skills/project-development/scripts/pipeline_template.py` and the prefix-cache edit
 cost sentence in `context-optimization`. It did not import the new
 `self-managed-context` skill or the routing lines that point to it; see
 [conditional skill decisions](docs/conditional-skill-decisions.md#self-managed-context).
@@ -58,7 +58,7 @@ The four Leancode skills first appear in local commit
 `lafin` on 2026-07-18T22:17:02+03:00. That commit has no source note or
 co-author trailer for these files.
 
-`leancode/SKILL.md` shares wording and the four-principle structure with
+`skills/leancode/SKILL.md` shares wording and the four-principle structure with
 `multica-ai/andrej-karpathy-skills` at commit
 `8462496b34419f20b32778610571ac723e91f94c`, authored and committed by
 Jiayuan Zhang on 2026-01-27T03:53:00Z. The external commit message describes

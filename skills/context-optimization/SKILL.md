@@ -214,7 +214,7 @@ Runnable script:
 
 - **Status:** Example.
 - **Boundary:** Uses illustrative token, summary, and cache heuristics without a tokenizer, model, or inference service. Token counts use a caller-supplied `count_tokens` function, or a labeled 4-characters-per-token fallback. It does not prove quality, savings, or cache behavior in production.
-- **Run:** From the repository root, run `python context-optimization/scripts/compaction.py`. The demo accepts no arguments or credentials and uses built-in text and budget data. `ContextBudget` takes one trigger threshold, `measured_safe_limit`.
+- **Run:** From the repository root, run `python skills/context-optimization/scripts/compaction.py`. The demo accepts no arguments or credentials and uses built-in text and budget data. `ContextBudget` takes one trigger threshold, `measured_safe_limit`.
 - **Output:** Writes human-readable token estimates, masking and retrieval status, budget advice, prompt stabilization, and a summary to standard output. Library callers receive strings, tuples, and dictionaries from the exported functions and classes.
 - **Failure:** The demo exits non-zero only on an uncaught Python error. Repair the reported import, invalid argument, or input-type error; an optimization recommendation is report data, not a process failure.
 

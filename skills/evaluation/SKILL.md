@@ -285,7 +285,7 @@ Runnable script:
 
 - **Status:** Example.
 - **Boundary:** Uses heuristic scoring and simulated agent output. It does not execute an agent or model, so its scores do not prove production quality.
-- **Run:** From the repository root, run `python evaluation/scripts/evaluator.py`. The demo accepts no arguments or credentials and uses its built-in test set.
+- **Run:** From the repository root, run `python skills/evaluation/scripts/evaluator.py`. The demo accepts no arguments or credentials and uses its built-in test set.
 - **Output:** Writes a human-readable rubric, per-test progress, pass count, pass rate, dimension averages, and failures to standard output. A dimension without evidence scores `unknown` and is excluded from the weighted average; an output with no scored dimension fails. The built-in factual test fails because the simulated output lacks the expected answer. Library callers receive dictionaries from `AgentEvaluator`, `EvaluationRunner`, and `ProductionMonitor`.
 - **Failure:** The demo exits non-zero only on an uncaught Python error. Repair the reported import, environment, or input-type error; a low heuristic score is data in the report, not a process failure.
 

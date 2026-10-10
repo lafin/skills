@@ -294,7 +294,7 @@ Runnable script:
 
 - **Status:** Example.
 - **Boundary:** Approximates token counts, writes only local sample files, and calls no external service. It does not provide durable storage, concurrency control, semantic memory, or a complete plan-state machine; callers must define any status beyond `pending`, `in_progress`, `completed`, and `blocked`.
-- **Run:** From the repository root, run `python filesystem-context/scripts/filesystem_context.py`. The demo accepts no arguments or credentials; it creates a disposable `demo_scratch/` directory relative to the current working directory and removes it after a successful run.
+- **Run:** From the repository root, run `python skills/filesystem-context/scripts/filesystem_context.py`. The demo accepts no arguments or credentials; it creates a disposable `demo_scratch/` directory relative to the current working directory and removes it after a successful run.
 - **Output:** Writes human-readable offload decisions, file references, token savings, plan state, tool-output handling, and cleanup status to standard output. The transient sample scratch and plan files are removed before successful exit. Library callers receive strings, dictionaries, or `AgentPlan` objects.
 - **Failure:** The demo exits non-zero on an uncaught Python, filesystem-permission, or malformed-plan error. Repair the path permissions or JSON/input named by the exception, remove any incomplete demo file, and retry.
 

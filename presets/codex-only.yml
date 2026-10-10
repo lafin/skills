@@ -1,0 +1,30 @@
+# Overlay: codex-only. Launch with: omp --profile home --config <omp-config>/presets/codex-only.yml
+# Requires a profile that loads the omp-config package via `extensions:` (deep-verifier, fixer, review-and-fix); `--config` alone cannot run this pipeline.
+# gpt-6.1-sol:xhigh = driver, gpt-6.1-sol:high = strong worker, gpt-6-luna = cheap worker. No terra.
+# Restates every modelRoles key + agentModelOverrides to avoid profile leakage
+# (map layers merge key-wise; arrays replace).
+enabledModels:
+  - openai-codex/gpt-6.1-sol
+  - openai-codex/gpt-6-luna
+modelRoles:
+  default: openai-codex/gpt-6.1-sol:xhigh
+  slow: openai-codex/gpt-6.1-sol:xhigh
+  plan: openai-codex/gpt-6.1-sol:xhigh
+  vision: openai-codex/gpt-6.1-sol:xhigh
+  task: openai-codex/gpt-6.1-sol:high
+  smol: openai-codex/gpt-6-luna:xhigh
+  tiny: openai-codex/gpt-6-luna:high
+  commit: openai-codex/gpt-6-luna:high
+  designer: openai-codex/gpt-6.1-sol:xhigh
+  advisor: openai-codex/gpt-6-luna:xhigh
+task:
+  agentModelOverrides:
+    scout: openai-codex/gpt-6-luna:xhigh
+    sonic: openai-codex/gpt-6-luna:high
+    librarian: openai-codex/gpt-6-luna:xhigh
+    reviewer: openai-codex/gpt-6.1-sol:xhigh
+    security-reviewer: openai-codex/gpt-6.1-sol:high
+    designer: openai-codex/gpt-6.1-sol:xhigh
+    deep-verifier: openai-codex/gpt-6.1-sol:xhigh
+    fixer: openai-codex/gpt-6.1-sol:high
+    regression-reviewer: openai-codex/gpt-6.1-sol:xhigh

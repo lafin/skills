@@ -1,0 +1,29 @@
+# Overlay: claude-only. Launch with: omp --profile home --config <omp-config>/presets/claude-only.yml
+# Requires a profile that loads the omp-config package via `extensions:` (deep-verifier, fixer, review-and-fix); `--config` alone cannot run this pipeline.
+# Only Opus 5.5 is in scope, so every role runs Opus 5.5 at varying thinking levels.
+# Restates every modelRoles key + agentModelOverrides to avoid profile leakage
+# (map layers merge key-wise; arrays replace).
+enabledModels:
+  - anthropic/claude-opus-5-5
+modelRoles:
+  default: anthropic/claude-opus-5-5:high
+  slow: anthropic/claude-opus-5-5:max
+  plan: anthropic/claude-opus-5-5:high
+  vision: anthropic/claude-opus-5-5:high
+  task: anthropic/claude-opus-5-5:high
+  smol: anthropic/claude-opus-5-5:low
+  tiny: anthropic/claude-opus-5-5:low
+  commit: anthropic/claude-opus-5-5:low
+  designer: anthropic/claude-opus-5-5:high
+  advisor: anthropic/claude-opus-5-5:medium
+task:
+  agentModelOverrides:
+    scout: anthropic/claude-opus-5-5:low
+    sonic: anthropic/claude-opus-5-5:low
+    librarian: anthropic/claude-opus-5-5:low
+    reviewer: anthropic/claude-opus-5-5:high
+    security-reviewer: anthropic/claude-opus-5-5:high
+    designer: anthropic/claude-opus-5-5:high
+    deep-verifier: anthropic/claude-opus-5-5:high
+    fixer: anthropic/claude-opus-5-5:high
+    regression-reviewer: anthropic/claude-opus-5-5:high

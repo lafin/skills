@@ -204,7 +204,7 @@ Runnable script:
 
 - **Status:** Example.
 - **Boundary:** Counts tokens with a caller-supplied `count_tokens` function; without one it falls back to a labeled 4-characters-per-token estimate. The demo uses a fixed 2.5-characters-per-token counter and a demo limit. It validates only its local context structure and does not prove model behavior.
-- **Run:** From the repository root, run `python context-fundamentals/scripts/context_manager.py`. The demo accepts no arguments or credentials and uses built-in prompt, task, and document strings. Library callers must pass `context_limit` from their measured safe limit.
+- **Run:** From the repository root, run `python skills/context-fundamentals/scripts/context_manager.py`. The demo accepts no arguments or credentials and uses built-in prompt, task, and document strings. Library callers must pass `context_limit` from their measured safe limit.
 - **Output:** Writes a human-readable estimated token total, utilization, section breakdown, and validation result to standard output. `build_agent_context` returns `context`, `usage_report`, and `validation` fields.
 - **Failure:** The demo exits non-zero only on an uncaught Python error. Repair the reported import or input-type error; a printed validation failure is report data and does not set a non-zero exit status.
 

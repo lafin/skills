@@ -402,7 +402,7 @@ Runnable script:
 
 - **Status:** Example.
 - **Boundary:** Returns fixed illustrative evaluator outputs and invokes no model. The results demonstrate data shapes and position swapping; they do not validate a judge.
-- **Run:** From the repository root, run `python advanced-evaluation/scripts/evaluation_example.py`. The demo accepts no arguments or credentials and uses built-in prompts, responses, and rubric data.
+- **Run:** From the repository root, run `python skills/advanced-evaluation/scripts/evaluation_example.py`. The demo accepts no arguments or credentials and uses built-in prompts, responses, and rubric data.
 - **Output:** Writes human-readable direct-scoring, pairwise-comparison, and rubric-generation examples to standard output. The three exported functions return dictionaries.
 - **Failure:** The demo exits non-zero only on an uncaught Python error. Repair the reported interpreter or import error; illustrative scores and winners are output, not process failures.
 

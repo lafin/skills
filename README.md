@@ -1,31 +1,51 @@
-# omp Skills
+# omp-config
 
-Canonical skills for [OMP](https://github.com/oh-my-pi). Root `<name>/SKILL.md` files are the source of truth.
+Canonical [OMP](https://github.com/oh-my-pi) configuration: skills, task agents,
+slash commands, hooks, extensions, and model presets. The repository is an OMP
+extension package; files here are the source of truth.
+
+| Path | Contents |
+|---|---|
+| `skills/<name>/SKILL.md` | Skills, loaded on demand via `skill://<name>` |
+| `agents/*.md` | Task agents (`deep-verifier`, `fixer`) |
+| `commands/*.md` | Slash commands (`/review-and-fix`) |
+| `hooks/pre/*.ts` | Hooks (`leancode`) |
+| `extensions/*.ts` | Extensions listed in `package.json#omp.extensions` (`dir-context`) |
+| `presets/*.yml` | `--config` overlays (`claude-only`, `codex-only`) |
 
 ## OMP
 
-Register this directory in
-`~/.omp/agent/config.yml`:
+Load the package from each profile's `config.yml`
+(`~/.omp/profiles/<profile>/agent/config.yml` or `~/.omp/agent/config.yml`):
+
+```yaml
+extensions:
+  - /<path>/omp-config
+skills:
+  enableSkillCommands: true
+```
+
+OMP discovers `skills/`, `agents/`, `commands/`, and `hooks/pre/` next to
+`package.json`, and imports the extensions it lists. Restart omp after changing
+the configuration or any file. With `enableSkillCommands`, each skill is also
+invocable as `/skill:<name>`.
+
+For skills only (for example, an isolated evaluation profile), register the
+directory instead of the package:
 
 ```yaml
 skills:
   customDirectories:
-    - /<path>/skills
-  enableSkillCommands: true
+    - /<path>/omp-config/skills
 ```
 
-Scanning is non-recursive: each skill is `<this-dir>/<name>/SKILL.md`. Restart
-omp after changing the configuration or any skill file.
+Presets overlay a package-loading profile:
+`omp --profile home --config /<path>/omp-config/presets/claude-only.yml`.
 
-Skills load on demand via `skill://<name>`, and their assets via
-`skill://<name>/references/<file>.md`. With `enableSkillCommands`, each skill is
-also invocable as `/skill:<name>`.
-
-`.omp/hooks/pre/leancode.ts` keeps leancode active every turn and registers
+`hooks/pre/leancode.ts` keeps leancode active every turn and registers
 `/leancode lite|full|ultra|off`. The selected mode persists for the current OMP
-process; a new process starts in `full`. The hook loads when OMP runs with this
-repository as the working directory; elsewhere, pass it with
-`--extension <path>/.omp/hooks/pre/leancode.ts`.
+process; a new process starts in `full`. Outside a package-loading profile, pass
+it with `--extension <path>/hooks/pre/leancode.ts`.
 
 ## Validation
 
@@ -34,6 +54,7 @@ python3 -m pip install -r requirements-validation.txt -r requirements-examples.t
 python3 scripts/validate_skills.py
 python3 evals/validate.py
 python3 -m unittest discover -s tests
+python3 -m unittest discover -s skills/context-compression/tests
 bun test tests/leancode_hook.test.ts
 ```
 
@@ -83,7 +104,7 @@ framework, artifact contract, and reproduction commands.
 
 `source-driven-development`, `api-and-interface-design`, and
 `deprecation-and-migration` are non-active candidates under `proposals/`.
-They are excluded from root skill discovery until their frozen routing and
+They are excluded from `skills/` discovery until their frozen routing and
 behavior admission gates pass. See [ATTRIBUTION.md](ATTRIBUTION.md) and
 [LICENSE-addy-agent-skills](LICENSE-addy-agent-skills) for their pinned source
 and license.

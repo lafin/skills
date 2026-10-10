@@ -12,13 +12,13 @@ import numpy as np
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SCRIPT_PATHS = sorted(ROOT.glob("*/scripts/*.py"))
+SCRIPT_PATHS = sorted(ROOT.glob("skills/*/scripts/*.py"))
 TEMPLATE_PATHS = {
-    Path("hosted-agents/scripts/sandbox_manager.py"),
-    Path("project-development/scripts/pipeline_template.py"),
+    Path("skills/hosted-agents/scripts/sandbox_manager.py"),
+    Path("skills/project-development/scripts/pipeline_template.py"),
 }
 BOUNDARY_TERMS = {
-    Path("context-compression/scripts/compression_evaluator.py"): (
+    Path("skills/context-compression/scripts/compression_evaluator.py"): (
         "heuristic stub",
         "mock response",
         "simplified heuristics",
@@ -26,18 +26,18 @@ BOUNDARY_TERMS = {
         "fact extraction",
         "no model api is called",
     ),
-    Path("evaluation/scripts/evaluator.py"): (
+    Path("skills/evaluation/scripts/evaluator.py"): (
         "scoring is heuristic",
         "simulated agent output",
         "no agent or model is executed",
     ),
-    Path("memory-systems/scripts/memory_store.py"): (
+    Path("skills/memory-systems/scripts/memory_store.py"): (
         "stub vectors",
         "storage is in-memory",
         "consolidation is not implemented",
         "no embedding model is called",
     ),
-    Path("multi-agent-patterns/scripts/coordination.py"): (
+    Path("skills/multi-agent-patterns/scripts/coordination.py"): (
         "rule-based simulations",
         "no agents, models, or remote workers are invoked",
     ),
@@ -144,7 +144,7 @@ class ScriptContractTests(unittest.TestCase):
                         self.assertIn(term, stdout)
 
     def test_embeddings_are_stable_across_fresh_processes(self) -> None:
-        path = ROOT / "memory-systems/scripts/memory_store.py"
+        path = ROOT / "skills/memory-systems/scripts/memory_store.py"
         program = """
 import json
 import runpy
@@ -171,7 +171,7 @@ print(json.dumps(store.vectors[index].tolist()))
         self.assertEqual(outputs[0], outputs[1])
 
     def test_embedding_does_not_mutate_global_numpy_rng(self) -> None:
-        module = import_script(ROOT / "memory-systems/scripts/memory_store.py")
+        module = import_script(ROOT / "skills/memory-systems/scripts/memory_store.py")
         np.random.seed(2026)
         expected = np.random.random(8)
         np.random.seed(2026)

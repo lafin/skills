@@ -1,0 +1,7 @@
+{
+  "name": "omp-config",
+  "private": true,
+  "omp": {
+    "extensions": ["./extensions/dir-context.ts"]
+  }
+}

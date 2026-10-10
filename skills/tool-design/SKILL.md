@@ -239,7 +239,7 @@ Runnable script:
 
 - **Status:** Example.
 - **Boundary:** Scores descriptions with deterministic text heuristics. Generated parameter prose omits enum constraints, and generated descriptions cannot satisfy every evaluator signal. It invokes no model and does not exercise a live tool, so its score does not prove routing, schema, or runtime correctness.
-- **Run:** From the repository root, run `python tool-design/scripts/description_generator.py`. The demo accepts no arguments or credentials and uses a built-in customer-tool specification.
+- **Run:** From the repository root, run `python skills/tool-design/scripts/description_generator.py`. The demo accepts no arguments or credentials and uses a built-in customer-tool specification.
 - **Output:** Writes the built specification, generated description, criterion scores, and a sample actionable error message to standard output. Library callers receive a `ToolSpec`, rendered strings, and score dictionaries.
 - **Failure:** The demo exits non-zero only on an uncaught Python error. Library generation can raise `KeyError` when a specification or error-template context omits required fields; an unknown error type falls back to the `INVALID_INPUT` template. Supply the required schema fields and template placeholders before retrying. Heuristic criterion scores are report data and do not change the exit status.
 

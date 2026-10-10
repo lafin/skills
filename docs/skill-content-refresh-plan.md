@@ -85,7 +85,7 @@ Group commits by skill family. One commit per family keeps review small and reve
 
 - **LC-1** · `leancode/SKILL.md:183` — "a PCA9685 runs a few percent fast" is wrong. The oscillator lands anywhere from about 23 to 27 MHz around the nominal 25 MHz, in either direction. **Change:** state that range. Keep the paragraph. Source: <https://raw.githubusercontent.com/adafruit/Adafruit-PWM-Servo-Driver-Library/master/examples/servo/servo.ino> lines 49–64.
 - **LD-1** · see `RP-3`.
-- **HK-2** · `.omp/hooks/pre/leancode.ts:15-20,36-57` — **[INFERENCE]** The reminder filter and legacy-migration code may be dead. Reason: the hook uses the `context` event, which changes the LLM context for one call and does not write reminders to session history. The first hook version (`8d25b71`) also used `context`. **Change:** add one `evals/mode_smoke.py` assertion that `event.messages` never contains a prior hook reminder. If it holds across all four modes, delete `LEGACY_REMINDERS`, `isLeancodeStateMessage`, the filter, and their tests (`tests/leancode_hook.test.ts:5-8,122-189`). If it fails, generate `LEGACY_REMINDERS` from `leancodeReminder()` so the reminder text exists in one place. Check: `bun test tests/leancode_hook.test.ts` and `mode_smoke.py`.
+- **HK-2** · `hooks/pre/leancode.ts:15-20,36-57` (was `.omp/hooks/pre/leancode.ts`) — **[INFERENCE]** The reminder filter and legacy-migration code may be dead. Reason: the hook uses the `context` event, which changes the LLM context for one call and does not write reminders to session history. The first hook version (`8d25b71`) also used `context`. **Change:** add one `evals/mode_smoke.py` assertion that `event.messages` never contains a prior hook reminder. If it holds across all four modes, delete `LEGACY_REMINDERS`, `isLeancodeStateMessage`, the filter, and their tests (`tests/leancode_hook.test.ts:5-8,122-189`). If it fails, generate `LEGACY_REMINDERS` from `leancodeReminder()` so the reminder text exists in one place. Check: `bun test tests/leancode_hook.test.ts` and `mode_smoke.py`.
 
 ### 7.2 Context core
 
@@ -236,7 +236,7 @@ These items use the Leancode candidate gate.
 - **LA-4** · `leancode-audit/SKILL.md:36-38` — **Change:** replace "files exporting one thing" with "modules whose single export has a single caller". Add "fallbacks for states internal code cannot reach" and "comments that restate the code". Group with `LA-1`.
 - **LD-2** · `leancode-debt/SKILL.md:44` — **Change:** end with `<N> markers, <M> no-trigger, <K> no-ceiling.`
 - **LD-3** · `leancode-debt/SKILL.md:22-26` — **Change:** start from `git grep -nI -F "lean-debt:"`, then keep hits inside comments. Group with `LD-2`.
-- **HK-1** · `.omp/hooks/pre/leancode.ts:28` — The reminder reached report-only subagents during this review. **Change:** re-run Candidate 3 as a hook-only candidate that appends "an explicitly requested report or format wins". Candidate 3's development grade passed 21/21 critical; only the combined gate failed.
+- **HK-1** · `hooks/pre/leancode.ts:28` (was `.omp/hooks/pre/leancode.ts`) — The reminder reached report-only subagents during this review. **Change:** re-run Candidate 3 as a hook-only candidate that appends "an explicitly requested report or format wins". Candidate 3's development grade passed 21/21 critical; only the combined gate failed.
 
 ### 8.4 Simplified Engineering English
 
